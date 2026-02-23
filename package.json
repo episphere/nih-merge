@@ -1,0 +1,27 @@
+{
+  "name": "epitracker",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@types/d3": "^7.4.3",
+    "@types/node": "^25.3.0",
+    "sass": "^1.97.3",
+    "typescript": "~5.9.3",
+    "vite": "^7.3.1"
+  },
+  "dependencies": {
+    "@nciocpl/ncids-css": "^3.5.1",
+    "@nciocpl/ncids-js": "^3.5.1",
+    "@observablehq/plot": "^0.6.17",
+    "@uswds/uswds": "^3.13.0",
+    "d3": "^7.9.0",
+    "hyparquet": "^1.25.0",
+    "nanostores": "^1.1.0"
+  }
+}

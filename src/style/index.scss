@@ -1,0 +1,49 @@
+@use "uswds-core" as * with (
+  $theme-image-path: '@nciocpl/ncids-css/uswds-img',
+  $theme-show-notifications: false,
+);
+@forward 'uswds-global';
+
+// Phase 1 components: header, footer, landing page
+@forward "usa-banner";
+@forward "usa-footer";
+@forward "usa-button";
+@forward "usa-form-group";
+@forward "usa-input";
+@forward "usa-layout-grid";
+@forward "usa-select";
+@forward "usa-label";
+@forward "usa-combo-box";
+@forward "usa-checkbox";
+@forward "usa-fieldset";
+@forward "nci-header";
+@forward "nci-card";
+@forward "nci-card-group";
+@forward "nci-heading";
+@forward "uswds-utilities";
+
+// App-level styles
+html {
+  background-color: color("primary-dark");
+}
+
+.epitracker-title {
+  justify-content: center;
+}
+
+.epitracker-subtitle {
+  font-size: 1.5em;
+  margin-block: 0px;
+}
+
+#hidden-stuff {
+  display: none;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.usa-label-short-margin {
+  margin-top: 8px;
+}
