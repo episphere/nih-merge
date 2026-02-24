@@ -1,0 +1,74 @@
+import type { CancerSite, Sex } from '../../../data/types';
+
+const FEMALE_ONLY_CANCERS: CancerSite[] = ['Cervix Uteri', 'Corpus and Uterus', 'Ovary'];
+
+// --- State shape contracts ---
+
+interface CauseSexState {
+  cause: CancerSite | 'Total';
+  sex: Sex | 'Total';
+  sexOptions: (Sex | 'Total')[];
+}
+
+interface ComparisonState {
+  disabledFilters: string[];
+  [key: string]: unknown;
+}
+
+/**
+ * Cancer-Sex constraint: sex-specific cancers force the sex filter.
+ * Breast defaults sex to Female when first selected.
+ * Applies to all dashboards.
+ */
+export function causeSexRule(state: CauseSexState, prev: CauseSexState): void {
+  if (state.cause === 'Prostate') {
+    state.sexOptions = ['Male'];
+    state.sex = 'Male';
+  } else if (FEMALE_ONLY_CANCERS.includes(state.cause as CancerSite)) {
+    state.sexOptions = ['Female'];
+    state.sex = 'Female';
+  } else if (state.cause === 'Breast') {
+    state.sexOptions = ['Total', 'Male', 'Female'];
+    if (prev.cause !== 'Breast') {
+      state.sex = 'Female';
+    }
+  } else {
+    state.sexOptions = ['Total', 'Male', 'Female'];
+  }
+}
+
+/**
+ * Comparison mutual exclusion: two comparison dimensions can't be the same non-"none" value.
+ * If comp1 matches comp2, comp2 resets to "none".
+ * Applies to Breakdowns & Determinants.
+ */
+export function comparisonMutualExclusionRule<T extends Record<string, unknown>>(
+  state: T,
+  _prev: T,
+  comp1Key: string,
+  comp2Key: string,
+): void {
+  if (state[comp1Key] !== 'none' && state[comp1Key] === state[comp2Key]) {
+    (state as Record<string, unknown>)[comp2Key] = 'none';
+  }
+}
+
+/**
+ * Comparison disables filter: when a field is used as a comparison dimension,
+ * its corresponding filter is forced to "Total" and marked as disabled.
+ * Applies to Breakdowns & Determinants.
+ */
+export function comparisonDisablesFilterRule<T extends ComparisonState>(
+  state: T,
+  _prev: T,
+  compKeys: string[],
+): void {
+  state.disabledFilters = [];
+  for (const key of compKeys) {
+    const field = state[key] as string;
+    if (field !== 'none' && field in state) {
+      (state as Record<string, unknown>)[field] = 'Total';
+      state.disabledFilters.push(field);
+    }
+  }
+}

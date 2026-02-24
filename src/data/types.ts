@@ -1,97 +1,103 @@
 // --- Field value types ---
+// Arrays are the source of truth; types are derived from them.
 
-export type Race =
-  | "White"
-  | "Black or African American"
-  | "Asian"
-  | "Hispanic"
-  | "American Indian or Alaska Native"
-  | "Native Hawaiian or Other Pacific Islander";
+export const ALL_RACES = [
+  "White",
+  "Black or African American",
+  "Asian",
+  "Hispanic",
+  "American Indian or Alaska Native",
+  "Native Hawaiian or Other Pacific Islander",
+] as const;
+export type Race = (typeof ALL_RACES)[number];
 
-export type Sex = "Male" | "Female";
+export const ALL_SEXES = ["Male", "Female"] as const;
+export type Sex = (typeof ALL_SEXES)[number];
 
-export type CancerSite =
-  | "Corpus and Uterus"
-  | "Other"
-  | "Pancreas"
-  | "Lung and Bronchus"
-  | "Soft Tissue including Heart"
-  | "Kidney and Renal Pelvis"
-  | "Liver"
-  | "Breast"
-  | "Colon and Rectum"
-  | "Esophagus"
-  | "Melanoma of the Skin"
-  | "Ovary"
-  | "Lymphocytic Leukemia"
-  | "Urinary Bladder"
-  | "Brain and Other Nervous System"
-  | "Oral Cavity and Pharynx"
-  | "Intrahepatic Bile Duct"
-  | "Myeloid and Monocytic Leukemia"
-  | "Stomach"
-  | "Cervix Uteri"
-  | "Prostate"
-  | "Thyroid"
-  | "Non-Melanoma Skin"
-  | "Myeloma"
-  | "Eye and Orbit";
+export const ALL_CANCER_SITES = [
+  "Breast",
+  "Brain and Other Nervous System",
+  "Cervix Uteri",
+  "Colon and Rectum",
+  "Corpus and Uterus",
+  "Esophagus",
+  "Eye and Orbit",
+  "Intrahepatic Bile Duct",
+  "Kidney and Renal Pelvis",
+  "Liver",
+  "Lung and Bronchus",
+  "Lymphocytic Leukemia",
+  "Melanoma of the Skin",
+  "Myeloid and Monocytic Leukemia",
+  "Myeloma",
+  "Non-Melanoma Skin",
+  "Oral Cavity and Pharynx",
+  "Other",
+  "Ovary",
+  "Pancreas",
+  "Prostate",
+  "Soft Tissue including Heart",
+  "Stomach",
+  "Thyroid",
+  "Urinary Bladder",
+] as const;
+export type CancerSite = (typeof ALL_CANCER_SITES)[number];
 
-export type AgeGroup =
-  | "0-4"
-  | "5-14"
-  | "15-24"
-  | "25-34"
-  | "35-44"
-  | "45-54"
-  | "55-64"
-  | "65-74"
-  | "75-84"
-  | "85+";
+export const ALL_AGE_GROUPS = [
+  "0-4", "5-14", "15-24", "25-34", "35-44",
+  "45-54", "55-64", "65-74", "75-84", "85+",
+] as const;
+export type AgeGroup = (typeof ALL_AGE_GROUPS)[number];
 
-export type Year = "2018" | "2019" | "2020" | "2021" | "2022" | "2018-2022";
+export const ALL_YEARS = [
+  "2018", "2019", "2020", "2021", "2022", "2018-2022",
+] as const;
+export type Year = (typeof ALL_YEARS)[number];
 
-export type QuantileType = "q3" | "q4" | "q5" | "q10";
+export const ALL_QUANTILE_TYPES = ["q3", "q4", "q5", "q10"] as const;
+export type QuantileType = (typeof ALL_QUANTILE_TYPES)[number];
 
-export type CountyMeasure =
-  | "access_to_exercise_opportunities"
-  | "adult_obesity"
-  | "adult_smoking"
-  | "air_pollution_particulate_matter"
-  | "children_in_poverty"
-  | "diabetes_prevalence"
-  | "excessive_drinking"
-  | "food_environment_index"
-  | "food_insecurity"
-  | "high_school_completion"
-  | "homeownership"
-  | "income_inequality"
-  | "insufficient_sleep"
-  | "limited_access_to_healthy_foods"
-  | "mammography_screening"
-  | "median_household_income"
-  | "percent_american_indian_alaska_native"
-  | "percent_asian"
-  | "percent_hispanic"
-  | "percent_native_hawaiian_other_pacific_islander"
-  | "percent_non_hispanic_black"
-  | "percent_non_hispanic_white"
-  | "percent_rural"
-  | "physical_inactivity"
-  | "poor_mental_health_days"
-  | "poor_or_fair_health"
-  | "poor_physical_health_days"
-  | "primary_care_physicians"
-  | "severe_housing_cost_burden"
-  | "severe_housing_problems"
-  | "sexually_transmitted_infections"
-  | "social_associations"
-  | "some_college"
-  | "traffic_volume"
-  | "unemployment"
-  | "uninsured"
-  | "uninsured_adults"
-  | "uninsured_children";
+export const ALL_COUNTY_MEASURES = [
+  "access_to_exercise_opportunities",
+  "adult_obesity",
+  "adult_smoking",
+  "air_pollution_particulate_matter",
+  "children_in_poverty",
+  "diabetes_prevalence",
+  "excessive_drinking",
+  "food_environment_index",
+  "food_insecurity",
+  "high_school_completion",
+  "homeownership",
+  "income_inequality",
+  "insufficient_sleep",
+  "limited_access_to_healthy_foods",
+  "mammography_screening",
+  "median_household_income",
+  "percent_american_indian_alaska_native",
+  "percent_asian",
+  "percent_hispanic",
+  "percent_native_hawaiian_other_pacific_islander",
+  "percent_non_hispanic_black",
+  "percent_non_hispanic_white",
+  "percent_rural",
+  "physical_inactivity",
+  "poor_mental_health_days",
+  "poor_or_fair_health",
+  "poor_physical_health_days",
+  "primary_care_physicians",
+  "severe_housing_cost_burden",
+  "severe_housing_problems",
+  "sexually_transmitted_infections",
+  "social_associations",
+  "some_college",
+  "traffic_volume",
+  "unemployment",
+  "uninsured",
+  "uninsured_adults",
+  "uninsured_children",
+] as const;
+export type CountyMeasure = (typeof ALL_COUNTY_MEASURES)[number];
 
 // --- Filter helpers ---
 

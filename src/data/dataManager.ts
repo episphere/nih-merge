@@ -17,11 +17,12 @@ import type {
 
 // --- Parquet loading with promise cache ---
 
-const DATA_BASE_URL = new URL(/* @vite-ignore */ 'data/', import.meta.url).href
+const DATA_BASE_URL = new URL(/* @vite-ignore */ './', import.meta.url).href
 const cache = new Map<string, Promise<Record<string, unknown>[]>>()
 
 function loadParquet(fileName: string): Promise<Record<string, unknown>[]> {
   const url = `${DATA_BASE_URL}${fileName}`
+  console.log(DATA_BASE_URL, url)
   let pending = cache.get(url)
   if (!pending) {
     pending = fetchAndParse(url)
@@ -98,6 +99,7 @@ async function queryCounty(filters: CountyFilters): Promise<CountyRow[]> {
 
 async function queryAge(filters: AgeFilters): Promise<AgeRow[]> {
   const rows = await loadParquet(ageFile(filters.year))
+  console.log(filters, rows)
   return applyFilters<AgeRow>(rows, [
     ['cause', filters.cause],
     ['race', filters.race],
