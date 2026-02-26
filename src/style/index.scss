@@ -22,6 +22,9 @@
 @forward "nci-heading";
 @forward "uswds-utilities";
 
+// Font Awesome
+@import '@fortawesome/fontawesome-free/css/all.min.css';
+
 // App-level styles
 html {
   background-color: color("primary-dark");
@@ -36,6 +39,18 @@ html {
   margin-block: 0px;
 }
 
+// --- Plot container ---
+// Height is viewport-based so the plot fills available space but never exceeds
+// the sidebar height.  Sticky keeps the plot visible while scrolling controls.
+#plot-container {
+  height: calc(100vh - 5rem);
+  max-height: 785px;
+  position: sticky;
+  top: units(2);
+  overflow-y: hidden;
+  flex-shrink: 0;
+}
+
 #hidden-stuff {
   display: none;
 }
@@ -46,4 +61,178 @@ html {
 
 .usa-label-short-margin {
   margin-top: 8px;
+}
+
+// --- Top controls toolbar ---
+
+.epi-top-controls {
+  display: flex;
+  gap: units(1);
+  justify-content: end;
+}
+
+.epi-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: units(5);
+  height: units(5);
+  border: 1px solid color("base-lighter");
+  border-radius: units(0.5);
+  background: color("white");
+  color: color("base-dark");
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.15s, color 0.15s;
+
+  &:hover {
+    background: color("base-lightest");
+    color: color("primary");
+  }
+}
+
+// --- Popup ---
+
+.epi-popup {
+  display: none;
+  position: absolute;
+  z-index: 1000;
+  min-width: 220px;
+  background: color("white");
+  border: 1px solid color("base-dark");
+  border-radius: units(0.5);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+  &--open {
+    display: block;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: units(1) units(2);
+    border-bottom: 1px solid color("base-lighter");
+  }
+
+  &__title {
+    font-weight: bold;
+    font-size: 0.95rem;
+  }
+
+  &__close {
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    cursor: pointer;
+    color: color("base-dark");
+    line-height: 1;
+    padding: 0 units(0.5);
+  }
+
+  &__body {
+    padding: units(2);
+  }
+}
+
+// --- Dropdown ---
+
+.epi-dropdown {
+  display: none;
+  position: absolute;
+  z-index: 1000;
+  min-width: 140px;
+  margin: 0;
+  padding: units(0.5) 0;
+  list-style: none;
+  background: color("white");
+  border: 1px solid color("base-dark");
+  border-radius: units(0.5);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+  &--open {
+    display: block;
+  }
+
+  &__item {
+    padding: units(1) units(2);
+    cursor: pointer;
+    font-size: 0.9rem;
+
+    &:hover {
+      background: color("base-lightest");
+      color: color("primary");
+    }
+  }
+
+  &__separator {
+    height: 1px;
+    margin: units(0.5) 0;
+    background: color("base-light");
+    list-style: none;
+  }
+}
+
+// --- Overlay ---
+
+.epi-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(0, 0, 0, 0.5);
+  align-items: center;
+  justify-content: center;
+
+  &--open {
+    display: flex;
+  }
+
+  &__panel {
+    background: color("white");
+    border-radius: units(0.5);
+    width: 90vw;
+    max-width: 1000px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    border: 1px solid color("base-dark");
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: units(2) units(3);
+    border-bottom: 1px solid color("base-lighter");
+  }
+
+  &__title {
+    font-weight: bold;
+    font-size: 1.1rem;
+  }
+
+  &__close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: color("base-dark");
+    line-height: 1;
+    padding: 0 units(0.5);
+  }
+
+  &__body {
+    flex: 1;
+    overflow: auto;
+  }
+}
+
+// --- Filter fieldsets inside popup ---
+
+.epi-filter-fieldset {
+  border: none;
+  padding: 0;
+  margin: 0 0 units(1) 0;
 }
