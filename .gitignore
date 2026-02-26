@@ -28,3 +28,4 @@ package-lock.json
 planning/
 src/data/convert.py
 src/data/old_data
+epitracker/
