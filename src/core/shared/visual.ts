@@ -104,6 +104,49 @@ export const MEASURE_STYLE: Record<Measure, MeasureStyle> = {
   },
 };
 
+// --- Determinants measure ---
+
+type DeterminantsMeasure =
+  | 'ageAdjustedRate'
+  | 'crudeRate'
+  | 'ageAdjustedRateRatioRefLow'
+  | 'ageAdjustedRateRatioRefHigh'
+  | 'crudeRateRatioRefLow'
+  | 'crudeRateRatioRefHigh';
+
+export const DETERMINANTS_MEASURE_STYLE: Record<DeterminantsMeasure, MeasureStyle> = {
+  ageAdjustedRate: {
+    label: 'Age-Adjusted Cancer Mortality (per 100,000)',
+    labelShort: 'AA Mortality',
+    plotLabel: 'Age-Adjusted Mortality (per 100,000)',
+  },
+  crudeRate: {
+    label: 'Crude Cancer Mortality (per 100,000)',
+    labelShort: 'Crude Mortality',
+    plotLabel: 'Crude Mortality (per 100,000)',
+  },
+  ageAdjustedRateRatioRefLow: {
+    label: 'AA Rate Ratio (ref: lowest quantile)',
+    labelShort: 'AA RR (ref low)',
+    plotLabel: 'Age-Adjusted Rate Ratio (ref: lowest quantile)',
+  },
+  ageAdjustedRateRatioRefHigh: {
+    label: 'AA Rate Ratio (ref: highest quantile)',
+    labelShort: 'AA RR (ref high)',
+    plotLabel: 'Age-Adjusted Rate Ratio (ref: highest quantile)',
+  },
+  crudeRateRatioRefLow: {
+    label: 'Crude Rate Ratio (ref: lowest quantile)',
+    labelShort: 'Crude RR (ref low)',
+    plotLabel: 'Crude Rate Ratio (ref: lowest quantile)',
+  },
+  crudeRateRatioRefHigh: {
+    label: 'Crude Rate Ratio (ref: highest quantile)',
+    labelShort: 'Crude RR (ref high)',
+    plotLabel: 'Crude Rate Ratio (ref: highest quantile)',
+  },
+};
+
 // --- Comparison field ---
 
 export const COMPARISON_FIELD_LABEL: Record<string, string> = {

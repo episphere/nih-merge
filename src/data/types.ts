@@ -54,7 +54,7 @@ export const ALL_YEARS = [
 ] as const;
 export type Year = (typeof ALL_YEARS)[number];
 
-export const ALL_QUANTILE_TYPES = ["q3", "q4", "q5", "q10"] as const;
+export const ALL_QUANTILE_TYPES = ["3", "4", "5", "10"] as const;
 export type QuantileType = (typeof ALL_QUANTILE_TYPES)[number];
 
 export const ALL_COUNTY_MEASURES = [

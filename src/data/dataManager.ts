@@ -22,7 +22,6 @@ const cache = new Map<string, Promise<Record<string, unknown>[]>>()
 
 function loadParquet(fileName: string): Promise<Record<string, unknown>[]> {
   const url = `${DATA_BASE_URL}${fileName}`
-  console.log(DATA_BASE_URL, url)
   let pending = cache.get(url)
   if (!pending) {
     pending = fetchAndParse(url)
@@ -77,7 +76,7 @@ function ageFile(year: Year): string {
 }
 
 function quantileFile(quantileType: string): string {
-  return `data_by-measure-quantile_${quantileType}_2018-2022.parquet`
+  return `data_by-measure-quantile_q${quantileType}_2018-2022.parquet`
 }
 
 function populationFile(year: Year): string {
@@ -111,12 +110,12 @@ async function queryAge(filters: AgeFilters): Promise<AgeRow[]> {
 
 async function queryQuantile(filters: QuantileFilters): Promise<QuantileRow[]> {
   const rows = await loadParquet(quantileFile(filters.quantileType))
+  console.log("R", rows, filters)
   return applyFilters<QuantileRow>(rows, [
     ['cause', filters.cause],
     ['race', filters.race],
     ['sex', filters.sex],
     ['countyMeasure', filters.countyMeasure],
-    ['quantile', filters.quantile],
   ])
 }
 

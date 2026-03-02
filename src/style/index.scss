@@ -45,10 +45,15 @@ html {
 #plot-container {
   height: calc(100vh - 5rem);
   max-height: 785px;
+  max-width: 100%;
   position: sticky;
   top: units(2);
   overflow-y: hidden;
   flex-shrink: 0;
+}
+
+#title {
+  overflow-wrap: anywhere;
 }
 
 #hidden-stuff {
@@ -235,4 +240,27 @@ html {
   border: none;
   padding: 0;
   margin: 0 0 units(1) 0;
+}
+
+// --- Combo box optgroup headers ---
+
+.usa-combo-box__list-option--group-header {
+  font-weight: bold;
+  font-size: 0.85rem;
+  padding: units(0.5) units(2);
+  color: color("base-dark");
+  cursor: default;
+  pointer-events: none;
+  user-select: none;
+  list-style: none;
+}
+
+// Indent selectable options that follow a group header
+.usa-combo-box__list-option--group-header + .usa-combo-box__list-option {
+  padding-left: units(3);
+}
+
+// Keep indentation for consecutive grouped options
+.usa-combo-box__list-option[data-group-label] {
+  padding-left: units(3);
 }

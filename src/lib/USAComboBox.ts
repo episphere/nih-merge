@@ -149,8 +149,11 @@ export class USAComboBox {
 	/** The id on the assistive hint element. */
 	private readonly assistiveHintID: string;
 
-	/** List of options to populate the listbox. */
+	/** List of selectable options to populate the listbox. */
 	private listOptions: HTMLLIElement[] | undefined;
+
+	/** Full list of rendered items (group headers + selectable options) for display. */
+	private allListItems: HTMLLIElement[] | undefined;
 
 	/** Filtered of options to populate the listbox. */
 	private filteredListOptions: HTMLLIElement[] | undefined;
@@ -195,6 +198,7 @@ export class USAComboBox {
 	 * @protected
 	 */
 	protected constructor(comboBox: HTMLElement) {
+		console.log("CB!")
 		this.comboBox = comboBox;
 		const existingComponent = USAComboBox._components.get(this.comboBox);
 
@@ -336,6 +340,40 @@ export class USAComboBox {
 	 */
 	public getOptions(): Array<HTMLOptionElement> {
 		return Array.from(this.select.options);
+	}
+
+	/**
+	 * Re-reads the underlying <select> and rebuilds the listbox options.
+	 * Call this after programmatically changing the <select>'s children
+	 * (e.g. adding <optgroup> elements).
+	 */
+	public refreshOptions(): void {
+		// Remove old option event listeners
+		if (this.listOptions) {
+			for (const option of this.listOptions) {
+				option.removeEventListener('mouseover', this.mouseoverListener);
+				option.removeEventListener('click', this.optionClickListener);
+			}
+		}
+
+		this.removeHighlightedOption();
+		this.createOptions();
+
+		if (this.listbox) {
+			const fullList = this.allListItems || this.listOptions!;
+			this.listbox.replaceChildren(...fullList);
+			this.updateAnnouncer(this.listOptions!.length);
+		}
+
+		// Re-select the current value visually without dispatching events
+		const currentValue = this.select.value;
+		if (currentValue && this.listOptions) {
+			const match = this.listOptions.find(li => li.dataset.value === currentValue);
+			if (match && this.input) {
+				this.selectedOption = match;
+				this.input.value = match.textContent as string;
+			}
+		}
 	}
 
 	/**
@@ -481,10 +519,10 @@ export class USAComboBox {
 		this.listbox.setAttribute('role', 'listbox');
 		this.listbox.setAttribute('aria-labelledby', this.label.id);
 
-		const options = this.createOptions();
-		this.updateListbox(options);
+		this.createOptions();
+		this.updateListbox(this.allListItems || this.listOptions!);
 
-		const selectedOption = [...options].find(
+		const selectedOption = [...this.listOptions!].find(
 			(option) => option.dataset.selected === 'true'
 		);
 
@@ -497,22 +535,26 @@ export class USAComboBox {
 	}
 
 	/**
-	 * Creates list of options.
+	 * Creates list of options, supporting both flat `<option>` elements and
+	 * `<optgroup>` groups. Group headers are non-selectable `<li>` items with
+	 * `data-group="true"`. Selectable items inside a group carry
+	 * `data-group-label` for filtering purposes.
 	 */
 	private createOptions(): HTMLLIElement[] {
-		const selectOptions = Array.from(this.select.options);
-		const filteredOptions = [...selectOptions].filter(
-			(option) =>
-				!option.disabled &&
-				option.hasAttribute('value') &&
-				option.value &&
-				option.value.trim() !== ''
-		);
-		this.listOptions = [...filteredOptions].map((option, index) => {
-			const optionId = `${this.listboxId}--option-${index + 1}`;
+		const allItems: HTMLLIElement[] = [];
+		const selectableItems: HTMLLIElement[] = [];
+		let selectableIndex = 0;
+
+		const isValidOption = (option: HTMLOptionElement): boolean =>
+			!option.disabled &&
+			option.hasAttribute('value') &&
+			option.value !== '' &&
+			option.value.trim() !== '';
+
+		const createOptionLi = (option: HTMLOptionElement, groupLabel?: string): HTMLLIElement => {
+			selectableIndex++;
+			const optionId = `${this.listboxId}--option-${selectableIndex}`;
 			const li = document.createElement('li');
-			li.setAttribute('aria-setsize', `${filteredOptions.length}`);
-			li.setAttribute('aria-posinset', `${index + 1}`);
 			li.setAttribute('aria-selected', 'false');
 			li.setAttribute('id', optionId);
 			li.setAttribute('class', 'usa-combo-box__list-option');
@@ -522,11 +564,52 @@ export class USAComboBox {
 			li.setAttribute('data-value', option.value);
 			li.textContent = option.textContent;
 
+			if (groupLabel) {
+				li.setAttribute('data-group-label', groupLabel);
+			}
+
 			li.addEventListener('mouseover', this.mouseoverListener);
 			li.addEventListener('click', this.optionClickListener);
 
 			return li;
+		};
+
+		for (const child of Array.from(this.select.children)) {
+			if (child instanceof HTMLOptGroupElement) {
+				const groupLabel = child.label;
+
+				// Create group header
+				const headerLi = document.createElement('li');
+				headerLi.setAttribute('role', 'presentation');
+				headerLi.setAttribute('class', 'usa-combo-box__list-option--group-header');
+				headerLi.setAttribute('data-group', 'true');
+				headerLi.textContent = groupLabel;
+				allItems.push(headerLi);
+
+				// Create selectable options within the group
+				for (const opt of Array.from(child.children)) {
+					if (opt instanceof HTMLOptionElement && isValidOption(opt)) {
+						const li = createOptionLi(opt, groupLabel);
+						allItems.push(li);
+						selectableItems.push(li);
+					}
+				}
+			} else if (child instanceof HTMLOptionElement && isValidOption(child)) {
+				const li = createOptionLi(child);
+				allItems.push(li);
+				selectableItems.push(li);
+			}
+		}
+
+		// Set aria-setsize and aria-posinset on selectable items only
+		const totalSelectable = selectableItems.length;
+		selectableItems.forEach((li, idx) => {
+			li.setAttribute('aria-setsize', `${totalSelectable}`);
+			li.setAttribute('aria-posinset', `${idx + 1}`);
 		});
+
+		this.listOptions = selectableItems;
+		this.allListItems = allItems;
 
 		return this.listOptions;
 	}
@@ -673,19 +756,21 @@ export class USAComboBox {
 				  in the popup.
 				 */
 				if (!this.selectedOption) {
-					const firstChild =
-						this.listbox && !this.highlightedOption
-							? (this.listbox.firstChild as HTMLLIElement)
-							: undefined;
-					const nextSibling = this.highlightedOption
-						? (this.highlightedOption.nextSibling as HTMLLIElement)
-						: undefined;
+					let candidate: HTMLLIElement | undefined;
+					if (this.highlightedOption) {
+						candidate = this.highlightedOption.nextSibling as HTMLLIElement | undefined;
+					} else if (this.listbox) {
+						candidate = this.listbox.firstChild as HTMLLIElement | undefined;
+					}
 
-					const option = nextSibling || firstChild;
+					// Skip group headers
+					while (candidate && candidate.dataset?.group === 'true') {
+						candidate = candidate.nextSibling as HTMLLIElement | undefined;
+					}
 
-					if (option) {
-						this.highlightOption(option);
-						this.scrollToOption(option);
+					if (candidate) {
+						this.highlightOption(candidate);
+						this.scrollToOption(candidate);
 					}
 				}
 
@@ -707,18 +792,21 @@ export class USAComboBox {
 				  If the popup is available, places [visual] focus on the last
 				  focusable element in the popup.
 				 */
-				const lastChild =
-					this.listbox && !this.highlightedOption
-						? (this.listbox.lastChild as HTMLLIElement)
-						: undefined;
-				const prevSibling = this.highlightedOption
-					? (this.highlightedOption.previousSibling as HTMLLIElement)
-					: undefined;
-				const option = prevSibling || lastChild;
+				let candidate: HTMLLIElement | undefined;
+				if (this.highlightedOption) {
+					candidate = this.highlightedOption.previousSibling as HTMLLIElement | undefined;
+				} else if (this.listbox) {
+					candidate = this.listbox.lastChild as HTMLLIElement | undefined;
+				}
 
-				if (option) {
-					this.highlightOption(option);
-					this.scrollToOption(option);
+				// Skip group headers
+				while (candidate && candidate.dataset?.group === 'true') {
+					candidate = candidate.previousSibling as HTMLLIElement | undefined;
+				}
+
+				if (candidate) {
+					this.highlightOption(candidate);
+					this.scrollToOption(candidate);
 				}
 
 				break;
@@ -788,9 +876,15 @@ export class USAComboBox {
 		this.filterListbox(input.value);
 
 		if (this.listbox && this.listbox.firstChild) {
-			this.highlightOption(this.listbox.firstChild as HTMLLIElement);
+			let firstSelectable = this.listbox.firstChild as HTMLLIElement | null;
+			while (firstSelectable && firstSelectable.dataset?.group === 'true') {
+				firstSelectable = firstSelectable.nextSibling as HTMLLIElement | null;
+			}
+			if (firstSelectable) {
+				this.highlightOption(firstSelectable);
+			}
 		} else {
-      this.removeHighlightedOption(); // Ensure nothing is highlighted if no results/no-results message
+      this.removeHighlightedOption();
     }
 
 		this.comboBox.dispatchEvent(
@@ -890,10 +984,11 @@ export class USAComboBox {
 		this.listbox.hidden = true;
 		this.listbox.scrollTop = 0;
 
-		// Reset listbox with unfiltered results.
+		// Reset listbox with unfiltered results (including group headers).
 		this.removeHighlightedOption();
 		if (this.listbox && this.listOptions) {
-			this.listbox.replaceChildren(...this.listOptions);
+			const fullList = this.allListItems || this.listOptions;
+			this.listbox.replaceChildren(...fullList);
 			this.updateAnnouncer(this.listOptions.length);
 		}
 
@@ -936,7 +1031,9 @@ export class USAComboBox {
 			});
 
 		if (this.filteredListOptions && this.filteredListOptions.length) {
-			this.updateListbox(this.filteredListOptions);
+			// Rebuild display list including group headers for matched items
+			const displayItems = this.buildFilteredDisplayList(this.filteredListOptions);
+			this.updateListbox(displayItems);
 		} else {
 			const li = document.createElement('li');
 			li.setAttribute(
@@ -1029,13 +1126,45 @@ export class USAComboBox {
   }
 
 	/**
+	 * Builds a display list that includes group headers for any groups that
+	 * have at least one matched option, plus ungrouped options directly.
+	 */
+	private buildFilteredDisplayList(filtered: HTMLLIElement[]): HTMLLIElement[] {
+		if (!this.allListItems) return filtered;
+
+		const matchedGroupLabels = new Set<string>();
+		for (const li of filtered) {
+			const groupLabel = li.dataset.groupLabel;
+			if (groupLabel) {
+				matchedGroupLabels.add(groupLabel);
+			}
+		}
+
+		const displayItems: HTMLLIElement[] = [];
+		for (const item of this.allListItems) {
+			if (item.dataset.group === 'true') {
+				// Include header only if its group has matched children
+				if (matchedGroupLabels.has(item.textContent || '')) {
+					displayItems.push(item);
+				}
+			} else if (filtered.includes(item)) {
+				displayItems.push(item);
+			}
+		}
+
+		return displayItems;
+	}
+
+	/**
 	 * Replaces options with filtered list and updates status announcer.
 	 * @param options Filtered list of options.
 	 */
 	private updateListbox(options: HTMLLIElement[]) {
 		if (this.listbox) {
 			this.listbox.replaceChildren(...options);
-			this.updateAnnouncer(options.length);
+			// Count only selectable items (exclude group headers) for announcer
+			const selectableCount = options.filter(o => o.dataset.group !== 'true').length;
+			this.updateAnnouncer(selectableCount);
 		}
 	}
 
@@ -1189,7 +1318,8 @@ export class USAComboBox {
 		this.select.value = '';
 
 		if (this.listbox && this.listOptions) {
-			this.listbox.replaceChildren(...this.listOptions);
+			const fullList = this.allListItems || this.listOptions;
+			this.listbox.replaceChildren(...fullList);
 			this.updateAnnouncer(this.listOptions.length);
 		}
 
