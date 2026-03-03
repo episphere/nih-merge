@@ -194,7 +194,8 @@ export function renderPlot(
   // Width
   const containerWidth = plotEl.clientWidth;
   const nFacets = fxDomain ? fxDomain.length : 1;
-  const plotWidth = Math.max(containerWidth, nFacets * 300);
+  // The -1 offset prevents a ResizeObserver loop
+  const plotWidth = Math.max(containerWidth-1, nFacets * 300);
 
   // Y domain
   const ci = ciFields(measure);
@@ -311,7 +312,6 @@ export function renderPlot(
   }
 
   // Render
-  console.log(plotOptions)
   const svg = Plot.plot(plotOptions);
   svg.style.minWidth = `${plotWidth}px`;
   svg.style.flexGrow = '1';

@@ -118,10 +118,7 @@ export function renderPlot(state: BreakdownsState, data: EnrichedAgeRow[]): void
 
   const fxTickFmt = tickFormat(compareFacet);
 
-  // Height: read from #plot which is the 1fr row of #plot-container.
-  // #plot-container's height is CSS-constrained (calc(100vh - 5rem), max 785px),
-  // so clientHeight is stable and won't cause feedback loops.
-  const height = Math.max(MIN_HEIGHT, plotEl.clientHeight);
+  const height = Math.max(MIN_HEIGHT, plotEl.clientHeight-1);
 
   // Margins (computed first since they affect available bar area).
   const marginTop = fxField ? 80 : 50;

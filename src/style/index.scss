@@ -44,6 +44,7 @@ html {
 // the sidebar height.  Sticky keeps the plot visible while scrolling controls.
 #plot-container {
   height: calc(100vh - 5rem);
+  min-height: 520px;
   max-height: 785px;
   max-width: 100%;
   position: sticky;

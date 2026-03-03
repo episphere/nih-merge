@@ -198,7 +198,6 @@ export class USAComboBox {
 	 * @protected
 	 */
 	protected constructor(comboBox: HTMLElement) {
-		console.log("CB!")
 		this.comboBox = comboBox;
 		const existingComponent = USAComboBox._components.get(this.comboBox);
 

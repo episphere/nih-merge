@@ -98,7 +98,6 @@ async function queryCounty(filters: CountyFilters): Promise<CountyRow[]> {
 
 async function queryAge(filters: AgeFilters): Promise<AgeRow[]> {
   const rows = await loadParquet(ageFile(filters.year))
-  console.log(filters, rows)
   return applyFilters<AgeRow>(rows, [
     ['cause', filters.cause],
     ['race', filters.race],
@@ -110,7 +109,6 @@ async function queryAge(filters: AgeFilters): Promise<AgeRow[]> {
 
 async function queryQuantile(filters: QuantileFilters): Promise<QuantileRow[]> {
   const rows = await loadParquet(quantileFile(filters.quantileType))
-  console.log("R", rows, filters)
   return applyFilters<QuantileRow>(rows, [
     ['cause', filters.cause],
     ['race', filters.race],

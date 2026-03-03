@@ -123,7 +123,6 @@ export function addRateRatios(data: EnrichedQuantileRow[], state: DeterminantsSt
 export async function fetchData(state: DeterminantsState): Promise<EnrichedQuantileRow[]> {
   const filters = buildFilters(state);
   const rows = await dataManager.quantileDomain.query(filters);
-  console.log("rows", rows)
   const enriched = rows.map(addConfidenceIntervals);
   addRateRatios(enriched, state);
   return enriched;
