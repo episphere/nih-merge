@@ -5,6 +5,24 @@ import { createDropdown } from '../shared/popup';
 import { createOverlay } from '../shared/overlay';
 import { downloadCSV, downloadTSV, downloadJSON } from '../shared/download';
 import { downloadFigurePNG, downloadFigureSVG, getFigureOptions } from '../shared/downloadImage';
+import { renderDataTable, type TableColumn } from '../shared/dataTable';
+import { COMPARISON_FIELD_LABEL } from '../shared/visual';
+
+const DETERMINANTS_COLUMNS: TableColumn[] = [
+  { field: 'race', title: COMPARISON_FIELD_LABEL.race ?? 'Race/Ethnicity', frozen: true },
+  { field: 'sex', title: COMPARISON_FIELD_LABEL.sex ?? 'Sex', frozen: true },
+  { field: 'cause', title: COMPARISON_FIELD_LABEL.cause ?? 'Cancer Site', frozen: true },
+  { field: 'countyMeasure', title: 'County Measure', frozen: true },
+  { field: 'quantile', title: 'Quantile', frozen: true },
+  { field: 'deaths', title: 'Deaths' },
+  { field: 'population', title: 'Population' },
+  { field: 'crudeRate', title: 'Crude Rate' },
+  { field: 'ageAdjustedRate', title: 'Age-Adjusted Rate' },
+  { field: 'crudeRateRatioRefLow', title: 'Crude RR (ref low)' },
+  { field: 'crudeRateRatioRefHigh', title: 'Crude RR (ref high)' },
+  { field: 'ageAdjustedRateRatioRefLow', title: 'AA RR (ref low)' },
+  { field: 'ageAdjustedRateRatioRefHigh', title: 'AA RR (ref high)' },
+];
 
 /**
  * Wire the 4 top-control icon buttons to their respective popups/dropdowns/overlays.
@@ -16,7 +34,7 @@ export function initTopControls(
 ): void {
   initFilterButton($state);
   initSettingsButton($state, update);
-  initTableButton();
+  initTableButton(getData);
   initDownloadButton(getData);
 }
 
@@ -117,14 +135,43 @@ function initSettingsButton(
 
 // --- Table button ---
 
-function initTableButton(): void {
+function initTableButton(getData?: () => Record<string, unknown>[]): void {
   const btn = document.getElementById('btn-table');
   if (!btn) return;
 
   const overlay = createOverlay({ title: 'Data Table' });
-  overlay.contentEl.innerHTML = '<p class="padding-3">Data table coming soon.</p>';
 
-  btn.addEventListener('click', () => overlay.open());
+  // Download button in toolbar
+  const downloadBtn = document.createElement('button');
+  downloadBtn.className = 'epi-icon-btn';
+  downloadBtn.type = 'button';
+  downloadBtn.title = 'Download table data';
+  downloadBtn.innerHTML = '<i class="fas fa-download"></i>';
+  overlay.toolbarEl.appendChild(downloadBtn);
+
+  createDropdown(downloadBtn, [
+    { label: 'CSV (.csv)', onClick: () => getData && downloadCSV(getData(), 'epitracker-determinants.csv') },
+    { label: 'TSV (.tsv)', onClick: () => getData && downloadTSV(getData(), 'epitracker-determinants.tsv') },
+    { label: 'JSON (.json)', onClick: () => getData && downloadJSON(getData(), 'epitracker-determinants.json') },
+  ]);
+
+  btn.addEventListener('click', () => {
+    // Set subtitle from current plot title
+    const titleEl = document.getElementById('title');
+    overlay.subtitleEl.textContent = titleEl?.textContent ?? '';
+
+    // Render table with current data
+    if (getData) {
+      const data = getData();
+      // Filter columns to only those present in the data
+      const dataKeys = data.length > 0 ? new Set(Object.keys(data[0])) : new Set<string>();
+      const activeColumns = DETERMINANTS_COLUMNS.filter(col => dataKeys.has(col.field));
+      renderDataTable(overlay.contentEl, data, activeColumns);
+    } else {
+      overlay.contentEl.innerHTML = '<p class="padding-3">No data available.</p>';
+    }
+    overlay.open();
+  });
 }
 
 // --- Download button ---

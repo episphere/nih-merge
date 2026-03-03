@@ -145,8 +145,8 @@ html {
 
 .epi-dropdown {
   display: none;
-  position: absolute;
-  z-index: 1000;
+  position: fixed;
+  z-index: 3000;
   min-width: 140px;
   margin: 0;
   padding: units(0.5) 0;
@@ -197,9 +197,9 @@ html {
   &__panel {
     background: color("white");
     border-radius: units(0.5);
-    width: 90vw;
-    max-width: 1000px;
-    max-height: 85vh;
+    width: 95vw;
+    max-width: 1400px;
+    max-height: 90vh;
     display: flex;
     flex-direction: column;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
@@ -212,11 +212,42 @@ html {
     justify-content: space-between;
     padding: units(2) units(3);
     border-bottom: 1px solid color("base-lighter");
+    gap: units(2);
+  }
+
+  &__header-left {
+    display: flex;
+    align-items: baseline;
+    gap: units(1.5);
+    min-width: 0;
+    flex: 1;
+  }
+
+  &__header-right {
+    display: flex;
+    align-items: center;
+    gap: units(1);
+    flex-shrink: 0;
   }
 
   &__title {
     font-weight: bold;
     font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  &__subtitle {
+    font-size: 0.9rem;
+    color: color("base-dark");
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__toolbar {
+    display: flex;
+    align-items: center;
+    gap: units(0.5);
   }
 
   &__close {
@@ -264,4 +295,79 @@ html {
 // Keep indentation for consecutive grouped options
 .usa-combo-box__list-option[data-group-label] {
   padding-left: units(3);
+}
+
+// --- Data table ---
+
+.epi-data-table {
+  overflow: auto;
+  max-height: 100%;
+
+  table {
+    width: max-content;
+    min-width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+
+  th,
+  td {
+    padding: units(1) units(1.5);
+    white-space: nowrap;
+    border-bottom: 1px solid color("base-lighter");
+  }
+
+  th {
+    position: sticky;
+    top: 0;
+    background: color("base-lightest");
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+    user-select: none;
+    z-index: 2;
+
+    &:hover {
+      background: color("base-light");
+    }
+
+    &.sort-asc::after {
+      content: " \25B2";
+      font-size: 0.65em;
+    }
+
+    &.sort-desc::after {
+      content: " \25BC";
+      font-size: 0.65em;
+    }
+  }
+
+  td.numeric {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  // Frozen (sticky) columns
+  .frozen {
+    position: sticky;
+    background: color("white");
+    z-index: 1;
+  }
+
+  th.frozen {
+    z-index: 3;
+    background: color("base-lightest");
+  }
+
+  .frozen-last {
+    border-right: 2px solid color("base-light");
+  }
+
+  tbody tr:hover td {
+    background: color("primary-lighter");
+  }
+
+  tbody tr:hover td.frozen {
+    background: color("primary-lighter");
+  }
 }
