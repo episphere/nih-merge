@@ -14,7 +14,7 @@ function formatLabel(key: string, value: string): string {
   }
 
   if (key === 'measure') {
-    return DETERMINANTS_MEASURE_STYLE[value as keyof typeof DETERMINANTS_MEASURE_STYLE]?.labelShort ?? value;
+    return DETERMINANTS_MEASURE_STYLE[value as keyof typeof DETERMINANTS_MEASURE_STYLE]?.label ?? value;
   }
 
   if (key === 'quantileField') {

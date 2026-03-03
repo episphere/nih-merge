@@ -15,7 +15,7 @@ function formatLabel(key: string, value: string): string {
   }
 
   if (key === 'measure') {
-    return MEASURE_STYLE[value as keyof typeof MEASURE_STYLE]?.labelShort ?? value;
+    return MEASURE_STYLE[value as keyof typeof MEASURE_STYLE]?.label ?? value;
   }
 
   if (key === 'stateFips') {
