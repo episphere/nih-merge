@@ -17,7 +17,7 @@ const { $state, update } = createDashboardStore(DETERMINANTS_DEFAULTS, resolveDe
 
 // 3. Controls
 initControls($state, update);
-initTopControls($state, update);
+initTopControls($state, update, () => lastData as unknown as Record<string, unknown>[]);
 
 // 4. URL sync
 const URL_KEYS: (keyof typeof DETERMINANTS_DEFAULTS & string)[] = [

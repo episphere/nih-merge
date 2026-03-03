@@ -16,7 +16,7 @@ const { $state, update } = createDashboardStore(BREAKDOWNS_DEFAULTS, resolveBrea
 
 // 3. Controls
 initControls($state, update);
-initTopControls($state, update);
+initTopControls($state, update, () => lastData as unknown as Record<string, unknown>[]);
 
 // 4. URL sync
 const URL_KEYS: (keyof typeof BREAKDOWNS_DEFAULTS & string)[] = [

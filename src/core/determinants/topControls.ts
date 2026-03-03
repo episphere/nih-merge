@@ -3,6 +3,8 @@ import type { DeterminantsState } from './state';
 import { createPopup } from '../shared/popup';
 import { createDropdown } from '../shared/popup';
 import { createOverlay } from '../shared/overlay';
+import { downloadCSV, downloadTSV, downloadJSON } from '../shared/download';
+import { downloadFigurePNG, downloadFigureSVG, getFigureOptions } from '../shared/downloadImage';
 
 /**
  * Wire the 4 top-control icon buttons to their respective popups/dropdowns/overlays.
@@ -10,11 +12,12 @@ import { createOverlay } from '../shared/overlay';
 export function initTopControls(
   $state: MapStore<DeterminantsState>,
   update: (change: Partial<DeterminantsState>) => void,
+  getData?: () => Record<string, unknown>[],
 ): void {
   initFilterButton($state);
   initSettingsButton($state, update);
   initTableButton();
-  initDownloadButton();
+  initDownloadButton(getData);
 }
 
 // --- Filter button ---
@@ -126,16 +129,16 @@ function initTableButton(): void {
 
 // --- Download button ---
 
-function initDownloadButton(): void {
+function initDownloadButton(getData?: () => Record<string, unknown>[]): void {
   const btn = document.getElementById('btn-download');
   if (!btn) return;
 
   createDropdown(btn, [
-    { label: 'Data (.csv)', onClick: () => console.log('Download CSV') },
-    { label: 'Data (.tsv)', onClick: () => console.log('Download TSV') },
-    { label: 'Data (.json)', onClick: () => console.log('Download JSON') },
+    { label: 'Data (.csv)', onClick: () => getData && downloadCSV(getData(), 'epitracker-determinants.csv') },
+    { label: 'Data (.tsv)', onClick: () => getData && downloadTSV(getData(), 'epitracker-determinants.tsv') },
+    { label: 'Data (.json)', onClick: () => getData && downloadJSON(getData(), 'epitracker-determinants.json') },
     'separator',
-    { label: 'Image (.png)', onClick: () => console.log('Download PNG') },
-    { label: 'Image (.svg)', onClick: () => console.log('Download SVG') },
+    { label: 'Image (.png)', onClick: () => { const o = getFigureOptions('epitracker-determinants'); if (o) downloadFigurePNG(o); } },
+    { label: 'Image (.svg)', onClick: () => { const o = getFigureOptions('epitracker-determinants'); if (o) downloadFigureSVG(o); } },
   ]);
 }
