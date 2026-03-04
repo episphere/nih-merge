@@ -37,7 +37,9 @@ export async function loadQuantileDetails(): Promise<QuantileDetailsIndex> {
     const detail: QuantileDetail = {
       ...entry,
       quantileRanges: entry.quantileRanges.map(([lo, hi]) =>
-        isProportion ? [lo * 100, hi * 100] : [lo, hi],
+        isProportion
+          ? [parseFloat((lo * 100).toPrecision(10)), parseFloat((hi * 100).toPrecision(10))]
+          : [lo, hi],
       ),
       unit: isProportion ? '%' : entry.unit,
     };
