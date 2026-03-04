@@ -65,7 +65,29 @@
         </div>
       </div>
 
-      <div id="grid-container" class="margin-x-3 margin-top-0 margin-bottom-1"></div>
+      <div id="dashboard" class="margin-x-3 margin-top-0 margin-bottom-1">
+        <!-- Topbar: title + buttons -->
+        <div id="dashboard-topbar" class="display-flex flex-justify flex-align-center padding-y-1">
+          <h3 id="title" class="margin-0 font-sans-sm"></h3>
+          <div class="epi-top-controls">
+            <button id="btn-edit-grid" class="epi-icon-btn" type="button" title="Edit Grid">
+              <i class="fa-solid fa-plus"></i>
+            </button>
+            <button id="btn-settings" class="epi-icon-btn" type="button" title="Settings">
+              <i class="fa-solid fa-gear"></i>
+            </button>
+            <button id="btn-table" class="epi-icon-btn" type="button" title="Data Table">
+              <i class="fa-solid fa-table"></i>
+            </button>
+            <button id="btn-download" class="epi-icon-btn" type="button" title="Download">
+              <i class="fa-solid fa-download"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Map grid container (Gridette attaches here) -->
+        <div id="map-grid"></div>
+      </div>
     </main>
 
     <!-- Footer -->

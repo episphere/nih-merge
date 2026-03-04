@@ -1,8 +1,10 @@
 /**
  * Reusable popup & dropdown utilities.
  * Both append to document.body to avoid overflow clipping,
- * and position via getBoundingClientRect relative to an anchor element.
+ * and use @floating-ui/dom for robust positioning.
  */
+
+import { computePosition, flip, shift, offset } from '@floating-ui/dom';
 
 export interface PopupOptions {
   title?: string;
@@ -50,15 +52,18 @@ export function createPopup(
 
   document.body.appendChild(el);
 
-  function position() {
-    const rect = anchorEl.getBoundingClientRect();
-    el.style.top = `${rect.bottom + window.scrollY + 4}px`;
-    el.style.left = `${rect.left + window.scrollX}px`;
+  async function position() {
+    const { x, y } = await computePosition(anchorEl, el, {
+      placement: 'bottom-start',
+      middleware: [offset(4), flip(), shift({ padding: 8 })],
+    });
+    el.style.left = `${x}px`;
+    el.style.top = `${y}px`;
   }
 
   function open() {
-    position();
     el.classList.add('epi-popup--open');
+    position();
     // Defer so the opening click doesn't immediately close
     requestAnimationFrame(() => {
       document.addEventListener('mousedown', onClickOutside);
@@ -133,15 +138,18 @@ export function createDropdown(
 
   document.body.appendChild(el);
 
-  function position() {
-    const rect = anchorEl.getBoundingClientRect();
-    el.style.top = `${rect.bottom + 4}px`;
-    el.style.left = `${rect.left}px`;
+  async function position() {
+    const { x, y } = await computePosition(anchorEl, el, {
+      placement: 'bottom-end',
+      middleware: [offset(4), flip(), shift({ padding: 8 })],
+    });
+    el.style.left = `${x}px`;
+    el.style.top = `${y}px`;
   }
 
   function open() {
-    position();
     el.classList.add('epi-dropdown--open');
+    position();
     requestAnimationFrame(() => {
       document.addEventListener('mousedown', onClickOutside);
     });

@@ -1,0 +1,229 @@
+import * as d3 from 'd3';
+import { dataManager } from '../../data/dataManager';
+import type { CountyFilters, CountyRow, PopulationFilters, PopulationRow } from '../../data/types';
+import type { Card, CardState, MapsMeasure, MapsState } from './state';
+
+// --- GeoJSON types ---
+
+export interface GeoFeature {
+  type: 'Feature';
+  id: string;
+  properties: { name: string };
+  geometry: unknown;
+}
+
+export interface GeoFeatureCollection {
+  type: 'FeatureCollection';
+  features: GeoFeature[];
+}
+
+export interface GeoData {
+  stateGeoJSON: GeoFeatureCollection;
+  countyGeoJSON: GeoFeatureCollection;
+  nationGeoJSON: GeoFeatureCollection;
+}
+
+// --- Color config ---
+
+export interface ColorConfig {
+  scheme: string;
+  reverse: boolean;
+  domain: [number, number];
+  pivot: number | null;
+  valid: boolean;
+}
+
+// --- GeoJSON loading (cached) ---
+
+let geoDataPromise: Promise<GeoData> | null = null;
+
+export function loadGeoJSON(): Promise<GeoData> {
+  if (!geoDataPromise) {
+    geoDataPromise = Promise.all([
+      d3.json(new URL('../../data/geography/states.geojson', import.meta.url).href) as Promise<GeoFeatureCollection>,
+      d3.json(new URL('../../data/geography/counties.geojson', import.meta.url).href) as Promise<GeoFeatureCollection>,
+      d3.json(new URL('../../data/geography/nation.geojson', import.meta.url).href) as Promise<GeoFeatureCollection>,
+    ]).then(([stateGeoJSON, countyGeoJSON, nationGeoJSON]) => ({
+      stateGeoJSON,
+      countyGeoJSON,
+      nationGeoJSON,
+    }));
+  }
+  return geoDataPromise;
+}
+
+// --- Per-card data fetching ---
+
+const dataCache = new Map<string, Promise<Record<string, unknown>[]>>();
+
+function cardQueryKey(cardState: CardState, measure: MapsMeasure): string {
+  return [
+    cardState.year,
+    cardState.cause,
+    cardState.sex,
+    cardState.race,
+    cardState.stateFips,
+    cardState.spatialLevel,
+    measure,
+  ].join('\0');
+}
+
+export async function fetchCardData(
+  cardState: CardState,
+  measure: MapsMeasure,
+): Promise<Record<string, unknown>[]> {
+  const key = cardQueryKey(cardState, measure);
+  let pending = dataCache.get(key);
+  if (pending) return pending;
+
+  pending = doFetch(cardState, measure);
+  dataCache.set(key, pending);
+  pending.catch(() => dataCache.delete(key));
+  return pending;
+}
+
+async function doFetch(
+  cardState: CardState,
+  measure: MapsMeasure,
+): Promise<Record<string, unknown>[]> {
+  if (measure === 'population') {
+    const filters: PopulationFilters = {
+      year: cardState.year,
+      race: cardState.race === 'Total' ? 'Total' : cardState.race,
+      sex: cardState.sex === 'Total' ? 'Total' : cardState.sex,
+      stateFips: cardState.stateFips === 'Total' ? '*' : cardState.stateFips,
+      countyFips: cardState.spatialLevel === 'state' ? 'Total' : '*',
+      ageGroup: 'Total',
+    };
+    const rows = await dataManager.populationDomain.query(filters);
+    return enrichRows(rows, cardState.spatialLevel);
+  }
+
+  const filters: CountyFilters = {
+    year: cardState.year,
+    cause: cardState.cause === 'Total' ? 'Total' : cardState.cause,
+    race: cardState.race === 'Total' ? 'Total' : cardState.race,
+    sex: cardState.sex === 'Total' ? 'Total' : cardState.sex,
+    stateFips: cardState.stateFips === 'Total' ? '*' : cardState.stateFips,
+    countyFips: cardState.spatialLevel === 'state' ? 'Total' : '*',
+  };
+  const rows = await dataManager.countyDomain.query(filters);
+  return enrichRows(rows, cardState.spatialLevel);
+}
+
+async function enrichRows(
+  rows: (CountyRow | PopulationRow)[],
+  spatialLevel: 'county' | 'state',
+): Promise<Record<string, unknown>[]> {
+  const geo = await loadGeoJSON();
+  const nameMap = new Map<string, string>();
+
+  if (spatialLevel === 'county') {
+    for (const f of geo.countyGeoJSON.features) {
+      nameMap.set(f.id, f.properties.name);
+    }
+  } else {
+    for (const f of geo.stateGeoJSON.features) {
+      nameMap.set(f.id, f.properties.name);
+    }
+  }
+
+  const fipsField = spatialLevel === 'county' ? 'countyFips' : 'stateFips';
+  return rows.map((row) => {
+    const r = row as unknown as Record<string, unknown>;
+    return {
+      ...r,
+      regionName: nameMap.get(r[fipsField] as string) ?? 'Unknown',
+    };
+  });
+}
+
+// --- Fetch all card data ---
+
+export async function fetchAllCardData(
+  cards: Card[],
+  measure: MapsMeasure,
+): Promise<Map<number, Record<string, unknown>[]>> {
+  const result = new Map<number, Record<string, unknown>[]>();
+  const promises: Promise<void>[] = [];
+
+  for (let i = 0; i < cards.length; i++) {
+    const card = cards[i];
+    if (card.blank || !card.state) continue;
+    const idx = i;
+    promises.push(
+      fetchCardData(card.state, measure).then((data) => {
+        result.set(idx, data);
+      }),
+    );
+  }
+
+  await Promise.all(promises);
+  return result;
+}
+
+// --- Color config computation ---
+
+export function computeColorConfig(
+  cardDataMap: Map<number, Record<string, unknown>[]>,
+  state: MapsState,
+): ColorConfig | null {
+  const allValues: number[] = [];
+  for (const data of cardDataMap.values()) {
+    for (const row of data) {
+      const val = row[state.measure] as number | null | undefined;
+      if (val != null && Number.isFinite(val)) {
+        allValues.push(val);
+      }
+    }
+  }
+
+  if (allValues.length === 0) {
+    return null;
+  }
+
+  let filteredValues = allValues;
+
+  // Initial clip using MAD to remove extreme outliers before computing stats
+  if (state.colorExcludeExtremes) {
+    const median = d3.median(filteredValues)!;
+    const deviations = filteredValues.map((d) => Math.abs(d - median));
+    const MAD = 1.4826 * d3.median(deviations)!;
+    const initialClipDomain = [median - 5 * MAD, median + 5 * MAD];
+    filteredValues = filteredValues.filter(
+      (d) => d > initialClipDomain[0] && d < initialClipDomain[1],
+    );
+  }
+
+  const mean = d3.mean(filteredValues)!;
+  const extent = d3.extent(filteredValues) as [number, number];
+
+  let domain: [number, number] = extent;
+  let pivot: number | null = null;
+
+  if (state.colorCenterMean) {
+    pivot = mean;
+  }
+
+  if (state.colorExcludeExtremes && filteredValues.length > 1) {
+    const std = d3.deviation(filteredValues)!;
+    const clipDomain: [number, number] = [
+      mean - state.colorExtremeCutoff * std,
+      mean + state.colorExtremeCutoff * std,
+    ];
+    domain = [
+      Math.max(extent[0], clipDomain[0]),
+      Math.min(extent[1], clipDomain[1]),
+    ];
+  }
+
+  const valid = Number.isFinite(mean) && domain.every((d) => Number.isFinite(d));
+
+  return {
+    scheme: state.colorScheme,
+    reverse: state.colorReverse,
+    domain,
+    pivot,
+    valid,
+  };
+}

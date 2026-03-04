@@ -4,6 +4,7 @@
 
 export interface OverlayOptions {
   title?: string;
+  maxWidth?: string;
 }
 
 export interface OverlayHandle {
@@ -58,6 +59,10 @@ export function createOverlay(options: OverlayOptions = {}): OverlayHandle {
 
   const contentEl = document.createElement('div');
   contentEl.className = 'epi-overlay__body';
+
+  if (options.maxWidth) {
+    panel.style.maxWidth = options.maxWidth;
+  }
 
   panel.appendChild(header);
   panel.appendChild(contentEl);

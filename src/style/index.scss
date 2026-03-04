@@ -14,6 +14,7 @@
 @forward "usa-select";
 @forward "usa-label";
 @forward "usa-combo-box";
+@forward "usa-range";
 @forward "usa-checkbox";
 @forward "usa-fieldset";
 @forward "nci-header";
@@ -103,7 +104,7 @@ html {
   display: none;
   position: absolute;
   z-index: 1000;
-  min-width: 220px;
+  min-width: 320px;
   background: color("white");
   border: 1px solid color("base-dark");
   border-radius: units(0.5);
@@ -137,7 +138,28 @@ html {
   }
 
   &__body {
-    padding: units(2);
+    padding: units(1) units(2) units(2);
+
+    // Remove top margin on the first form group so there's no gap at the top
+    > .usa-form-group:first-child {
+      margin-top: 0;
+    }
+
+    .usa-form-group {
+      margin-top: units(1);
+    }
+
+    .usa-checkbox {
+      margin-top: units(0.5);
+    }
+
+    input.usa-range {
+      border: none;
+      height: auto;
+      padding: 0;
+      margin-top: units(0.5);
+      max-width: 100%;
+    }
   }
 }
 
@@ -145,7 +167,7 @@ html {
 
 .epi-dropdown {
   display: none;
-  position: fixed;
+  position: absolute;
   z-index: 3000;
   min-width: 140px;
   margin: 0;
@@ -263,6 +285,8 @@ html {
   &__body {
     flex: 1;
     overflow: auto;
+    overflow-x: hidden;
+    padding: units(2) units(3);
   }
 }
 
@@ -369,5 +393,184 @@ html {
 
   tbody tr:hover td.frozen {
     background: color("primary-lighter");
+  }
+}
+
+// --- Color legend (inline in topbar) ---
+
+#color-legend {
+  flex-shrink: 0;
+}
+
+#title {
+  flex: 1;
+  text-align: center;
+  min-width: 0;
+}
+
+// --- Maps dashboard grid (wrapper with add row/col buttons) ---
+
+.maps-dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 30px;
+  grid-template-rows: 1fr 30px;
+  height: calc(100vh - 14rem);
+  min-height: 400px;
+}
+
+.maps-dashboard-grid > #map-grid {
+  grid-row: 1;
+  grid-column: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+.grid-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: none;
+    font-size: 16px;
+    color: color("base-dark");
+    cursor: pointer;
+    border-radius: units(0.5);
+    transition: color 0.15s, background-color 0.15s;
+
+    &:hover {
+      color: color("primary");
+      background: color("base-lightest");
+    }
+  }
+
+  &--col {
+    grid-column: 2;
+    grid-row: 1;
+    flex-direction: column;
+  }
+
+  &--row {
+    grid-column: 1;
+    grid-row: 2;
+    flex-direction: row;
+  }
+}
+
+// --- Gridette ---
+
+.gridette {
+  display: grid;
+  gap: units(1);
+  height: 100%;
+}
+
+.gridette-cell {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.gridette-cell-dragging-from {
+  opacity: 0.4;
+}
+
+// --- Map cards ---
+
+.map-card {
+  display: flex;
+  flex-direction: column;
+  background: color("white");
+  border: 1px solid color("base-lighter");
+  border-radius: units(0.5);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  height: 100%;
+  overflow: hidden;
+
+  &--blank {
+    border-style: dashed;
+    border-color: color("base-light");
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: color("base-lightest");
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: units(0.5);
+    padding: units(0.5) units(1);
+    border-bottom: 1px solid color("base-lighter");
+    background: color("base-lightest");
+    flex-shrink: 0;
+  }
+
+  &__drag-handle {
+    cursor: grab;
+    color: color("base");
+    font-size: 0.85rem;
+    padding: 0 units(0.5);
+
+    &:active {
+      cursor: grabbing;
+    }
+  }
+
+  &__title {
+    flex: 1;
+    font-size: 0.75rem;
+    color: color("base-dark");
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__controls {
+    display: flex;
+    gap: units(0.5);
+
+    .epi-icon-btn {
+      width: units(3);
+      height: units(3);
+      font-size: 0.7rem;
+      border: none;
+    }
+  }
+
+  &__body {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  &__add-btn {
+    background: none;
+    border: 2px dashed color("base-light");
+    border-radius: 50%;
+    width: units(6);
+    height: units(6);
+    cursor: pointer;
+    color: color("base");
+    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.15s, color 0.15s;
+
+    &:hover {
+      border-color: color("primary");
+      color: color("primary");
+    }
   }
 }
