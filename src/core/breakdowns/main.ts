@@ -7,6 +7,8 @@ import { initControls } from './controls';
 import { initTopControls } from './topControls';
 import { fetchData, applyPlotFilters, deriveFilterOptions, type EnrichedAgeRow } from './query';
 import { renderPlot } from './plot';
+import { createPlotTooltip, type PlotTooltipField } from '../shared/plotTooltip';
+import { COMPARISON_FIELD_LABEL, MEASURE_STYLE } from '../shared/visual';
 
 // 1. Layout
 initLayout();
@@ -69,10 +71,43 @@ $state.subscribe(async (state) => {
   render();
 });
 
+const plotTooltip = createPlotTooltip();
+
 function render(): void {
   const state = $state.get();
   const filtered = applyPlotFilters(state, lastData);
   renderPlot(state, filtered);
+
+  // Bind tooltip to bar marks
+  const plotEl = document.getElementById('plot')!;
+  const fields: PlotTooltipField[] = [];
+
+  // Show comparison fields first
+  for (const comp of [state.compareBar, state.compareFacet] as const) {
+    if (comp !== 'none') {
+      fields.push({
+        label: COMPARISON_FIELD_LABEL[comp] ?? comp,
+        value: (row) => String(row[comp] ?? ''),
+      });
+    }
+  }
+
+  // Measure value last
+  const measureLabel = MEASURE_STYLE[state.measure].labelShort;
+  fields.push({
+    label: measureLabel,
+    value: (row) => {
+      const v = row[state.measure];
+      return typeof v === 'number' ? v.toFixed(2) : String(v ?? 'N/A');
+    },
+  });
+
+  plotTooltip.bind(
+    plotEl,
+    "g[aria-label='bar'] rect",
+    filtered as unknown as Record<string, unknown>[],
+    fields,
+  );
 }
 
 // 6. Re-render on resize — clear the plot immediately so the user sees the

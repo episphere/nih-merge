@@ -10,6 +10,7 @@ import { fetchAllCardData, computeColorConfig, loadGeoJSON, type ColorConfig } f
 import { renderMapCard } from './mapPlot';
 import { renderColorLegend } from './colorLegend';
 import { Gridette } from './grid';
+import { initMapTooltip, type MapTooltipHandle } from './mapTooltip';
 
 // 1. Layout
 initLayout();
@@ -102,7 +103,19 @@ $state.subscribe((s) => {
   removeRowBtn.style.display = s.nRows <= 1 ? 'none' : '';
 });
 
-// 5. Render loop with query-key separation
+// 5. Tooltip
+const mapTooltipHandle: MapTooltipHandle = initMapTooltip((cardIndex, featureId) => {
+  const state = $state.get();
+  const card = state.cards[cardIndex];
+  if (!card || card.blank || !card.state) return null;
+  const data = cardDataMap.get(cardIndex);
+  if (!data) return null;
+  const indexField = card.state.spatialLevel === 'county' ? 'countyFips' : 'stateFips';
+  const row = data.find((r) => r[indexField] === featureId);
+  return { row, spatialLevel: card.state.spatialLevel, measure: state.measure };
+});
+
+// 6. Render loop with query-key separation
 let cardDataMap = new Map<number, Record<string, unknown>[]>();
 let colorConfig: ColorConfig | null = null;
 let renderVersion = 0;
@@ -147,6 +160,19 @@ $state.subscribe(async (state) => {
   colorConfig = computeColorConfig(cardDataMap, state);
   renderColorLegend(legendEl, colorConfig, state);
   updateTitles(state);
+
+  // Update tooltip histogram with all values from all cards
+  if (colorConfig && colorConfig.valid) {
+    const allValues: number[] = [];
+    for (const rows of cardDataMap.values()) {
+      for (const row of rows) {
+        const v = row[state.measure];
+        if (typeof v === 'number' && !Number.isNaN(v)) allValues.push(v);
+      }
+    }
+    mapTooltipHandle.updateHistogram(allValues, colorConfig);
+  }
+
   render();
 });
 
@@ -232,7 +258,10 @@ async function render(): Promise<void> {
     if (!cell) continue;
     const mapContainer = cell.element.querySelector('.map-card__body') as HTMLElement;
     if (mapContainer) {
-      renderMapCard(mapContainer, card.state, data, colorConfig, geoData, state);
+      const fc = renderMapCard(mapContainer, card.state, data, colorConfig, geoData, state);
+      if (fc) {
+        mapTooltipHandle.bindCard(mapContainer, cardIdx, fc.features);
+      }
     }
   }
 }
@@ -240,6 +269,7 @@ async function render(): Promise<void> {
 function createCardElement(blank: boolean, cardIndex: number): HTMLElement {
   const el = document.createElement('div');
   el.className = blank ? 'map-card map-card--blank' : 'map-card';
+  el.setAttribute('data-card-index', String(cardIndex));
 
   if (blank) {
     const addBtn = document.createElement('button');
@@ -398,7 +428,7 @@ function getCardTitle(cardState: CardState, measure: MapsMeasure): string {
   return parts.length > 0 ? parts.join(', ') : '';
 }
 
-// 6. Re-render on resize
+// 7. Re-render on resize
 if (mapGridEl) {
   onResize(
     mapGridEl,

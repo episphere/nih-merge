@@ -201,6 +201,64 @@ html {
   }
 }
 
+// --- Tooltip ---
+
+.epi-tooltip {
+  display: none;
+  position: absolute;
+  z-index: 4000;
+  pointer-events: none;
+  background: color("white");
+  border: 1px solid color("base-lighter");
+  border-radius: units(0.5);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  padding: units(1) units(1.5);
+  font-size: 0.8rem;
+
+  &--visible {
+    display: flex;
+    flex-direction: column;
+    gap: units(0.5);
+  }
+
+  &__name {
+    font-weight: bold;
+    font-size: 0.85rem;
+  }
+
+  &__value {
+    color: color("base-dark");
+  }
+
+  &__histogram {
+    line-height: 0;
+
+    svg {
+      display: block;
+    }
+  }
+
+  &__table {
+    border-collapse: collapse;
+    font-size: 0.8rem;
+
+    td {
+      padding: 1px units(0.5);
+    }
+  }
+
+  &__table-label {
+    color: color("base-dark");
+    padding-right: units(1);
+    white-space: nowrap;
+  }
+
+  &__table-value {
+    font-weight: bold;
+    white-space: nowrap;
+  }
+}
+
 // --- Overlay ---
 
 .epi-overlay {

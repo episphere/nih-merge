@@ -155,9 +155,9 @@ export function renderMapCard(
   colorConfig: ColorConfig,
   geoData: GeoData,
   globalState: MapsState,
-): void {
+): GeoFeatureCollection | null {
   const bbox = container.getBoundingClientRect();
-  if (bbox.width === 0 || bbox.height === 0) return;
+  if (bbox.width === 0 || bbox.height === 0) return null;
 
   const indexField = cardState.spatialLevel === 'county' ? 'countyFips' : 'stateFips';
   const { countyGeoJSON, stateGeoJSON, nationGeoJSON } = geoData;
@@ -223,4 +223,5 @@ export function renderMapCard(
   });
 
   container.replaceChildren(plot);
+  return featureCollection;
 }
