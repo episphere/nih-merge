@@ -40,7 +40,7 @@ export function causeSexRule(state: CauseSexState, prev: CauseSexState): void {
 /**
  * Comparison mutual exclusion: two comparison dimensions can't be the same non-"none" value.
  * If comp1 matches comp2, comp2 resets to "none".
- * Applies to Breakdowns & Determinants.
+ * Applies to Demographics & Characteristics.
  */
 export function comparisonMutualExclusionRule<T extends Record<string, unknown>>(
   state: T,
@@ -56,7 +56,7 @@ export function comparisonMutualExclusionRule<T extends Record<string, unknown>>
 /**
  * Comparison disables filter: when a field is used as a comparison dimension,
  * its corresponding filter is forced to "Total" and marked as disabled.
- * Applies to Breakdowns & Determinants.
+ * Applies to Demographics & Characteristics.
  */
 export function comparisonDisablesFilterRule<T extends ComparisonState>(
   state: T,

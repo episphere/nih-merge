@@ -22,7 +22,7 @@ function copyParquetFiles() {
   }
 }
 
-const pages = ['breakdowns', 'maps', 'determinants'] as const
+const pages = ['demographics', 'maps', 'characteristics'] as const
 
 function devCleanUrls(): Plugin {
   return {
@@ -93,9 +93,9 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'src/pages/index.html'),
-        breakdowns: resolve(__dirname, 'src/pages/breakdowns.html'),
+        demographics: resolve(__dirname, 'src/pages/demographics.html'),
         maps: resolve(__dirname, 'src/pages/maps.html'),
-        determinants: resolve(__dirname, 'src/pages/determinants.html'),
+        characteristics: resolve(__dirname, 'src/pages/characteristics.html'),
       },
     },
   },

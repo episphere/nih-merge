@@ -1,6 +1,6 @@
 import { dataManager } from '../../data';
 import type { QuantileRow, QuantileFilters, FilterValue, CancerSite, Race, Sex } from '../../data/types';
-import type { DeterminantsState, ComparisonField, DeterminantsMeasure } from './state';
+import type { CharacteristicsState, ComparisonField, CharacteristicsMeasure } from './state';
 
 // --- Enriched row type ---
 
@@ -30,7 +30,7 @@ function dimensionFilter<T extends string>(
   return stateValue as FilterValue<T>;
 }
 
-function buildFilters(state: DeterminantsState): QuantileFilters {
+function buildFilters(state: CharacteristicsState): QuantileFilters {
   const { compareColor, compareFacet } = state;
   return {
     year: '2018-2022',
@@ -73,7 +73,7 @@ function addConfidenceIntervals(row: QuantileRow): EnrichedQuantileRow {
  * Build a stratum key from the comparison axes.
  * Rows within the same stratum share the same color+facet values.
  */
-function stratumKey(row: EnrichedQuantileRow, state: DeterminantsState): string {
+function stratumKey(row: EnrichedQuantileRow, state: CharacteristicsState): string {
   const parts: string[] = [];
   if (state.compareColor !== 'none') {
     parts.push(row[state.compareColor as keyof EnrichedQuantileRow] as string);
@@ -88,7 +88,7 @@ function parseQuantileIndex(q: string): number {
   return parseInt(q, 10);
 }
 
-export function addRateRatios(data: EnrichedQuantileRow[], state: DeterminantsState): void {
+export function addRateRatios(data: EnrichedQuantileRow[], state: CharacteristicsState): void {
   // Group by stratum
   const groups = new Map<string, EnrichedQuantileRow[]>();
   for (const row of data) {
@@ -120,7 +120,7 @@ export function addRateRatios(data: EnrichedQuantileRow[], state: DeterminantsSt
 
 // --- Public API ---
 
-export async function fetchData(state: DeterminantsState): Promise<EnrichedQuantileRow[]> {
+export async function fetchData(state: CharacteristicsState): Promise<EnrichedQuantileRow[]> {
   const filters = buildFilters(state);
   const rows = await dataManager.quantileDomain.query(filters);
   const enriched = rows.map(addConfidenceIntervals);
@@ -131,7 +131,7 @@ export async function fetchData(state: DeterminantsState): Promise<EnrichedQuant
 /**
  * Apply plot filters to already-fetched data.
  */
-export function applyPlotFilters(state: DeterminantsState, data: EnrichedQuantileRow[]): EnrichedQuantileRow[] {
+export function applyPlotFilters(state: CharacteristicsState, data: EnrichedQuantileRow[]): EnrichedQuantileRow[] {
   let result = data;
 
   if (state.compareColor !== 'none' && state.compareColorFilter !== null) {
@@ -153,7 +153,7 @@ export function applyPlotFilters(state: DeterminantsState, data: EnrichedQuantil
  * Derive filter options from query results.
  */
 export function deriveFilterOptions(
-  state: DeterminantsState,
+  state: CharacteristicsState,
   data: EnrichedQuantileRow[],
 ): { compareColorFilterOptions: string[]; compareFacetFilterOptions: string[] } {
   const colorOpts = state.compareColor !== 'none'
@@ -168,6 +168,6 @@ export function deriveFilterOptions(
 /**
  * Get the y-field name for the current measure.
  */
-export function measureField(measure: DeterminantsMeasure): keyof EnrichedQuantileRow {
+export function measureField(measure: CharacteristicsMeasure): keyof EnrichedQuantileRow {
   return measure as keyof EnrichedQuantileRow;
 }

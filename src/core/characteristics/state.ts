@@ -4,9 +4,9 @@ import {
 } from '../../data/types';
 import { causeSexRule, comparisonMutualExclusionRule, comparisonDisablesFilterRule } from '../shared/state/rules';
 
-// --- Determinants-specific types ---
+// --- Characteristics-specific types ---
 
-export type DeterminantsMeasure =
+export type CharacteristicsMeasure =
   | 'ageAdjustedRate'
   | 'crudeRate'
   | 'ageAdjustedRateRatioRefLow'
@@ -16,7 +16,7 @@ export type DeterminantsMeasure =
 
 export type ComparisonField = 'race' | 'sex';
 
-export interface DeterminantsState {
+export interface CharacteristicsState {
   // Filters
   cause: CancerSite | 'Total';
   race: Race | 'Total';
@@ -31,7 +31,7 @@ export interface DeterminantsState {
   compareFacet: ComparisonField | 'none';
 
   // Measure
-  measure: DeterminantsMeasure;
+  measure: CharacteristicsMeasure;
 
   // Display settings
   showCI: boolean;
@@ -50,7 +50,7 @@ export interface DeterminantsState {
   sexOptions: (Sex | 'Total')[];
   quantileFieldOptions: CountyMeasure[];
   quantileNumberOptions: string[];
-  measureOptions: DeterminantsMeasure[];
+  measureOptions: CharacteristicsMeasure[];
   compareColorOptions: (ComparisonField | 'none')[];
   compareFacetOptions: (ComparisonField | 'none')[];
 
@@ -62,7 +62,7 @@ export interface DeterminantsState {
 
 const ALL_COMPARISON_FIELDS: (ComparisonField | 'none')[] = ['none', 'race', 'sex'];
 
-const ALL_MEASURES: DeterminantsMeasure[] = [
+const ALL_MEASURES: CharacteristicsMeasure[] = [
   'ageAdjustedRate',
   'crudeRate',
   'ageAdjustedRateRatioRefLow',
@@ -73,7 +73,7 @@ const ALL_MEASURES: DeterminantsMeasure[] = [
 
 // --- Defaults ---
 
-export const DETERMINANTS_DEFAULTS: DeterminantsState = {
+export const CHARACTERISTICS_DEFAULTS: CharacteristicsState = {
   cause: 'Total',
   race: 'Total',
   sex: 'Total',
@@ -107,12 +107,12 @@ export const DETERMINANTS_DEFAULTS: DeterminantsState = {
   disabledFilters: [],
 };
 
-// --- Determinants-only rules ---
+// --- Characteristics-only rules ---
 
 /** Reset plot filters when the corresponding comparison field changes. */
 function plotFilterResetRule(
-  state: DeterminantsState,
-  prev: DeterminantsState,
+  state: CharacteristicsState,
+  prev: CharacteristicsState,
 ): void {
   if (state.compareColor !== prev.compareColor) {
     state.compareColorFilter = null;
@@ -126,7 +126,7 @@ function plotFilterResetRule(
 
 // --- Resolve ---
 
-export function resolveDeterminants(state: DeterminantsState, change: Partial<DeterminantsState>): DeterminantsState {
+export function resolveCharacteristics(state: CharacteristicsState, change: Partial<CharacteristicsState>): CharacteristicsState {
   const next = { ...state, ...change };
   causeSexRule(next, state);
   comparisonMutualExclusionRule(next as never, state as never, 'compareColor', 'compareFacet');

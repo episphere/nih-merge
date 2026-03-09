@@ -1,10 +1,10 @@
 import * as Plot from '@observablehq/plot';
 import * as d3 from 'd3';
-import type { DeterminantsState, DeterminantsMeasure, ComparisonField } from './state';
+import type { CharacteristicsState, CharacteristicsMeasure, ComparisonField } from './state';
 import type { EnrichedQuantileRow } from './query';
 import type { Race, Sex } from '../../data/types';
 import {
-  DETERMINANTS_MEASURE_STYLE, COMPARISON_FIELD_LABEL,
+  CHARACTERISTICS_MEASURE_STYLE, COMPARISON_FIELD_LABEL,
   RACE_STYLE, SEX_STYLE, PALETTE, COUNTY_MEASURE_LABEL,
 } from '../shared/visual';
 import type { QuantileDetail } from './quantileDetails';
@@ -12,8 +12,8 @@ import { formatQuantileRange } from './quantileDetails';
 
 // --- Title generation ---
 
-export function generateTitle(state: DeterminantsState, detail: QuantileDetail | undefined): string {
-  const measure = DETERMINANTS_MEASURE_STYLE[state.measure].label;
+export function generateTitle(state: CharacteristicsState, detail: QuantileDetail | undefined): string {
+  const measure = CHARACTERISTICS_MEASURE_STYLE[state.measure].label;
   const fieldLabel = detail?.name ?? COUNTY_MEASURE_LABEL[state.quantileField] ?? state.quantileField;
 
   const comparisons = [state.compareColor, state.compareFacet]
@@ -61,7 +61,7 @@ function seriesKey(field: ComparisonField | 'none'): ((d: EnrichedQuantileRow) =
 }
 
 /** CI field names for the active measure (only for rate measures, not ratios). */
-function ciFields(measure: DeterminantsMeasure): { lower: keyof EnrichedQuantileRow; upper: keyof EnrichedQuantileRow } | null {
+function ciFields(measure: CharacteristicsMeasure): { lower: keyof EnrichedQuantileRow; upper: keyof EnrichedQuantileRow } | null {
   if (measure === 'crudeRate') {
     return { lower: 'crudeRateCiLower', upper: 'crudeRateCiUpper' };
   }
@@ -83,7 +83,7 @@ function parseQuantileIndex(q: string): number {
 
 // --- Legend ---
 
-function buildLegend(state: DeterminantsState, data: EnrichedQuantileRow[]): HTMLElement | null {
+function buildLegend(state: CharacteristicsState, data: EnrichedQuantileRow[]): HTMLElement | null {
   if (state.compareColor === 'none') return null;
 
   const field = state.compareColor;
@@ -134,7 +134,7 @@ function buildLegend(state: DeterminantsState, data: EnrichedQuantileRow[]): HTM
 // --- Render ---
 
 export function renderPlot(
-  state: DeterminantsState,
+  state: CharacteristicsState,
   data: EnrichedQuantileRow[],
   detail: QuantileDetail | undefined,
 ): void {
@@ -287,7 +287,7 @@ export function renderPlot(
     },
     y: {
       grid: true,
-      label: DETERMINANTS_MEASURE_STYLE[measure].plotLabel,
+      label: CHARACTERISTICS_MEASURE_STYLE[measure].plotLabel,
       domain: yDomain,
       nice: true,
       labelAnchor: 'center',

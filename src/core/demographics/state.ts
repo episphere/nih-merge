@@ -5,12 +5,12 @@ import {
 import { ALL_STATE_FIPS } from '../shared/fips';
 import { causeSexRule, comparisonMutualExclusionRule, comparisonDisablesFilterRule } from '../shared/state/rules';
 
-// --- Breakdowns-specific types ---
+// --- Demographics-specific types ---
 
 export type Measure = 'crudeRate' | 'ageAdjustedRate';
 export type ComparisonField = 'race' | 'sex' | 'ageGroup' | 'cause';
 
-export interface BreakdownsState {
+export interface DemographicsState {
   // Filters
   year: Year;
   cause: CancerSite | 'Total';
@@ -54,7 +54,7 @@ const ALL_COMPARISON_FIELDS: (ComparisonField | 'none')[] = ['none', 'race', 'se
 
 // --- Defaults ---
 
-export const BREAKDOWNS_DEFAULTS: BreakdownsState = {
+export const DEMOGRAPHICS_DEFAULTS: DemographicsState = {
   year: '2018-2022',
   cause: 'Total',
   race: 'Total',
@@ -84,9 +84,9 @@ export const BREAKDOWNS_DEFAULTS: BreakdownsState = {
   disabledFilters: [],
 };
 
-// --- Breakdowns-only rules ---
+// --- Demographics-only rules ---
 
-function ageForcesCrudeRateRule(state: BreakdownsState): void {
+function ageForcesCrudeRateRule(state: DemographicsState): void {
   const comparingByAge = state.compareBar === 'ageGroup' || state.compareFacet === 'ageGroup';
   const filteringByAge = state.ageGroup !== 'Total';
   if (comparingByAge || filteringByAge) {
@@ -99,8 +99,8 @@ function ageForcesCrudeRateRule(state: BreakdownsState): void {
 
 /** Reset plot filters when the corresponding comparison field changes. */
 function plotFilterResetRule(
-  state: BreakdownsState,
-  prev: BreakdownsState,
+  state: DemographicsState,
+  prev: DemographicsState,
 ): void {
   if (state.compareBar !== prev.compareBar) {
     state.compareBarFilter = null;
@@ -114,7 +114,7 @@ function plotFilterResetRule(
 
 // --- Resolve ---
 
-export function resolveBreakdowns(state: BreakdownsState, change: Partial<BreakdownsState>): BreakdownsState {
+export function resolveDemographics(state: DemographicsState, change: Partial<DemographicsState>): DemographicsState {
   const next = { ...state, ...change };
   causeSexRule(next, state);
   comparisonMutualExclusionRule(next as never, state as never, 'compareBar', 'compareFacet');

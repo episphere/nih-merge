@@ -1,5 +1,5 @@
 import type { MapStore } from 'nanostores';
-import type { BreakdownsState } from './state';
+import type { CharacteristicsState } from './state';
 import { createPopup } from '../shared/popup';
 import { createDropdown } from '../shared/popup';
 import { createOverlay } from '../shared/overlay';
@@ -8,24 +8,28 @@ import { downloadFigurePNG, downloadFigureSVG, getFigureOptions } from '../share
 import { renderDataTable, type TableColumn } from '../shared/dataTable';
 import { COMPARISON_FIELD_LABEL } from '../shared/visual';
 
-const BREAKDOWNS_COLUMNS: TableColumn[] = [
-  { field: 'state', title: 'State', frozen: true },
-  { field: 'cause', title: COMPARISON_FIELD_LABEL.cause ?? 'Cancer Site', frozen: true },
+const CHARACTERISTICS_COLUMNS: TableColumn[] = [
   { field: 'race', title: COMPARISON_FIELD_LABEL.race ?? 'Race/Ethnicity', frozen: true },
   { field: 'sex', title: COMPARISON_FIELD_LABEL.sex ?? 'Sex', frozen: true },
-  { field: 'ageGroup', title: COMPARISON_FIELD_LABEL.ageGroup ?? 'Age Group', frozen: true },
+  { field: 'cause', title: COMPARISON_FIELD_LABEL.cause ?? 'Cancer Site', frozen: true },
+  { field: 'countyMeasure', title: 'County Measure', frozen: true },
+  { field: 'quantile', title: 'Quantile', frozen: true },
   { field: 'deaths', title: 'Deaths' },
   { field: 'population', title: 'Population' },
   { field: 'crudeRate', title: 'Crude Rate' },
   { field: 'ageAdjustedRate', title: 'Age-Adjusted Rate' },
+  { field: 'crudeRateRatioRefLow', title: 'Crude RR (ref low)' },
+  { field: 'crudeRateRatioRefHigh', title: 'Crude RR (ref high)' },
+  { field: 'ageAdjustedRateRatioRefLow', title: 'AA RR (ref low)' },
+  { field: 'ageAdjustedRateRatioRefHigh', title: 'AA RR (ref high)' },
 ];
 
 /**
  * Wire the 4 top-control icon buttons to their respective popups/dropdowns/overlays.
  */
 export function initTopControls(
-  $state: MapStore<BreakdownsState>,
-  update: (change: Partial<BreakdownsState>) => void,
+  $state: MapStore<CharacteristicsState>,
+  update: (change: Partial<CharacteristicsState>) => void,
   getData?: () => Record<string, unknown>[],
 ): void {
   initFilterButton($state);
@@ -36,23 +40,22 @@ export function initTopControls(
 
 // --- Filter button ---
 
-function initFilterButton($state: MapStore<BreakdownsState>): void {
+function initFilterButton($state: MapStore<CharacteristicsState>): void {
   const btn = document.getElementById('btn-filter');
   if (!btn) return;
 
-  // Build popup content: two fieldsets wrapping the existing filter containers
   const content = document.createElement('div');
 
-  const barFieldset = document.createElement('fieldset');
-  barFieldset.className = 'usa-fieldset epi-filter-fieldset';
-  const barLegend = document.createElement('legend');
-  barLegend.className = 'usa-legend text-bold';
-  barLegend.textContent = 'Within Plot';
-  barFieldset.appendChild(barLegend);
+  const colorFieldset = document.createElement('fieldset');
+  colorFieldset.className = 'usa-fieldset epi-filter-fieldset';
+  const colorLegend = document.createElement('legend');
+  colorLegend.className = 'usa-legend text-bold';
+  colorLegend.textContent = 'Within Plot';
+  colorFieldset.appendChild(colorLegend);
 
-  const barContainer = document.getElementById('filter-compare-bar');
-  if (barContainer) barFieldset.appendChild(barContainer);
-  content.appendChild(barFieldset);
+  const colorContainer = document.getElementById('filter-compare-color');
+  if (colorContainer) colorFieldset.appendChild(colorContainer);
+  content.appendChild(colorFieldset);
 
   const facetFieldset = document.createElement('fieldset');
   facetFieldset.className = 'usa-fieldset epi-filter-fieldset';
@@ -69,9 +72,8 @@ function initFilterButton($state: MapStore<BreakdownsState>): void {
 
   btn.addEventListener('click', () => popup.toggle());
 
-  // Show/hide fieldsets based on comparison axes
   $state.subscribe((state) => {
-    barFieldset.classList.toggle('hidden', state.compareBar === 'none');
+    colorFieldset.classList.toggle('hidden', state.compareColor === 'none');
     facetFieldset.classList.toggle('hidden', state.compareFacet === 'none');
   });
 }
@@ -79,42 +81,55 @@ function initFilterButton($state: MapStore<BreakdownsState>): void {
 // --- Settings button ---
 
 function initSettingsButton(
-  $state: MapStore<BreakdownsState>,
-  update: (change: Partial<BreakdownsState>) => void,
+  $state: MapStore<CharacteristicsState>,
+  update: (change: Partial<CharacteristicsState>) => void,
 ): void {
   const btn = document.getElementById('btn-settings');
   if (!btn) return;
 
   const content = document.createElement('div');
 
-  const wrapper = document.createElement('div');
-  wrapper.className = 'usa-checkbox';
+  const checkboxes: { key: keyof CharacteristicsState; label: string; id: string }[] = [
+    { key: 'showCI', label: 'Show confidence intervals', id: 'checkbox-show-ci' },
+    { key: 'showLines', label: 'Show connecting lines', id: 'checkbox-show-lines' },
+    { key: 'startZero', label: 'Start y-axis at zero', id: 'checkbox-start-zero' },
+  ];
 
-  const input = document.createElement('input');
-  input.type = 'checkbox';
-  input.className = 'usa-checkbox__input';
-  input.id = 'checkbox-show-ci';
+  const inputs: { key: keyof CharacteristicsState; input: HTMLInputElement }[] = [];
 
-  const label = document.createElement('label');
-  label.className = 'usa-checkbox__label';
-  label.htmlFor = 'checkbox-show-ci';
-  label.textContent = 'Show confidence intervals';
+  for (const cb of checkboxes) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'usa-checkbox';
 
-  wrapper.appendChild(input);
-  wrapper.appendChild(label);
-  content.appendChild(wrapper);
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.className = 'usa-checkbox__input';
+    input.id = cb.id;
+
+    const label = document.createElement('label');
+    label.className = 'usa-checkbox__label';
+    label.htmlFor = cb.id;
+    label.textContent = cb.label;
+
+    wrapper.appendChild(input);
+    wrapper.appendChild(label);
+    content.appendChild(wrapper);
+
+    inputs.push({ key: cb.key, input });
+
+    input.addEventListener('change', () => {
+      update({ [cb.key]: input.checked } as Partial<CharacteristicsState>);
+    });
+  }
 
   const popup = createPopup(btn, content, { title: 'Graph Settings' });
 
   btn.addEventListener('click', () => popup.toggle());
 
-  // Sync checkbox to state
   $state.subscribe((state) => {
-    input.checked = state.showCI;
-  });
-
-  input.addEventListener('change', () => {
-    update({ showCI: input.checked });
+    for (const { key, input } of inputs) {
+      input.checked = state[key] as boolean;
+    }
   });
 }
 
@@ -135,9 +150,9 @@ function initTableButton(getData?: () => Record<string, unknown>[]): void {
   overlay.toolbarEl.appendChild(downloadBtn);
 
   createDropdown(downloadBtn, [
-    { label: 'CSV (.csv)', onClick: () => getData && downloadCSV(getData(), 'epitracker-breakdowns.csv') },
-    { label: 'TSV (.tsv)', onClick: () => getData && downloadTSV(getData(), 'epitracker-breakdowns.tsv') },
-    { label: 'JSON (.json)', onClick: () => getData && downloadJSON(getData(), 'epitracker-breakdowns.json') },
+    { label: 'CSV (.csv)', onClick: () => getData && downloadCSV(getData(), 'epitracker-characteristics.csv') },
+    { label: 'TSV (.tsv)', onClick: () => getData && downloadTSV(getData(), 'epitracker-characteristics.tsv') },
+    { label: 'JSON (.json)', onClick: () => getData && downloadJSON(getData(), 'epitracker-characteristics.json') },
   ]);
 
   btn.addEventListener('click', () => {
@@ -150,7 +165,7 @@ function initTableButton(getData?: () => Record<string, unknown>[]): void {
       const data = getData();
       // Filter columns to only those present in the data
       const dataKeys = data.length > 0 ? new Set(Object.keys(data[0])) : new Set<string>();
-      const activeColumns = BREAKDOWNS_COLUMNS.filter(col => dataKeys.has(col.field));
+      const activeColumns = CHARACTERISTICS_COLUMNS.filter(col => dataKeys.has(col.field));
       renderDataTable(overlay.contentEl, data, activeColumns);
     } else {
       overlay.contentEl.innerHTML = '<p class="padding-3">No data available.</p>';
@@ -166,11 +181,11 @@ function initDownloadButton(getData?: () => Record<string, unknown>[]): void {
   if (!btn) return;
 
   createDropdown(btn, [
-    { label: 'Data (.csv)', onClick: () => getData && downloadCSV(getData(), 'epitracker-breakdowns.csv') },
-    { label: 'Data (.tsv)', onClick: () => getData && downloadTSV(getData(), 'epitracker-breakdowns.tsv') },
-    { label: 'Data (.json)', onClick: () => getData && downloadJSON(getData(), 'epitracker-breakdowns.json') },
+    { label: 'Data (.csv)', onClick: () => getData && downloadCSV(getData(), 'epitracker-characteristics.csv') },
+    { label: 'Data (.tsv)', onClick: () => getData && downloadTSV(getData(), 'epitracker-characteristics.tsv') },
+    { label: 'Data (.json)', onClick: () => getData && downloadJSON(getData(), 'epitracker-characteristics.json') },
     'separator',
-    { label: 'Image (.png)', onClick: () => { const o = getFigureOptions('epitracker-breakdowns'); if (o) downloadFigurePNG(o); } },
-    { label: 'Image (.svg)', onClick: () => { const o = getFigureOptions('epitracker-breakdowns'); if (o) downloadFigureSVG(o); } },
+    { label: 'Image (.png)', onClick: () => { const o = getFigureOptions('epitracker-characteristics'); if (o) downloadFigurePNG(o); } },
+    { label: 'Image (.svg)', onClick: () => { const o = getFigureOptions('epitracker-characteristics'); if (o) downloadFigureSVG(o); } },
   ]);
 }

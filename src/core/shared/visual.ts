@@ -104,9 +104,9 @@ export const MEASURE_STYLE: Record<Measure, MeasureStyle> = {
   },
 };
 
-// --- Determinants measure ---
+// --- Characteristics measure ---
 
-type DeterminantsMeasure =
+type CharacteristicsMeasure =
   | 'ageAdjustedRate'
   | 'crudeRate'
   | 'ageAdjustedRateRatioRefLow'
@@ -114,7 +114,7 @@ type DeterminantsMeasure =
   | 'crudeRateRatioRefLow'
   | 'crudeRateRatioRefHigh';
 
-export const DETERMINANTS_MEASURE_STYLE: Record<DeterminantsMeasure, MeasureStyle> = {
+export const CHARACTERISTICS_MEASURE_STYLE: Record<CharacteristicsMeasure, MeasureStyle> = {
   ageAdjustedRate: {
     label: 'Age-Adjusted Cancer Mortality (per 100,000)',
     labelShort: 'AA Mortality',

@@ -1,6 +1,6 @@
 import { dataManager } from '../../data';
 import type { AgeRow, AgeFilters, FilterValue, CancerSite, Race, Sex, AgeGroup } from '../../data/types';
-import type { BreakdownsState, ComparisonField } from './state';
+import type { DemographicsState, ComparisonField } from './state';
 
 // --- Enriched row type (AgeRow + confidence intervals) ---
 
@@ -30,7 +30,7 @@ function dimensionFilter<T extends string>(
   return stateValue as FilterValue<T>;
 }
 
-function buildFilters(state: BreakdownsState): AgeFilters {
+function buildFilters(state: DemographicsState): AgeFilters {
   const { compareBar, compareFacet } = state;
   return {
     year: state.year,
@@ -64,7 +64,7 @@ function addConfidenceIntervals(row: AgeRow): EnrichedAgeRow {
 
 // --- Public API ---
 
-export async function fetchData(state: BreakdownsState): Promise<EnrichedAgeRow[]> {
+export async function fetchData(state: DemographicsState): Promise<EnrichedAgeRow[]> {
   const filters = buildFilters(state);
   const rows = await dataManager.ageDomain.query(filters);
   return rows.map(addConfidenceIntervals);
@@ -74,7 +74,7 @@ export async function fetchData(state: BreakdownsState): Promise<EnrichedAgeRow[
  * Apply plot filters (compareBarFilter / compareFacetFilter) to already-fetched data.
  * Returns the filtered subset. If a filter is null, all values pass.
  */
-export function applyPlotFilters(state: BreakdownsState, data: EnrichedAgeRow[]): EnrichedAgeRow[] {
+export function applyPlotFilters(state: DemographicsState, data: EnrichedAgeRow[]): EnrichedAgeRow[] {
   let result = data;
 
   if (state.compareBar !== 'none' && state.compareBarFilter !== null) {
@@ -97,7 +97,7 @@ export function applyPlotFilters(state: BreakdownsState, data: EnrichedAgeRow[])
  * Returns the distinct values for each active comparison axis.
  */
 export function deriveFilterOptions(
-  state: BreakdownsState,
+  state: DemographicsState,
   data: EnrichedAgeRow[],
 ): { compareBarFilterOptions: string[]; compareFacetFilterOptions: string[] } {
   const barOpts = state.compareBar !== 'none'

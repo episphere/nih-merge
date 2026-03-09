@@ -1,7 +1,7 @@
 import type { MapStore } from 'nanostores';
-import type { DeterminantsState } from './state';
+import type { CharacteristicsState } from './state';
 import { USAComboBox } from '../../lib/USAComboBox';
-import { DETERMINANTS_MEASURE_STYLE, COMPARISON_FIELD_LABEL, COUNTY_MEASURE_LABEL } from '../shared/visual';
+import { CHARACTERISTICS_MEASURE_STYLE, COMPARISON_FIELD_LABEL, COUNTY_MEASURE_LABEL } from '../shared/visual';
 
 // --- Label formatting ---
 
@@ -14,7 +14,7 @@ function formatLabel(key: string, value: string): string {
   }
 
   if (key === 'measure') {
-    return DETERMINANTS_MEASURE_STYLE[value as keyof typeof DETERMINANTS_MEASURE_STYLE]?.label ?? value;
+    return CHARACTERISTICS_MEASURE_STYLE[value as keyof typeof CHARACTERISTICS_MEASURE_STYLE]?.label ?? value;
   }
 
   if (key === 'quantileField') {
@@ -41,8 +41,8 @@ export function setQuantileFieldGroups(groupMap: Map<string, string>): void {
 
 interface ControlConfig {
   id: string;
-  stateKey: keyof DeterminantsState;
-  optionsKey: keyof DeterminantsState;
+  stateKey: keyof CharacteristicsState;
+  optionsKey: keyof CharacteristicsState;
   comboBoxId?: string;
   /** When true, use quantileFieldGroupMap to build <optgroup> elements. */
   grouped?: boolean;
@@ -126,8 +126,8 @@ function populateSelect(
 function bindSelect(
   selectEl: HTMLSelectElement,
   config: ControlConfig,
-  $state: MapStore<DeterminantsState>,
-  update: (change: Partial<DeterminantsState>) => void,
+  $state: MapStore<CharacteristicsState>,
+  update: (change: Partial<CharacteristicsState>) => void,
 ): void {
   $state.subscribe((state) => {
     const options = state[config.optionsKey] as string[];
@@ -141,7 +141,7 @@ function bindSelect(
   });
 
   selectEl.addEventListener('change', () => {
-    update({ [config.stateKey]: selectEl.value } as Partial<DeterminantsState>);
+    update({ [config.stateKey]: selectEl.value } as Partial<CharacteristicsState>);
   });
 }
 
@@ -151,8 +151,8 @@ function bindComboBox(
   selectEl: HTMLSelectElement,
   wrapperEl: HTMLElement,
   config: ControlConfig,
-  $state: MapStore<DeterminantsState>,
-  update: (change: Partial<DeterminantsState>) => void,
+  $state: MapStore<CharacteristicsState>,
+  update: (change: Partial<CharacteristicsState>) => void,
 ): void {
   let comboBox: USAComboBox | null = null;
   let syncing = false;
@@ -182,7 +182,7 @@ function bindComboBox(
     if (syncing || !comboBox) return;
     const value = comboBox.getValue();
     if (value !== undefined) {
-      update({ [config.stateKey]: value } as Partial<DeterminantsState>);
+      update({ [config.stateKey]: value } as Partial<CharacteristicsState>);
     }
   });
 }
@@ -193,8 +193,8 @@ function bindPlotFilter(
   containerId: string,
   filterKey: 'compareColorFilter' | 'compareFacetFilter',
   optionsKey: 'compareColorFilterOptions' | 'compareFacetFilterOptions',
-  $state: MapStore<DeterminantsState>,
-  update: (change: Partial<DeterminantsState>) => void,
+  $state: MapStore<CharacteristicsState>,
+  update: (change: Partial<CharacteristicsState>) => void,
 ): void {
   const container = document.getElementById(containerId);
   if (!container) return;
@@ -233,7 +233,7 @@ function bindPlotFilter(
           }
 
           const allChecked = currentOptions.every(v => newSet.has(v));
-          update({ [filterKey]: allChecked ? null : newSet } as Partial<DeterminantsState>);
+          update({ [filterKey]: allChecked ? null : newSet } as Partial<CharacteristicsState>);
         });
 
         const label = document.createElement('label');
@@ -257,8 +257,8 @@ function bindPlotFilter(
 // --- Public API ---
 
 export function initControls(
-  $state: MapStore<DeterminantsState>,
-  update: (change: Partial<DeterminantsState>) => void,
+  $state: MapStore<CharacteristicsState>,
+  update: (change: Partial<CharacteristicsState>) => void,
 ): void {
   for (const config of CONTROLS) {
     const selectEl = document.getElementById(config.id) as HTMLSelectElement | null;

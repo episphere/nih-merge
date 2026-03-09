@@ -196,7 +196,7 @@ export function getFigureOptions(filename: string): FigureOptions | null {
 
   const title = titleEl.textContent ?? '';
 
-  // Extract legend items from the HTML legend (determinants only)
+  // Extract legend items from the HTML legend (characteristics only)
   const legendEl = plotEl?.querySelector('.epi-legend');
   let legend: LegendItem[] | undefined;
   if (legendEl) {

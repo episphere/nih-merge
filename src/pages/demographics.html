@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>EpiTracker – Determinants</title>
+    <title>EpiTracker – Demographics</title>
     <link rel="stylesheet" href="/src/style/index.scss" />
   </head>
   <body>
@@ -65,13 +65,21 @@
 
               <h3 class="nci-heading-h3 margin-top-2">Compare</h3>
 
-              <label class="usa-label text-bold usa-label-short-margin" for="select-compare-color">Within Plot</label>
-              <select class="usa-select" name="select-compare-color" id="select-compare-color" disabled></select>
+              <label class="usa-label text-bold usa-label-short-margin" for="select-compare-bar">Within Plot</label>
+              <select class="usa-select" name="select-compare-bar" id="select-compare-bar" disabled></select>
 
               <label class="usa-label text-bold usa-label-short-margin" for="select-compare-facet">Between Plot</label>
               <select class="usa-select" name="select-compare-facet" id="select-compare-facet" disabled></select>
 
               <h3 class="nci-heading-h3">Select</h3>
+
+              <label class="usa-label text-bold usa-label-short-margin" for="select-select-year">Year</label>
+              <select class="usa-select" name="select-select-year" id="select-select-year" disabled></select>
+
+              <label class="usa-label text-bold usa-label-short-margin" for="select-select-state">US State</label>
+              <div id="combo-select-state" class="usa-combo-box">
+                <select class="usa-select" name="select-select-state" id="select-select-state" disabled></select>
+              </div>
 
               <label class="usa-label text-bold usa-label-short-margin" for="select-select-cause">Cancer Site</label>
               <div id="combo-select-cause" class="usa-combo-box">
@@ -84,15 +92,8 @@
               <label class="usa-label text-bold usa-label-short-margin" for="select-select-race">Race/Ethnicity</label>
               <select class="usa-select" name="select-select-race" id="select-select-race" disabled></select>
 
-              <h3 class="nci-heading-h3">Stratify Quantiles</h3>
-
-              <label class="usa-label text-bold usa-label-short-margin" for="select-quantile-field">County Characteristic</label>
-              <div id="combo-quantile-field" class="usa-combo-box">
-                <select class="usa-select" name="select-quantile-field" id="select-quantile-field" disabled></select>
-              </div>
-
-              <label class="usa-label text-bold usa-label-short-margin" for="select-quantile-number">Number of Quantiles</label>
-              <select class="usa-select" name="select-quantile-number" id="select-quantile-number" disabled></select>
+              <label class="usa-label text-bold usa-label-short-margin" for="select-select-age">Age Group</label>
+              <select class="usa-select" name="select-select-age" id="select-select-age" disabled></select>
 
               <h3 class="nci-heading-h3">Other</h3>
 
@@ -103,8 +104,8 @@
 
           <!-- Main area -->
           <div class="grid-col-fill display-flex flex-column padding-left-5 padding-right-0">
-            <h1 class="margin-0">Determinants</h1>
-            <p class="font-serif-sm">Configurable graphs showing cancer mortality rates (crude or age-adjusted) by quantiles of a selection of county-level characteristics, with optional stratification by race and sex.</p>
+            <h1 class="margin-0">Demographics</h1>
+            <p class="font-serif-sm">Configurable bar charts showing cancer mortality rates (crude or age-adjusted) optionally stratified by age group, race, and sex.</p>
 
             <div class="epi-top-controls">
               <button id="btn-filter" class="epi-icon-btn" type="button" title="Filter">
@@ -122,7 +123,7 @@
             </div>
 
             <div id="plot-container-container" class="margin-x-0 margin-y-1 height-full display-flex flex-justify-center">
-              <div id="plot-container" style="display: grid; grid-template-rows: auto 1fr; min-height: 550px;">
+              <div id="plot-container" style="display: grid; grid-template-rows: auto 1fr; width: 100%;">
                 <h3 id="title" class="margin-0 padding-top-2 padding-x-3 text-center"></h3>
                 <div id="plot" style="overflow-x: auto; overflow-y: hidden;"></div>
               </div>
@@ -278,12 +279,12 @@
                 </div>
                 <div class="grid-col-4">
                   <ul class="nci-megamenu__list">
-                    <li class="nci-megamenu__list-item"><a class="nci-megamenu__list-item-link" href="../determinants/">Determinants Tool</a></li>
+                    <li class="nci-megamenu__list-item"><a class="nci-megamenu__list-item-link" href="../characteristics/">County Characteristics Tool</a></li>
                   </ul>
                 </div>
                 <div class="grid-col-4">
                   <ul class="nci-megamenu__list">
-                    <li class="nci-megamenu__list-item"><a class="nci-megamenu__list-item-link" href="../breakdowns/">Breakdowns Tool</a></li>
+                    <li class="nci-megamenu__list-item"><a class="nci-megamenu__list-item-link" href="../demographics/">Demographics Tool</a></li>
                   </ul>
                 </div>
               </div>
@@ -293,12 +294,12 @@
       </div>
     </div>
 
-    <!-- Hidden containers for plot filter checkboxes (shown in popups) -->
+    <!-- Hidden containers for plot filter checkboxes (shown in tooltips later) -->
     <div style="display: none;">
-      <div id="filter-compare-color"></div>
+      <div id="filter-compare-bar"></div>
       <div id="filter-compare-facet"></div>
     </div>
 
-    <script type="module" src="/src/core/determinants/main.ts"></script>
+    <script type="module" src="/src/core/demographics/main.ts"></script>
   </body>
 </html>

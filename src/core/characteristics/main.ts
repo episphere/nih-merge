@@ -2,27 +2,27 @@ import { initLayout } from '../shared/initLayout';
 import { createDashboardStore } from '../shared/state/createStore';
 import { syncStoreToURL } from '../shared/state/urlSync';
 import { onResize } from '../shared/resizeObserver';
-import { DETERMINANTS_DEFAULTS, resolveDeterminants, type DeterminantsState } from './state';
+import { CHARACTERISTICS_DEFAULTS, resolveCharacteristics, type CharacteristicsState } from './state';
 import { initControls, setQuantileFieldGroups } from './controls';
 import { initTopControls } from './topControls';
 import { fetchData, applyPlotFilters, deriveFilterOptions, type EnrichedQuantileRow } from './query';
 import { renderPlot } from './plot';
 import { loadQuantileDetails, getQuantileDetail, buildFieldGroupMap, formatQuantileRange, type QuantileDetailsIndex, type QuantileDetail } from './quantileDetails';
 import { createPlotTooltip, type PlotTooltipField } from '../shared/plotTooltip';
-import { COMPARISON_FIELD_LABEL, DETERMINANTS_MEASURE_STYLE } from '../shared/visual';
+import { COMPARISON_FIELD_LABEL, CHARACTERISTICS_MEASURE_STYLE } from '../shared/visual';
 
 // 1. Layout
 initLayout();
 
 // 2. Store
-const { $state, update } = createDashboardStore(DETERMINANTS_DEFAULTS, resolveDeterminants);
+const { $state, update } = createDashboardStore(CHARACTERISTICS_DEFAULTS, resolveCharacteristics);
 
 // 3. Controls
 initControls($state, update);
 initTopControls($state, update, () => lastData as unknown as Record<string, unknown>[]);
 
 // 4. URL sync
-const URL_KEYS: (keyof typeof DETERMINANTS_DEFAULTS & string)[] = [
+const URL_KEYS: (keyof typeof CHARACTERISTICS_DEFAULTS & string)[] = [
   'cause', 'race', 'sex', 'quantileField', 'quantileNumber',
   'compareColor', 'compareFacet', 'measure',
   'showCI', 'showLines', 'startZero',
@@ -30,7 +30,7 @@ const URL_KEYS: (keyof typeof DETERMINANTS_DEFAULTS & string)[] = [
 syncStoreToURL($state, update, URL_KEYS);
 
 // 5. Render loop with query-key separation
-const QUERY_KEYS: (keyof DeterminantsState)[] = [
+const QUERY_KEYS: (keyof CharacteristicsState)[] = [
   'cause', 'race', 'sex', 'quantileField', 'quantileNumber',
   'compareColor', 'compareFacet',
 ];
@@ -44,7 +44,7 @@ function arraysEqual(a: string[], b: string[]): boolean {
   return a.length === b.length && a.every((v, i) => v === b[i]);
 }
 
-function querySnapshot(state: DeterminantsState): string {
+function querySnapshot(state: CharacteristicsState): string {
   return QUERY_KEYS.map(k => String(state[k])).join('\0');
 }
 
@@ -124,7 +124,7 @@ function render(): void {
   });
 
   // Measure value last
-  const measureLabel = DETERMINANTS_MEASURE_STYLE[state.measure].labelShort;
+  const measureLabel = CHARACTERISTICS_MEASURE_STYLE[state.measure].labelShort;
   fields.push({
     label: measureLabel,
     value: (row) => {

@@ -1,6 +1,6 @@
 import * as Plot from '@observablehq/plot';
 import * as d3 from 'd3';
-import type { BreakdownsState, ComparisonField, Measure } from './state';
+import type { DemographicsState, ComparisonField, Measure } from './state';
 import type { EnrichedAgeRow } from './query';
 import type { Race, Sex } from '../../data/types';
 import {
@@ -11,7 +11,7 @@ import { fipsName } from '../shared/fips';
 
 // --- Title generation ---
 
-export function generateTitle(state: BreakdownsState): string {
+export function generateTitle(state: DemographicsState): string {
   const measure = MEASURE_STYLE[state.measure].label;
 
   const comparisons = [state.compareBar, state.compareFacet]
@@ -84,7 +84,7 @@ function estimateLabelHeight(labels: string[], angleDeg = 45): number {
 
 // --- Render ---
 
-export function renderPlot(state: BreakdownsState, data: EnrichedAgeRow[]): void {
+export function renderPlot(state: DemographicsState, data: EnrichedAgeRow[]): void {
   const plotEl = document.getElementById('plot')!;
   const titleEl = document.getElementById('title')!;
 

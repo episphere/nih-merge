@@ -1,5 +1,5 @@
 import type { MapStore } from 'nanostores';
-import type { BreakdownsState } from './state';
+import type { DemographicsState } from './state';
 import { USAComboBox } from '../../lib/USAComboBox';
 import { MEASURE_STYLE, COMPARISON_FIELD_LABEL } from '../shared/visual';
 import { fipsName } from '../shared/fips';
@@ -29,8 +29,8 @@ function formatLabel(key: string, value: string): string {
 
 interface ControlConfig {
   id: string;
-  stateKey: keyof BreakdownsState;
-  optionsKey: keyof BreakdownsState;
+  stateKey: keyof DemographicsState;
+  optionsKey: keyof DemographicsState;
   comboBoxId?: string;  // if set, this control is a USAComboBox
 }
 
@@ -69,8 +69,8 @@ function populateSelect(selectEl: HTMLSelectElement, options: string[], stateKey
 function bindSelect(
   selectEl: HTMLSelectElement,
   config: ControlConfig,
-  $state: MapStore<BreakdownsState>,
-  update: (change: Partial<BreakdownsState>) => void,
+  $state: MapStore<DemographicsState>,
+  update: (change: Partial<DemographicsState>) => void,
 ): void {
   $state.subscribe((state) => {
     const options = state[config.optionsKey] as string[];
@@ -83,7 +83,7 @@ function bindSelect(
   });
 
   selectEl.addEventListener('change', () => {
-    update({ [config.stateKey]: selectEl.value } as Partial<BreakdownsState>);
+    update({ [config.stateKey]: selectEl.value } as Partial<DemographicsState>);
   });
 }
 
@@ -93,8 +93,8 @@ function bindComboBox(
   selectEl: HTMLSelectElement,
   wrapperEl: HTMLElement,
   config: ControlConfig,
-  $state: MapStore<BreakdownsState>,
-  update: (change: Partial<BreakdownsState>) => void,
+  $state: MapStore<DemographicsState>,
+  update: (change: Partial<DemographicsState>) => void,
 ): void {
   let comboBox: USAComboBox | null = null;
   let syncing = false; // guard against programmatic setSelectedByValue firing the event
@@ -123,7 +123,7 @@ function bindComboBox(
     if (syncing || !comboBox) return;
     const value = comboBox.getValue();
     if (value !== undefined) {
-      update({ [config.stateKey]: value } as Partial<BreakdownsState>);
+      update({ [config.stateKey]: value } as Partial<DemographicsState>);
     }
   });
 }
@@ -134,8 +134,8 @@ function bindPlotFilter(
   containerId: string,
   filterKey: 'compareBarFilter' | 'compareFacetFilter',
   optionsKey: 'compareBarFilterOptions' | 'compareFacetFilterOptions',
-  $state: MapStore<BreakdownsState>,
-  update: (change: Partial<BreakdownsState>) => void,
+  $state: MapStore<DemographicsState>,
+  update: (change: Partial<DemographicsState>) => void,
 ): void {
   const container = document.getElementById(containerId);
   if (!container) return;
@@ -176,7 +176,7 @@ function bindPlotFilter(
 
           // All checked → null (no filter)
           const allChecked = currentOptions.every(v => newSet.has(v));
-          update({ [filterKey]: allChecked ? null : newSet } as Partial<BreakdownsState>);
+          update({ [filterKey]: allChecked ? null : newSet } as Partial<DemographicsState>);
         });
 
         const label = document.createElement('label');
@@ -201,8 +201,8 @@ function bindPlotFilter(
 // --- Public API ---
 
 export function initControls(
-  $state: MapStore<BreakdownsState>,
-  update: (change: Partial<BreakdownsState>) => void,
+  $state: MapStore<DemographicsState>,
+  update: (change: Partial<DemographicsState>) => void,
 ): void {
   for (const config of CONTROLS) {
     const selectEl = document.getElementById(config.id) as HTMLSelectElement | null;

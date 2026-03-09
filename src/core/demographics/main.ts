@@ -2,7 +2,7 @@ import { initLayout } from '../shared/initLayout';
 import { createDashboardStore } from '../shared/state/createStore';
 import { syncStoreToURL } from '../shared/state/urlSync';
 import { onResize } from '../shared/resizeObserver';
-import { BREAKDOWNS_DEFAULTS, resolveBreakdowns, type BreakdownsState } from './state';
+import { DEMOGRAPHICS_DEFAULTS, resolveDemographics, type DemographicsState } from './state';
 import { initControls } from './controls';
 import { initTopControls } from './topControls';
 import { fetchData, applyPlotFilters, deriveFilterOptions, type EnrichedAgeRow } from './query';
@@ -14,14 +14,14 @@ import { COMPARISON_FIELD_LABEL, MEASURE_STYLE } from '../shared/visual';
 initLayout();
 
 // 2. Store
-const { $state, update } = createDashboardStore(BREAKDOWNS_DEFAULTS, resolveBreakdowns);
+const { $state, update } = createDashboardStore(DEMOGRAPHICS_DEFAULTS, resolveDemographics);
 
 // 3. Controls
 initControls($state, update);
 initTopControls($state, update, () => lastData as unknown as Record<string, unknown>[]);
 
 // 4. URL sync
-const URL_KEYS: (keyof typeof BREAKDOWNS_DEFAULTS & string)[] = [
+const URL_KEYS: (keyof typeof DEMOGRAPHICS_DEFAULTS & string)[] = [
   'year', 'cause', 'race', 'sex', 'ageGroup',
   'stateFips', 'measure', 'compareBar', 'compareFacet', 'showCI',
 ];
@@ -29,7 +29,7 @@ syncStoreToURL($state, update, URL_KEYS);
 
 // 5. Render loop with query-key separation
 // Only these keys require a data re-fetch; all others are display-only.
-const QUERY_KEYS: (keyof BreakdownsState)[] = [
+const QUERY_KEYS: (keyof DemographicsState)[] = [
   'year', 'cause', 'race', 'sex', 'ageGroup',
   'stateFips', 'compareBar', 'compareFacet',
 ];
@@ -42,7 +42,7 @@ function arraysEqual(a: string[], b: string[]): boolean {
   return a.length === b.length && a.every((v, i) => v === b[i]);
 }
 
-function querySnapshot(state: BreakdownsState): string {
+function querySnapshot(state: DemographicsState): string {
   return QUERY_KEYS.map(k => String(state[k])).join('\0');
 }
 
