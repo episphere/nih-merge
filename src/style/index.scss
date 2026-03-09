@@ -379,6 +379,13 @@ html {
   padding-left: units(3);
 }
 
+// --- Color scheme combo box gradient previews ---
+
+.usa-combo-box__list-option svg {
+  vertical-align: middle;
+  margin-right: 0.5rem;
+}
+
 // --- Data table ---
 
 .epi-data-table {
