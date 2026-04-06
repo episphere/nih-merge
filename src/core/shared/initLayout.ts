@@ -3,7 +3,7 @@ import { NCIBigFooter } from '@nciocpl/ncids-js/usa-footer'
 
 class MegaMenuSource {
   async getMegaMenuContent(_id: number | string): Promise<HTMLElement> {
-    return document.getElementById('megamenu-layer')!
+    return document.getElementById('megamenu-layer')!.cloneNode(true) as HTMLElement
   }
 }
 

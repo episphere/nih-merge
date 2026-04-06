@@ -22,7 +22,7 @@ function copyParquetFiles() {
   }
 }
 
-const pages = ['demographics', 'maps', 'characteristics'] as const
+const pages = ['demographics', 'maps', 'characteristics', 'help'] as const
 
 function devCleanUrls(): Plugin {
   return {
@@ -96,6 +96,7 @@ export default defineConfig({
         demographics: resolve(__dirname, 'src/pages/demographics.html'),
         maps: resolve(__dirname, 'src/pages/maps.html'),
         characteristics: resolve(__dirname, 'src/pages/characteristics.html'),
+        help: resolve(__dirname, 'src/pages/help.html'),
       },
     },
   },

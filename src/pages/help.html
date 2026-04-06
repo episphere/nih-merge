@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>EpiTracker – Maps</title>
+    <title>EpiTracker – Help</title>
     <link rel="stylesheet" href="/src/style/index.scss" />
   </head>
   <body>
@@ -50,7 +50,7 @@
               <a href="https://github.com/episphere/epitracker/issues/new" class="nci-header-nav__primary-link"><span>Report Issue</span></a>
             </li>
             <li class="nci-header-nav__primary-item">
-              <a href="../help/" class="nci-header-nav__primary-link"><span>Help</span></a>
+              <a href="../help/" class="nci-header-nav__primary-link usa-current"><span>Help</span></a>
             </li>
           </ul>
         </div>
@@ -58,38 +58,29 @@
     </header>
 
     <!-- Main content -->
-    <main id="main-content" class="main-content">
-      <div class="grid-container padding-top-3">
-        <div class="grid-row display-flex flex-column">
-          <h1 class="margin-0">Interactive Map Dashboard</h1>
-          <p class="font-serif-sm">Configurable grid of maps showing geographic data for cancer mortality rates and population counts.
-            Maps can show county or state level information. Configure maps by clicking the edit icon on the top left of each card.
-            Add rows or columns to the map by clicking the plus buttons at the bottom and right respectively.</p>
-        </div>
-      </div>
-
-      <div id="dashboard" class="margin-x-3 margin-top-0 margin-bottom-1">
-        <!-- Topbar: title + buttons -->
-        <div id="dashboard-topbar" class="display-flex flex-justify flex-align-center padding-y-1">
-          <h3 id="title" class="margin-0 font-sans-sm"></h3>
-          <div class="epi-top-controls">
-            <button id="btn-edit-grid" class="epi-icon-btn" type="button" title="Edit Grid">
-              <i class="fa-solid fa-plus"></i>
-            </button>
-            <button id="btn-settings" class="epi-icon-btn" type="button" title="Settings">
-              <i class="fa-solid fa-gear"></i>
-            </button>
-            <button id="btn-table" class="epi-icon-btn" type="button" title="Data Table">
-              <i class="fa-solid fa-table"></i>
-            </button>
-            <button id="btn-download" class="epi-icon-btn" type="button" title="Download">
-              <i class="fa-solid fa-download"></i>
-            </button>
+    <main id="main-content" class="main-content usa-section">
+      <div class="grid-container">
+        <div class="grid-row grid-gap">
+          <aside class="usa-in-page-nav-container__nav desktop:grid-col-3">
+            <nav class="usa-in-page-nav" id="help-in-page-nav">
+              <!-- Built by custom init script from h2/h3 headings -->
+            </nav>
+          </aside>
+          <div class="usa-in-page-nav-container__main desktop:grid-col-9">
+            <h1>Help</h1>
+            <h2>Getting Started</h2>
+            <p>Placeholder content for getting started with EpiTracker.</p>
+            <h2>Mapping Tool</h2>
+            <p>Placeholder content for the Mapping Tool.</p>
+            <h2>County Characteristics Tool</h2>
+            <h3>County Measures Data</h3>
+            <p>County characteristics data is sourced from <a href="https://www.countyhealthrankings.org/" class="usa-link">County Health Rankings (CHR)</a>, a resource that aggregates various county-level datasets. Detailed information on their methodology can be found in the CHR data documentation. CHR releases a new dataset annually, with typically minor differences between each release. The specific CHR dataset used by the County Characteristics Tool depends on the mortality data year and the county characteristic you select. Specifically, the tool selects the most recent CHR dataset whose data range ends prior to your chosen mortality year. The tool only uses a subset of CHR's total data; the available fields, their data year ranges, and their source datasets are listed in the table below.</p>
+            <h2>Demographics Tool</h2>
+            <p>Placeholder content for the Demographics Tool.</p>
+            <h2>FAQ</h2>
+            <p>Placeholder content for frequently asked questions.</p>
           </div>
         </div>
-
-        <!-- Map grid container (Gridette attaches here) -->
-        <div id="map-grid"></div>
       </div>
     </main>
 
@@ -254,6 +245,6 @@
       </div>
     </div>
 
-    <script type="module" src="/src/core/maps/main.ts"></script>
+    <script type="module" src="/src/core/help/main.ts"></script>
   </body>
 </html>
