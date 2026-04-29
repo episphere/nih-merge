@@ -4,7 +4,7 @@ import type { MapsState, MapsMeasure } from './state';
 import { createPopup, createDropdown } from '../shared/popup';
 import { createOverlay } from '../shared/overlay';
 import { downloadCSV, downloadTSV, downloadJSON } from '../shared/download';
-import { renderDataTable, type TableColumn } from '../shared/dataTable';
+import { renderDataTable, type DataTable } from '../shared/dataTable';
 import { createCheckbox, createSelect } from '../shared/formElements';
 import { USAComboBox } from '../../lib/USAComboBox';
 
@@ -38,25 +38,6 @@ const COLOR_SCHEMES: { value: string; label: string }[] = [
   { value: 'Greys', label: 'Greys' },
 ];
 
-// --- Table columns ---
-
-const MORTALITY_COLUMNS: TableColumn[] = [
-  { field: 'regionName', title: 'Region', frozen: true },
-  { field: 'cause', title: 'Cancer Site' },
-  { field: 'race', title: 'Race/Ethnicity' },
-  { field: 'sex', title: 'Sex' },
-  { field: 'deaths', title: 'Deaths' },
-  { field: 'population', title: 'Population' },
-  { field: 'crudeRate', title: 'Crude Rate' },
-  { field: 'ageAdjustedRate', title: 'Age-Adjusted Rate' },
-];
-
-const POPULATION_COLUMNS: TableColumn[] = [
-  { field: 'regionName', title: 'Region', frozen: true },
-  { field: 'race', title: 'Race/Ethnicity' },
-  { field: 'sex', title: 'Sex' },
-  { field: 'population', title: 'Population' },
-];
 
 // --- Public ---
 
@@ -67,7 +48,7 @@ export function initTopControls(
 ): void {
   initGridEditButton($state, update);
   initSettingsButton($state, update);
-  initTableButton($state, getData);
+  initTableButton(getData);
   initDownloadButton(getData);
 }
 
@@ -267,37 +248,33 @@ function initSettingsButton(
 // --- Table button ---
 
 function initTableButton(
-  $state: MapStore<MapsState>,
   getData: () => Record<string, unknown>[],
 ): void {
   const btn = document.getElementById('btn-table');
   if (!btn) return;
 
   const overlay = createOverlay({ title: 'Data Table' });
+  let activeTable: DataTable | null = null;
 
-  // Download button in toolbar
-  const downloadBtn = document.createElement('button');
-  downloadBtn.className = 'epi-icon-btn';
-  downloadBtn.type = 'button';
-  downloadBtn.title = 'Download table data';
-  downloadBtn.innerHTML = '<i class="fas fa-download"></i>';
-  overlay.toolbarEl.appendChild(downloadBtn);
+  overlay.onClose(() => {
+    if (activeTable) {
+      activeTable.destroy();
+      activeTable = null;
+    }
+  });
 
-  createDropdown(downloadBtn, [
-    { label: 'CSV (.csv)', onClick: () => downloadCSV(getData(), 'epitracker-maps.csv') },
-    { label: 'TSV (.tsv)', onClick: () => downloadTSV(getData(), 'epitracker-maps.tsv') },
-    { label: 'JSON (.json)', onClick: () => downloadJSON(getData(), 'epitracker-maps.json') },
-  ]);
+  btn.addEventListener('click', async () => {
+    // Destroy previous table if any
+    if (activeTable) {
+      await activeTable.destroy();
+      activeTable = null;
+    }
 
-  btn.addEventListener('click', () => {
-    const state = $state.get();
-    const data = getData();
-    const columns = state.measure === 'population' ? POPULATION_COLUMNS : MORTALITY_COLUMNS;
-
-    const dataKeys = data.length > 0 ? new Set(Object.keys(data[0])) : new Set<string>();
-    const activeColumns = columns.filter((col) => dataKeys.has(col.field));
-    renderDataTable(overlay.contentEl, data, activeColumns);
+    // Open overlay first so the container has layout dimensions
     overlay.open();
+
+    const data = getData();
+    activeTable = await renderDataTable(overlay.contentEl, data);
   });
 }
 

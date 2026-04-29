@@ -167,7 +167,7 @@ export function renderMapCard(
   let mapOutline: GeoFeatureCollection | unknown[];
 
   if (cardState.spatialLevel === 'county') {
-    if (cardState.stateFips !== 'Total') {
+    if (cardState.stateFips !== 'All') {
       // Filter counties to selected state
       featureCollection = {
         type: 'FeatureCollection',
@@ -181,7 +181,7 @@ export function renderMapCard(
       mapOutline = nationGeoJSON;
     }
   } else {
-    if (cardState.stateFips !== 'Total') {
+    if (cardState.stateFips !== 'All') {
       featureCollection = {
         type: 'FeatureCollection',
         features: stateGeoJSON.features.filter((d) => d.id === cardState.stateFips),
@@ -196,7 +196,7 @@ export function renderMapCard(
   // Build overlays
   const overlays: Overlay[] = [];
   if (
-    cardState.stateFips === 'Total' &&
+    cardState.stateFips === 'All' &&
     globalState.showOutlineState
   ) {
     overlays.push({

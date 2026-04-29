@@ -369,13 +369,13 @@ function computeSharedFields(state: MapsState): Partial<Record<CardField, string
 function formatFieldValue(field: CardField, value: string): string {
   switch (field) {
     case 'sex':
-      return value === 'Total' ? 'All sexes' : value;
+      return value === 'All' ? 'All sexes' : value;
     case 'race':
-      return value === 'Total' ? 'All races' : value;
+      return value === 'All' ? 'All races' : value;
     case 'cause':
-      return value === 'Total' ? 'All cancers' : value;
+      return value === 'All' ? 'All cancers' : value;
     case 'stateFips':
-      return value === 'Total' ? 'US' : fipsName(value);
+      return value === 'All' ? 'US' : fipsName(value);
     case 'spatialLevel':
       return value === 'county' ? 'County' : 'State';
     case 'year':

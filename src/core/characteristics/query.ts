@@ -19,7 +19,7 @@ export interface EnrichedQuantileRow extends QuantileRow {
 // --- Filter building ---
 
 function dimensionFilter<T extends string>(
-  stateValue: T | 'Total',
+  stateValue: T | 'All',
   dimension: string,
   compareColor: ComparisonField | 'none',
   compareFacet: ComparisonField | 'none',
@@ -33,12 +33,12 @@ function dimensionFilter<T extends string>(
 function buildFilters(state: CharacteristicsState): QuantileFilters {
   const { compareColor, compareFacet } = state;
   return {
-    year: '2018-2022',
+    year: state.year,
     quantileType: state.quantileNumber,
-    cause: dimensionFilter<CancerSite>(state.cause as CancerSite | 'Total', 'cause', compareColor, compareFacet),
-    race: dimensionFilter<Race>(state.race as Race | 'Total', 'race', compareColor, compareFacet),
-    sex: dimensionFilter<Sex>(state.sex as Sex | 'Total', 'sex', compareColor, compareFacet),
-    countyMeasure: state.quantileField,
+    cause: dimensionFilter<CancerSite>(state.cause as CancerSite | 'All', 'cause', compareColor, compareFacet),
+    race: dimensionFilter<Race>(state.race as Race | 'All', 'race', compareColor, compareFacet),
+    sex: dimensionFilter<Sex>(state.sex as Sex | 'All', 'sex', compareColor, compareFacet),
+    field_id: state.quantileField,
   };
 }
 
@@ -84,8 +84,8 @@ function stratumKey(row: EnrichedQuantileRow, state: CharacteristicsState): stri
   return parts.join('|');
 }
 
-function parseQuantileIndex(q: string): number {
-  return parseInt(q, 10);
+function parseQuantileIndex(q: string | number): number {
+  return typeof q === 'number' ? q : parseInt(q, 10);
 }
 
 export function addRateRatios(data: EnrichedQuantileRow[], state: CharacteristicsState): void {
@@ -102,7 +102,7 @@ export function addRateRatios(data: EnrichedQuantileRow[], state: Characteristic
   }
 
   for (const group of groups.values()) {
-    group.sort((a, b) => parseQuantileIndex(a.quantile) - parseQuantileIndex(b.quantile));
+    group.sort((a, b) => parseQuantileIndex(a.quantile_bin) - parseQuantileIndex(b.quantile_bin));
 
     const lowestAA = group[0]?.ageAdjustedRate ?? 0;
     const highestAA = group[group.length - 1]?.ageAdjustedRate ?? 0;

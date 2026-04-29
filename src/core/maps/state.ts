@@ -1,5 +1,5 @@
 import {
-  ALL_YEARS, ALL_CANCER_SITES, ALL_RACES,
+  ALL_CANCER_SITES, ALL_RACES,
   type Year, type CancerSite, type Race, type Sex,
 } from '../../data/types';
 import { ALL_STATE_FIPS } from '../shared/fips';
@@ -11,9 +11,9 @@ export type MapsMeasure = 'ageAdjustedRate' | 'crudeRate' | 'deaths' | 'populati
 
 export interface CardState {
   year: Year;
-  cause: CancerSite | 'Total';
-  sex: Sex | 'Total';
-  race: Race | 'Total';
+  cause: CancerSite | 'All';
+  sex: Sex | 'All';
+  race: Race | 'All';
   stateFips: string;
   spatialLevel: 'county' | 'state';
 }
@@ -45,16 +45,16 @@ export interface MapsState {
   // Card editor form state (transient)
   editingCardIndex: number | null;
   editYear: Year;
-  editCause: CancerSite | 'Total';
-  editSex: Sex | 'Total';
-  editRace: Race | 'Total';
+  editCause: CancerSite | 'All';
+  editSex: Sex | 'All';
+  editRace: Race | 'All';
   editStateFips: string;
   editSpatialLevel: 'county' | 'state';
 
   // Options (managed by resolver)
-  editSexOptions: (Sex | 'Total')[];
-  editCauseOptions: (CancerSite | 'Total')[];
-  editRaceOptions: (Race | 'Total')[];
+  editSexOptions: (Sex | 'All')[];
+  editCauseOptions: (CancerSite | 'All')[];
+  editRaceOptions: (Race | 'All')[];
   editStateFipsOptions: string[];
   editYearOptions: Year[];
   measureOptions: MapsMeasure[];
@@ -63,11 +63,11 @@ export interface MapsState {
 // --- Defaults ---
 
 const DEFAULT_CARD: CardState = {
-  year: '2018-2022',
-  cause: 'Total',
-  sex: 'Total',
-  race: 'Total',
-  stateFips: 'Total',
+  year: '2022',
+  cause: 'All',
+  sex: 'All',
+  race: 'All',
+  stateFips: 'All',
   spatialLevel: 'county',
 };
 
@@ -94,18 +94,18 @@ export const MAPS_DEFAULTS: MapsState = {
   showOutlineNation: true,
 
   editingCardIndex: null,
-  editYear: '2018-2022',
-  editCause: 'Total',
-  editSex: 'Total',
-  editRace: 'Total',
-  editStateFips: 'Total',
+  editYear: '2022',
+  editCause: 'All',
+  editSex: 'All',
+  editRace: 'All',
+  editStateFips: 'All',
   editSpatialLevel: 'county',
 
-  editSexOptions: ['Total', 'Male', 'Female'],
-  editCauseOptions: ['Total', ...ALL_CANCER_SITES],
-  editRaceOptions: ['Total', ...ALL_RACES],
-  editStateFipsOptions: ['Total', ...ALL_STATE_FIPS],
-  editYearOptions: [...ALL_YEARS],
+  editSexOptions: ['All', 'Male', 'Female'],
+  editCauseOptions: ['All', ...ALL_CANCER_SITES],
+  editRaceOptions: ['All', ...ALL_RACES],
+  editStateFipsOptions: ['All', ...ALL_STATE_FIPS],
+  editYearOptions: ['2022'],
   measureOptions: ['ageAdjustedRate', 'crudeRate', 'deaths', 'population'],
 };
 
@@ -114,7 +114,7 @@ export const MAPS_DEFAULTS: MapsState = {
 /** When measure is 'population', cause is irrelevant — force to Total. */
 function populationHidesCauseRule(state: MapsState): void {
   if (state.measure === 'population') {
-    state.editCause = 'Total';
+    state.editCause = 'All';
   }
 }
 

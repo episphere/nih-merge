@@ -1,5 +1,5 @@
 import {
-  ALL_YEARS, ALL_CANCER_SITES, ALL_RACES, ALL_AGE_GROUPS,
+  ALL_CANCER_SITES, ALL_RACES, ALL_AGE_GROUPS,
   type Year, type CancerSite, type Race, type Sex, type AgeGroup,
 } from '../../data/types';
 import { ALL_STATE_FIPS } from '../shared/fips';
@@ -13,10 +13,10 @@ export type ComparisonField = 'race' | 'sex' | 'ageGroup' | 'cause';
 export interface DemographicsState {
   // Filters
   year: Year;
-  cause: CancerSite | 'Total';
-  race: Race | 'Total';
-  sex: Sex | 'Total';
-  ageGroup: AgeGroup | 'Total';
+  cause: CancerSite | 'All';
+  race: Race | 'All';
+  sex: Sex | 'All';
+  ageGroup: AgeGroup | 'All';
   stateFips: string;
   measure: Measure;
 
@@ -35,10 +35,10 @@ export interface DemographicsState {
 
   // Options for every dropdown
   yearOptions: Year[];
-  causeOptions: (CancerSite | 'Total')[];
-  raceOptions: (Race | 'Total')[];
-  sexOptions: (Sex | 'Total')[];
-  ageGroupOptions: (AgeGroup | 'Total')[];
+  causeOptions: (CancerSite | 'All')[];
+  raceOptions: (Race | 'All')[];
+  sexOptions: (Sex | 'All')[];
+  ageGroupOptions: (AgeGroup | 'All')[];
   measureOptions: Measure[];
   compareBarOptions: (ComparisonField | 'none')[];
   compareFacetOptions: (ComparisonField | 'none')[];
@@ -55,12 +55,12 @@ const ALL_COMPARISON_FIELDS: (ComparisonField | 'none')[] = ['none', 'race', 'se
 // --- Defaults ---
 
 export const DEMOGRAPHICS_DEFAULTS: DemographicsState = {
-  year: '2018-2022',
-  cause: 'Total',
-  race: 'Total',
-  sex: 'Total',
-  ageGroup: 'Total',
-  stateFips: 'Total',
+  year: '2022',
+  cause: 'All',
+  race: 'All',
+  sex: 'All',
+  ageGroup: 'All',
+  stateFips: 'All',
   measure: 'ageAdjustedRate',
   compareBar: 'race',
   compareFacet: 'none',
@@ -71,15 +71,15 @@ export const DEMOGRAPHICS_DEFAULTS: DemographicsState = {
   compareBarFilterOptions: [],
   compareFacetFilterOptions: [],
 
-  yearOptions: [...ALL_YEARS],
-  causeOptions: ['Total', ...ALL_CANCER_SITES],
-  raceOptions: ['Total', ...ALL_RACES],
-  sexOptions: ['Total', 'Male', 'Female'],
-  ageGroupOptions: ['Total', ...ALL_AGE_GROUPS],
+  yearOptions: ['2022'],
+  causeOptions: ['All', ...ALL_CANCER_SITES],
+  raceOptions: ['All', ...ALL_RACES],
+  sexOptions: ['All', 'Male', 'Female'],
+  ageGroupOptions: ['All', ...ALL_AGE_GROUPS],
   measureOptions: ['crudeRate', 'ageAdjustedRate'],
   compareBarOptions: ALL_COMPARISON_FIELDS,
   compareFacetOptions: ALL_COMPARISON_FIELDS,
-  stateFipsOptions: ['Total', ...ALL_STATE_FIPS],
+  stateFipsOptions: ['All', ...ALL_STATE_FIPS],
 
   disabledFilters: [],
 };
@@ -88,7 +88,7 @@ export const DEMOGRAPHICS_DEFAULTS: DemographicsState = {
 
 function ageForcesCrudeRateRule(state: DemographicsState): void {
   const comparingByAge = state.compareBar === 'ageGroup' || state.compareFacet === 'ageGroup';
-  const filteringByAge = state.ageGroup !== 'Total';
+  const filteringByAge = state.ageGroup !== 'All';
   if (comparingByAge || filteringByAge) {
     state.measure = 'crudeRate';
     state.measureOptions = ['crudeRate'];

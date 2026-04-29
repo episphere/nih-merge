@@ -5,9 +5,9 @@ const FEMALE_ONLY_CANCERS: CancerSite[] = ['Cervix Uteri', 'Corpus and Uterus', 
 // --- State shape contracts ---
 
 interface CauseSexState {
-  cause: CancerSite | 'Total';
-  sex: Sex | 'Total';
-  sexOptions: (Sex | 'Total')[];
+  cause: CancerSite | 'All';
+  sex: Sex | 'All';
+  sexOptions: (Sex | 'All')[];
 }
 
 interface ComparisonState {
@@ -28,12 +28,12 @@ export function causeSexRule(state: CauseSexState, prev: CauseSexState): void {
     state.sexOptions = ['Female'];
     state.sex = 'Female';
   } else if (state.cause === 'Breast') {
-    state.sexOptions = ['Total', 'Male', 'Female'];
+    state.sexOptions = ['All', 'Male', 'Female'];
     if (prev.cause !== 'Breast') {
       state.sex = 'Female';
     }
   } else {
-    state.sexOptions = ['Total', 'Male', 'Female'];
+    state.sexOptions = ['All', 'Male', 'Female'];
   }
 }
 
@@ -55,7 +55,7 @@ export function comparisonMutualExclusionRule<T extends Record<string, unknown>>
 
 /**
  * Comparison disables filter: when a field is used as a comparison dimension,
- * its corresponding filter is forced to "Total" and marked as disabled.
+ * its corresponding filter is forced to "All" and marked as disabled.
  * Applies to Demographics & Characteristics.
  */
 export function comparisonDisablesFilterRule<T extends ComparisonState>(
@@ -67,7 +67,7 @@ export function comparisonDisablesFilterRule<T extends ComparisonState>(
   for (const key of compKeys) {
     const field = state[key] as string;
     if (field !== 'none' && field in state) {
-      (state as Record<string, unknown>)[field] = 'Total';
+      (state as Record<string, unknown>)[field] = 'All';
       state.disabledFilters.push(field);
     }
   }

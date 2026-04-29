@@ -89,11 +89,11 @@ async function doFetch(
   if (measure === 'population') {
     const filters: PopulationFilters = {
       year: cardState.year,
-      race: cardState.race === 'Total' ? 'Total' : cardState.race,
-      sex: cardState.sex === 'Total' ? 'Total' : cardState.sex,
-      stateFips: cardState.stateFips === 'Total' ? '*' : cardState.stateFips,
-      countyFips: cardState.spatialLevel === 'state' ? 'Total' : '*',
-      ageGroup: 'Total',
+      race: cardState.race === 'All' ? 'All' : cardState.race,
+      sex: cardState.sex === 'All' ? 'All' : cardState.sex,
+      stateFips: cardState.stateFips === 'All' ? '*' : cardState.stateFips,
+      countyFips: cardState.spatialLevel === 'state' ? 'All' : '*',
+      ageGroup: 'All',
     };
     const rows = await dataManager.populationDomain.query(filters);
     return enrichRows(rows, cardState.spatialLevel);
@@ -101,11 +101,11 @@ async function doFetch(
 
   const filters: CountyFilters = {
     year: cardState.year,
-    cause: cardState.cause === 'Total' ? 'Total' : cardState.cause,
-    race: cardState.race === 'Total' ? 'Total' : cardState.race,
-    sex: cardState.sex === 'Total' ? 'Total' : cardState.sex,
-    stateFips: cardState.stateFips === 'Total' ? '*' : cardState.stateFips,
-    countyFips: cardState.spatialLevel === 'state' ? 'Total' : '*',
+    cause: cardState.cause === 'All' ? 'All' : cardState.cause,
+    race: cardState.race === 'All' ? 'All' : cardState.race,
+    sex: cardState.sex === 'All' ? 'All' : cardState.sex,
+    stateFips: cardState.stateFips === 'All' ? '*' : cardState.stateFips,
+    countyFips: cardState.spatialLevel === 'state' ? 'All' : '*',
   };
   const rows = await dataManager.countyDomain.query(filters);
   return enrichRows(rows, cardState.spatialLevel);

@@ -33,20 +33,29 @@ function loadParquet(fileName: string): Promise<Record<string, unknown>[]> {
 
 async function fetchAndParse(url: string): Promise<Record<string, unknown>[]> {
   const file = await asyncBufferFromUrl({ url })
-  return await parquetReadObjects({ file })
+  const rows = await parquetReadObjects({ file })
+  // Convert BigInt values to Number (hyparquet returns int64 columns as BigInt)
+  for (const row of rows) {
+    for (const key in row) {
+      if (typeof row[key] === 'bigint') {
+        row[key] = Number(row[key])
+      }
+    }
+  }
+  return rows
 }
 
 // --- Filtering ---
 
 function matchesFilter<T extends string>(
-  rowValue: T | 'Total',
+  rowValue: T | 'All',
   filterValue: FilterValue<T> | undefined,
 ): boolean {
-  if (filterValue === undefined || filterValue === 'Total') {
-    return rowValue === 'Total'
+  if (filterValue === undefined || filterValue === 'All') {
+    return rowValue === 'All'
   }
   if (filterValue === '*') {
-    return rowValue !== 'Total'
+    return rowValue !== 'All'
   }
   if (Array.isArray(filterValue)) {
     return (filterValue as string[]).includes(rowValue)
@@ -68,19 +77,19 @@ function applyFilters<TRow>(
 // --- File path resolution ---
 
 function countyFile(year: Year): string {
-  return `data_by-county_${year}.parquet`
+  return `data_with-county_${year}.parquet`
 }
 
 function ageFile(year: Year): string {
-  return `data_by-age_${year}.parquet`
+  return `data_with-age_${year}.parquet`
 }
 
-function quantileFile(quantileType: string): string {
-  return `data_by-measure-quantile_q${quantileType}_2018-2022.parquet`
+function quantileFile(quantileType: string, year: Year): string {
+  return `data_by-measure-quantile_q${quantileType}_${year}.parquet`
 }
 
 function populationFile(year: Year): string {
-  return `data_by-population_${year}.parquet`
+  return `data_with-population_${year}.parquet`
 }
 
 // --- Domain query functions ---
@@ -108,12 +117,12 @@ async function queryAge(filters: AgeFilters): Promise<AgeRow[]> {
 }
 
 async function queryQuantile(filters: QuantileFilters): Promise<QuantileRow[]> {
-  const rows = await loadParquet(quantileFile(filters.quantileType))
+  const rows = await loadParquet(quantileFile(filters.quantileType, filters.year))
   return applyFilters<QuantileRow>(rows, [
     ['cause', filters.cause],
     ['race', filters.race],
     ['sex', filters.sex],
-    ['countyMeasure', filters.countyMeasure],
+    ['field_id', filters.field_id],
   ])
 }
 
@@ -129,7 +138,7 @@ async function queryPopulation(filters: PopulationFilters): Promise<PopulationRo
 }
 
 async function queryMortality(filters: MortalityFilters): Promise<MortalityRow[]> {
-  // Use age domain (smaller files) with geography/age defaulting to Total.
+  // Use age domain (smaller files) with geography/age defaulting to All.
   const ageRows = await queryAge(filters)
   return ageRows.map(({ race, sex, population, cause, deaths, crudeRate, ageAdjustedRate }) => ({
     race, sex, population, cause, deaths, crudeRate, ageAdjustedRate,

@@ -77,6 +77,9 @@ function buildOutputRestructure(): Plugin {
 
 export default defineConfig({
   base: './',
+  optimizeDeps: {
+    exclude: ['@jeyabbalas/data-table'],
+  },
   css: {
     preprocessorOptions: {
       scss: {

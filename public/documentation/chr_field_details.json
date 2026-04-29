@@ -1,0 +1,568 @@
+[
+  {
+    "id": "v132",
+    "measure": "Access to Exercise Opportunities",
+    "category": "Health Behaviors",
+    "dataset": {
+      "2025": { "data_years_start": 2020, "data_years_end": 2024, "source": "ArcGIS Business Analyst and ArcGIS Online; YMCA; US Census TIGER/Line Shapefiles" },
+      "2024": { "data_years_start": 2020, "data_years_end": 2023, "source": "ArcGIS Business Analyst and ArcGIS Online; YMCA; US Census TIGER/Line Shapefiles" },
+      "2023": { "data_years_start": 2020, "data_years_end": 2022, "source": "ArcGIS Business Analyst and Living Atlas of the World; YMCA; US Census TIGER/Line Shapefiles" },
+      "2022": { "data_years_start": 2010, "data_years_end": 2021, "source": "Business Analyst, Delorme map data, ESRI, & US Census TIGER/Line Files" },
+      "2021": { "data_years_start": 2010, "data_years_end": 2019, "source": "Business Analyst, Delorme map data, ESRI, & US Census Tigerline Files" },
+      "2020": { "data_years_start": 2010, "data_years_end": 2019, "source": "Business Analyst, Delorme map data, ESRI, & US Census Tigerline Files" },
+      "2019": { "data_years_start": 2010, "data_years_end": 2018, "source": "Business Analyst, Delorme map data, ESRI, & US Census Tigerline Files" },
+      "2018": { "data_years_start": 2010, "data_years_end": 2016, "source": "Business Analyst, Delorme map data, ESRI, & US Census Tigerline Files" }
+    }
+  },
+  {
+    "id": "v011",
+    "measure": "Adult Obesity",
+    "category": "Health Behaviors",
+    "dataset": {
+      "2025": { "data_years_start": 2022, "data_years_end": 2022, "source": "Behavioral Risk Factor Surveillance System" },
+      "2024": { "data_years_start": 2021, "data_years_end": 2021, "source": "Behavioral Risk Factor Surveillance System" },
+      "2023": { "data_years_start": 2020, "data_years_end": 2020, "source": "Behavioral Risk Factor Surveillance System" },
+      "2022": { "data_years_start": 2019, "data_years_end": 2019, "source": "CDC Diabetes Interactive Atlas" },
+      "2021": { "data_years_start": 2017, "data_years_end": 2017, "source": "United States Diabetes Surveillance System" },
+      "2020": { "data_years_start": 2016, "data_years_end": 2016, "source": "United States Diabetes Surveillance System" },
+      "2019": { "data_years_start": 2015, "data_years_end": 2015, "source": "CDC Diabetes Interactive Atlas" },
+      "2018": { "data_years_start": 2014, "data_years_end": 2014, "source": "CDC Diabetes Interactive Atlas" }
+    }
+  },
+  {
+    "id": "v009",
+    "measure": "Adult Smoking",
+    "category": "Health Behaviors",
+    "dataset": {
+      "2025": { "data_years_start": 2022, "data_years_end": 2022, "source": "Behavioral Risk Factor Surveillance System" },
+      "2024": { "data_years_start": 2021, "data_years_end": 2021, "source": "Behavioral Risk Factor Surveillance System" },
+      "2023": { "data_years_start": 2020, "data_years_end": 2020, "source": "Behavioral Risk Factor Surveillance System" },
+      "2022": { "data_years_start": 2019, "data_years_end": 2019, "source": "Behavioral Risk Factor Surveillance System" },
+      "2021": { "data_years_start": 2018, "data_years_end": 2018, "source": "Behavioral Risk Factor Surveillance System" },
+      "2020": { "data_years_start": 2017, "data_years_end": 2017, "source": "Behavioral Risk Factor Surveillance System" },
+      "2019": { "data_years_start": 2016, "data_years_end": 2016, "source": "Behavioral Risk Factor Surveillance System" },
+      "2018": { "data_years_start": 2016, "data_years_end": 2016, "source": "Behavioral Risk Factor Surveillance System" }
+    }
+  },
+  {
+    "id": "v125",
+    "measure": "Air Pollution - Particulate Matter",
+    "category": "Physical Environment",
+    "dataset": {
+      "2025": { "data_years_start": 2020, "data_years_end": 2020, "source": "Environmental Public Health Tracking Network" },
+      "2024": { "data_years_start": 2019, "data_years_end": 2019, "source": "Environmental Public Health Tracking Network" },
+      "2023": { "data_years_start": 2019, "data_years_end": 2019, "source": "Environmental Public Health Tracking Network" },
+      "2022": { "data_years_start": 2018, "data_years_end": 2018, "source": "Environmental Public Health Tracking Network" },
+      "2021": { "data_years_start": 2016, "data_years_end": 2016, "source": "Environmental Public Health Tracking Network" },
+      "2020": { "data_years_start": 2014, "data_years_end": 2014, "source": "Environmental Public Health Tracking Network" },
+      "2019": { "data_years_start": 2014, "data_years_end": 2014, "source": "Environmental Public Health Tracking Network" },
+      "2018": { "data_years_start": 2012, "data_years_end": 2012, "source": "Environmental Public Health Tracking Network" }
+    }
+  },
+  {
+    "id": "v024",
+    "measure": "Children in Poverty",
+    "category": "Social & Economic Factors",
+    "dataset": {
+      "2025": { "data_years_start": 2019, "data_years_end": 2023, "source": "Small Area Income and Poverty Estimates; American Community Survey, five-year estimates" },
+      "2024": { "data_years_start": 2018, "data_years_end": 2022, "source": "Small Area Income and Poverty Estimates; American Community Survey, 5-year estimates" },
+      "2023": { "data_years_start": 2021, "data_years_end": 2021, "source": "Small Area Income and Poverty Estimates" },
+      "2022": { "data_years_start": 2020, "data_years_end": 2020, "source": "Small Area Income and Poverty Estimates" },
+      "2021": { "data_years_start": 2019, "data_years_end": 2019, "source": "Small Area Income and Poverty Estimates" },
+      "2020": { "data_years_start": 2018, "data_years_end": 2018, "source": "Small Area Income and Poverty Estimates" },
+      "2019": { "data_years_start": 2017, "data_years_end": 2017, "source": "Small Area Income and Poverty Estimates" },
+      "2018": { "data_years_start": 2016, "data_years_end": 2016, "source": "Small Area Income and Poverty Estimates" }
+    }
+  },
+  {
+    "id": "v060",
+    "measure": "Diabetes Prevalence",
+    "category": "Health Outcomes",
+    "dataset": {
+      "2025": { "data_years_start": 2022, "data_years_end": 2022, "source": "Behavioral Risk Factor Surveillance System" },
+      "2024": { "data_years_start": 2021, "data_years_end": 2021, "source": "Behavioral Risk Factor Surveillance System" },
+      "2023": { "data_years_start": 2020, "data_years_end": 2020, "source": "Behavioral Risk Factor Surveillance System" },
+      "2022": { "data_years_start": 2019, "data_years_end": 2019, "source": "Behavioral Risk Factor Surveillance System" },
+      "2021": { "data_years_start": 2017, "data_years_end": 2017, "source": "United States Diabetes Surveillance System" },
+      "2020": { "data_years_start": 2016, "data_years_end": 2016, "source": "United States Diabetes Surveillance System" },
+      "2019": { "data_years_start": 2015, "data_years_end": 2015, "source": "CDC Diabetes Interactive Atlas" },
+      "2018": { "data_years_start": 2015, "data_years_end": 2015, "source": "CDC Diabetes Interactive Atlas" }
+    }
+  },
+  {
+    "id": "v049",
+    "measure": "Excessive Drinking",
+    "category": "Health Behaviors",
+    "dataset": {
+      "2025": { "data_years_start": 2022, "data_years_end": 2022, "source": "Behavioral Risk Factor Surveillance System" },
+      "2024": { "data_years_start": 2021, "data_years_end": 2021, "source": "Behavioral Risk Factor Surveillance System" },
+      "2023": { "data_years_start": 2020, "data_years_end": 2020, "source": "Behavioral Risk Factor Surveillance System" },
+      "2022": { "data_years_start": 2019, "data_years_end": 2019, "source": "Behavioral Risk Factor Surveillance System" },
+      "2021": { "data_years_start": 2018, "data_years_end": 2018, "source": "Behavioral Risk Factor Surveillance System" },
+      "2020": { "data_years_start": 2017, "data_years_end": 2017, "source": "Behavioral Risk Factor Surveillance System" },
+      "2019": { "data_years_start": 2016, "data_years_end": 2016, "source": "Behavioral Risk Factor Surveillance System" },
+      "2018": { "data_years_start": 2016, "data_years_end": 2016, "source": "Behavioral Risk Factor Surveillance System" }
+    }
+  },
+  {
+    "id": "v133",
+    "measure": "Food Environment Index",
+    "category": "Health Behaviors",
+    "dataset": {
+      "2025": { "data_years_start": 2019, "data_years_end": 2022, "source": "USDA Food Environment Atlas; Map the Meal Gap from Feeding America" },
+      "2024": { "data_years_start": 2019, "data_years_end": 2021, "source": "USDA Food Environment Atlas; Map the Meal Gap from Feeding America" },
+      "2023": { "data_years_start": 2019, "data_years_end": 2020, "source": "USDA Food Environment Atlas, Map the Meal Gap from Feeding America" },
+      "2022": { "data_years_start": 2019, "data_years_end": 2019, "source": "USDA Food Environment Atlas, Map the Meal Gap from Feeding America" },
+      "2021": { "data_years_start": 2015, "data_years_end": 2018, "source": "USDA Food Environment Atlas, Map the Meal Gap from Feeding America" },
+      "2020": { "data_years_start": 2015, "data_years_end": 2017, "source": "USDA Food Environment Atlas, Map the Meal Gap from Feeding America" },
+      "2019": { "data_years_start": 2015, "data_years_end": 2016, "source": "USDA Food Environment Atlas, Map the Meal Gap from Feeding America" },
+      "2018": { "data_years_start": 2015, "data_years_end": 2015, "source": "USDA Food Environment Atlas, Map the Meal Gap" }
+    }
+  },
+  {
+    "id": "v139",
+    "measure": "Food Insecurity",
+    "category": "Health Behaviors",
+    "dataset": {
+      "2025": { "data_years_start": 2022, "data_years_end": 2022, "source": "Map the Meal Gap" },
+      "2024": { "data_years_start": 2021, "data_years_end": 2021, "source": "Map the Meal Gap" },
+      "2023": { "data_years_start": 2020, "data_years_end": 2020, "source": "Map the Meal Gap" },
+      "2022": { "data_years_start": 2019, "data_years_end": 2019, "source": "Map the Meal Gap" },
+      "2021": { "data_years_start": 2018, "data_years_end": 2018, "source": "Map the Meal Gap" },
+      "2020": { "data_years_start": 2017, "data_years_end": 2017, "source": "Map the Meal Gap" },
+      "2019": { "data_years_start": 2016, "data_years_end": 2016, "source": "Map the Meal Gap" },
+      "2018": { "data_years_start": 2015, "data_years_end": 2015, "source": "Map the Meal Gap" }
+    }
+  },
+  {
+    "id": "v021",
+    "measure": "High School Graduation",
+    "category": "Social & Economic Factors",
+    "dataset": {
+      "2025": { "data_years_start": null, "data_years_end": null, "source": "State-specific sources & EDFacts" },
+      "2024": { "data_years_start": 2020, "data_years_end": 2021, "source": "State-specific sources & EDFacts" },
+      "2023": { "data_years_start": 2019, "data_years_end": 2020, "source": "EDFacts" },
+      "2022": { "data_years_start": 2018, "data_years_end": 2019, "source": "EDFacts" },
+      "2021": { "data_years_start": 2017, "data_years_end": 2018, "source": "EDFacts" },
+      "2020": { "data_years_start": null, "data_years_end": null, "source": "State-specific sources & EDFacts" },
+      "2019": { "data_years_start": 2016, "data_years_end": 2017, "source": "State-specific sources & EDFacts" },
+      "2018": { "data_years_start": 2014, "data_years_end": 2015, "source": "EDFacts" }
+    }
+  },
+  {
+    "id": "v153",
+    "measure": "Homeownership",
+    "category": "Physical Environment",
+    "dataset": {
+      "2025": { "data_years_start": 2019, "data_years_end": 2023, "source": "American Community Survey, five-year estimates" },
+      "2024": { "data_years_start": 2018, "data_years_end": 2022, "source": "American Community Survey, 5-year estimates" },
+      "2023": { "data_years_start": 2017, "data_years_end": 2021, "source": "American Community Survey, 5-year estimates" },
+      "2022": { "data_years_start": 2019, "data_years_end": 2019, "source": "American Community Survey, 5-year estimates" },
+      "2021": { "data_years_start": 2015, "data_years_end": 2019, "source": "American Community Survey, 5-year estimates" },
+      "2020": { "data_years_start": 2014, "data_years_end": 2018, "source": "American Community Survey, 5-year estimates" },
+      "2019": { "data_years_start": 2013, "data_years_end": 2017, "source": "American Community Survey, 5-year estimates" }
+    }
+  },
+  {
+    "id": "v044",
+    "measure": "Income Inequality",
+    "category": "Social & Economic Factors",
+    "dataset": {
+      "2025": { "data_years_start": 2019, "data_years_end": 2023, "source": "American Community Survey, five-year estimates" },
+      "2024": { "data_years_start": 2018, "data_years_end": 2022, "source": "American Community Survey, 5-year estimates" },
+      "2023": { "data_years_start": 2017, "data_years_end": 2021, "source": "American Community Survey, 5-year estimates" },
+      "2022": { "data_years_start": 2016, "data_years_end": 2020, "source": "American Community Survey, 5-year estimates" },
+      "2021": { "data_years_start": 2015, "data_years_end": 2019, "source": "American Community Survey, 5-year estimates" },
+      "2020": { "data_years_start": 2014, "data_years_end": 2018, "source": "American Community Survey, 5-year estimates" },
+      "2019": { "data_years_start": 2013, "data_years_end": 2017, "source": "American Community Survey, 5-year estimates" },
+      "2018": { "data_years_start": 2012, "data_years_end": 2016, "source": "American Community Survey" }
+    }
+  },
+  {
+    "id": "v143",
+    "measure": "Insufficient Sleep",
+    "category": "Health Behaviors",
+    "dataset": {
+      "2025": { "data_years_start": 2022, "data_years_end": 2022, "source": "Behavioral Risk Factor Surveillance System" },
+      "2024": { "data_years_start": 2020, "data_years_end": 2020, "source": "Behavioral Risk Factor Surveillance System" },
+      "2023": { "data_years_start": 2020, "data_years_end": 2020, "source": "Behavioral Risk Factor Surveillance System" },
+      "2022": { "data_years_start": 2018, "data_years_end": 2018, "source": "Behavioral Risk Factor Surveillance System" },
+      "2021": { "data_years_start": 2018, "data_years_end": 2018, "source": "Behavioral Risk Factor Surveillance System" },
+      "2020": { "data_years_start": 2016, "data_years_end": 2016, "source": "Behavioral Risk Factor Surveillance System" },
+      "2019": { "data_years_start": 2016, "data_years_end": 2016, "source": "Behavioral Risk Factor Surveillance System" },
+      "2018": { "data_years_start": 2016, "data_years_end": 2016, "source": "Behavioral Risk Factor Surveillance System" }
+    }
+  },
+  {
+    "id": "v083",
+    "measure": "Limited Access to Healthy Foods",
+    "category": "Health Behaviors",
+    "dataset": {
+      "2025": { "data_years_start": 2019, "data_years_end": 2019, "source": "USDA Food Environment Atlas" },
+      "2024": { "data_years_start": 2019, "data_years_end": 2019, "source": "USDA Food Environment Atlas" },
+      "2023": { "data_years_start": 2019, "data_years_end": 2019, "source": "USDA Food Environment Atlas" },
+      "2022": { "data_years_start": 2019, "data_years_end": 2019, "source": "USDA Food Environment Atlas" },
+      "2021": { "data_years_start": 2015, "data_years_end": 2015, "source": "USDA Food Environment Atlas" },
+      "2020": { "data_years_start": 2015, "data_years_end": 2015, "source": "USDA Food Environment Atlas" },
+      "2019": { "data_years_start": 2015, "data_years_end": 2015, "source": "USDA Food Environment Atlas" },
+      "2018": { "data_years_start": 2015, "data_years_end": 2015, "source": "USDA Food Environment Atlas" }
+    }
+  },
+  {
+    "id": "v050",
+    "measure": "Mammography Screening",
+    "category": "Clinical Care",
+    "dataset": {
+      "2025": { "data_years_start": 2022, "data_years_end": 2022, "source": "Mapping Medicare Disparities Tool" },
+      "2024": { "data_years_start": 2021, "data_years_end": 2021, "source": "Mapping Medicare Disparities Tool" },
+      "2023": { "data_years_start": 2020, "data_years_end": 2020, "source": "Mapping Medicare Disparities Tool" },
+      "2022": { "data_years_start": 2019, "data_years_end": 2019, "source": "Mapping Medicare Disparities Tool" },
+      "2021": { "data_years_start": 2018, "data_years_end": 2018, "source": "Mapping Medicare Disparities Tool" },
+      "2020": { "data_years_start": 2017, "data_years_end": 2017, "source": "Mapping Medicare Disparities Tool" },
+      "2019": { "data_years_start": 2016, "data_years_end": 2016, "source": "Mapping Medicare Disparities Tool" },
+      "2018": { "data_years_start": 2014, "data_years_end": 2014, "source": "Dartmouth Atlas of Health Care" }
+    }
+  },
+  {
+    "id": "v063",
+    "measure": "Median Household Income",
+    "category": "Social & Economic Factors",
+    "dataset": {
+      "2025": { "data_years_start": 2019, "data_years_end": 2023, "source": "Small Area Income and Poverty Estimates; American Community Survey, five-year estimates" },
+      "2024": { "data_years_start": 2018, "data_years_end": 2022, "source": "Small Area Income and Poverty Estimates; American Community Survey, 5-year estimates" },
+      "2023": { "data_years_start": 2021, "data_years_end": 2021, "source": "Small Area Income and Poverty Estimates" },
+      "2022": { "data_years_start": 2020, "data_years_end": 2020, "source": "Small Area Income and Poverty Estimates" },
+      "2021": { "data_years_start": 2019, "data_years_end": 2019, "source": "Small Area Income and Poverty Estimates" },
+      "2020": { "data_years_start": 2018, "data_years_end": 2018, "source": "Small Area Income and Poverty Estimates" },
+      "2019": { "data_years_start": 2017, "data_years_end": 2017, "source": "Small Area Income and Poverty Estimates" },
+      "2018": { "data_years_start": 2016, "data_years_end": 2016, "source": "Small Area Income and Poverty Estimates" }
+    }
+  },
+  {
+    "id": "v055",
+    "measure": "% American Indian & Alaska Native",
+    "category": "Demographics",
+    "dataset": {
+      "2025": { "data_years_start": 2023, "data_years_end": 2023, "source": "Census Population Estimates Program" },
+      "2024": { "data_years_start": 2022, "data_years_end": 2022, "source": "Census Population Estimates" },
+      "2023": { "data_years_start": 2021, "data_years_end": 2021, "source": "Census Population Estimates" },
+      "2022": { "data_years_start": 2020, "data_years_end": 2020, "source": "Census Population Estimates" },
+      "2021": { "data_years_start": 2019, "data_years_end": 2019, "source": "Census Population Estimates" },
+      "2020": { "data_years_start": 2018, "data_years_end": 2018, "source": "Census Population Estimates" },
+      "2019": { "data_years_start": 2017, "data_years_end": 2017, "source": "Census Population Estimates" },
+      "2018": { "data_years_start": 2016, "data_years_end": 2016, "source": "Census Population Estimates" }
+    }
+  },
+  {
+    "id": "v081",
+    "measure": "% Asian",
+    "category": "Demographics",
+    "dataset": {
+      "2025": { "data_years_start": 2023, "data_years_end": 2023, "source": "Census Population Estimates Program" },
+      "2024": { "data_years_start": 2022, "data_years_end": 2022, "source": "Census Population Estimates" },
+      "2023": { "data_years_start": 2021, "data_years_end": 2021, "source": "Census Population Estimates" },
+      "2022": { "data_years_start": 2020, "data_years_end": 2020, "source": "Census Population Estimates" },
+      "2021": { "data_years_start": 2019, "data_years_end": 2019, "source": "Census Population Estimates" },
+      "2020": { "data_years_start": 2018, "data_years_end": 2018, "source": "Census Population Estimates" },
+      "2019": { "data_years_start": 2017, "data_years_end": 2017, "source": "Census Population Estimates" },
+      "2018": { "data_years_start": 2016, "data_years_end": 2016, "source": "Census Population Estimates" }
+    }
+  },
+  {
+    "id": "v056",
+    "measure": "% Hispanic",
+    "category": "Demographics",
+    "dataset": {
+      "2025": { "data_years_start": 2023, "data_years_end": 2023, "source": "Census Population Estimates Program" },
+      "2024": { "data_years_start": 2022, "data_years_end": 2022, "source": "Census Population Estimates" },
+      "2023": { "data_years_start": 2021, "data_years_end": 2021, "source": "Census Population Estimates" },
+      "2022": { "data_years_start": 2020, "data_years_end": 2020, "source": "Census Population Estimates" },
+      "2021": { "data_years_start": 2019, "data_years_end": 2019, "source": "Census Population Estimates" },
+      "2020": { "data_years_start": 2018, "data_years_end": 2018, "source": "Census Population Estimates" },
+      "2019": { "data_years_start": 2017, "data_years_end": 2017, "source": "Census Population Estimates" },
+      "2018": { "data_years_start": 2016, "data_years_end": 2016, "source": "Census Population Estimates" }
+    }
+  },
+  {
+    "id": "v080",
+    "measure": "% Native Hawaiian/Other Pacific Islander",
+    "category": "Demographics",
+    "dataset": {
+      "2025": { "data_years_start": 2023, "data_years_end": 2023, "source": "Census Population Estimates Program" },
+      "2024": { "data_years_start": 2022, "data_years_end": 2022, "source": "Census Population Estimates" },
+      "2023": { "data_years_start": 2021, "data_years_end": 2021, "source": "Census Population Estimates" },
+      "2022": { "data_years_start": 2020, "data_years_end": 2020, "source": "Census Population Estimates" },
+      "2021": { "data_years_start": 2019, "data_years_end": 2019, "source": "Census Population Estimates" },
+      "2020": { "data_years_start": 2018, "data_years_end": 2018, "source": "Census Population Estimates" },
+      "2019": { "data_years_start": 2017, "data_years_end": 2017, "source": "Census Population Estimates" },
+      "2018": { "data_years_start": 2016, "data_years_end": 2016, "source": "Census Population Estimates" }
+    }
+  },
+  {
+    "id": "v054",
+    "measure": "% Non-Hispanic Black",
+    "category": "Demographics",
+    "dataset": {
+      "2025": { "data_years_start": 2023, "data_years_end": 2023, "source": "Census Population Estimates Program" },
+      "2024": { "data_years_start": 2022, "data_years_end": 2022, "source": "Census Population Estimates" },
+      "2023": { "data_years_start": 2021, "data_years_end": 2021, "source": "Census Population Estimates" },
+      "2022": { "data_years_start": 2020, "data_years_end": 2020, "source": "Census Population Estimates" },
+      "2021": { "data_years_start": 2019, "data_years_end": 2019, "source": "Census Population Estimates" },
+      "2020": { "data_years_start": 2018, "data_years_end": 2018, "source": "Census Population Estimates" },
+      "2019": { "data_years_start": 2017, "data_years_end": 2017, "source": "Census Population Estimates" },
+      "2018": { "data_years_start": 2016, "data_years_end": 2016, "source": "Census Population Estimates" }
+    }
+  },
+  {
+    "id": "v126",
+    "measure": "% Non-Hispanic White",
+    "category": "Demographics",
+    "dataset": {
+      "2025": { "data_years_start": 2023, "data_years_end": 2023, "source": "Census Population Estimates Program" },
+      "2024": { "data_years_start": 2022, "data_years_end": 2022, "source": "Census Population Estimates" },
+      "2023": { "data_years_start": 2021, "data_years_end": 2021, "source": "Census Population Estimates" },
+      "2022": { "data_years_start": 2020, "data_years_end": 2020, "source": "Census Population Estimates" },
+      "2021": { "data_years_start": 2019, "data_years_end": 2019, "source": "Census Population Estimates" },
+      "2020": { "data_years_start": 2018, "data_years_end": 2018, "source": "Census Population Estimates" },
+      "2019": { "data_years_start": 2017, "data_years_end": 2017, "source": "Census Population Estimates" },
+      "2018": { "data_years_start": 2016, "data_years_end": 2016, "source": "Census Population Estimates" }
+    }
+  },
+  {
+    "id": "v058",
+    "measure": "% Rural",
+    "category": "Demographics",
+    "dataset": {
+      "2025": { "data_years_start": 2020, "data_years_end": 2020, "source": "Decennial Census Demographic and Housing Characteristics File" },
+      "2024": { "data_years_start": 2020, "data_years_end": 2020, "source": "Census Population Estimates" },
+      "2023": { "data_years_start": 2010, "data_years_end": 2010, "source": "Census Population Estimates" },
+      "2022": { "data_years_start": 2010, "data_years_end": 2010, "source": "Census Population Estimates" },
+      "2021": { "data_years_start": 2010, "data_years_end": 2010, "source": "Census Population Estimates" },
+      "2020": { "data_years_start": 2010, "data_years_end": 2010, "source": "Census Population Estimates" },
+      "2019": { "data_years_start": 2010, "data_years_end": 2010, "source": "Census Population Estimates" },
+      "2018": { "data_years_start": 2010, "data_years_end": 2010, "source": "Census Population Estimates" }
+    }
+  },
+  {
+    "id": "v070",
+    "measure": "Physical Inactivity",
+    "category": "Health Behaviors",
+    "dataset": {
+      "2025": { "data_years_start": 2022, "data_years_end": 2022, "source": "Behavioral Risk Factor Surveillance System" },
+      "2024": { "data_years_start": 2021, "data_years_end": 2021, "source": "Behavioral Risk Factor Surveillance System" },
+      "2023": { "data_years_start": 2020, "data_years_end": 2020, "source": "Behavioral Risk Factor Surveillance System" },
+      "2022": { "data_years_start": 2019, "data_years_end": 2019, "source": "CDC Diabetes Interactive Atlas" },
+      "2021": { "data_years_start": 2017, "data_years_end": 2017, "source": "United States Diabetes Surveillance System" },
+      "2020": { "data_years_start": 2016, "data_years_end": 2016, "source": "United States Diabetes Surveillance System" },
+      "2019": { "data_years_start": 2015, "data_years_end": 2015, "source": "CDC Diabetes Interactive Atlas" },
+      "2018": { "data_years_start": 2014, "data_years_end": 2014, "source": "CDC Diabetes Interactive Atlas" }
+    }
+  },
+  {
+    "id": "v042",
+    "measure": "Poor Mental Health Days",
+    "category": "Health Outcomes",
+    "dataset": {
+      "2025": { "data_years_start": 2022, "data_years_end": 2022, "source": "Behavioral Risk Factor Surveillance System" },
+      "2024": { "data_years_start": 2021, "data_years_end": 2021, "source": "Behavioral Risk Factor Surveillance System" },
+      "2023": { "data_years_start": 2020, "data_years_end": 2020, "source": "Behavioral Risk Factor Surveillance System" },
+      "2022": { "data_years_start": 2019, "data_years_end": 2019, "source": "Behavioral Risk Factor Surveillance System" },
+      "2021": { "data_years_start": 2018, "data_years_end": 2018, "source": "Behavioral Risk Factor Surveillance System" },
+      "2020": { "data_years_start": 2017, "data_years_end": 2017, "source": "Behavioral Risk Factor Surveillance System" },
+      "2019": { "data_years_start": 2016, "data_years_end": 2016, "source": "Behavioral Risk Factor Surveillance System" },
+      "2018": { "data_years_start": 2016, "data_years_end": 2016, "source": "Behavioral Risk Factor Surveillance System" }
+    }
+  },
+  {
+    "id": "v002",
+    "measure": "Poor or Fair Health",
+    "category": "Health Outcomes",
+    "dataset": {
+      "2025": { "data_years_start": 2022, "data_years_end": 2022, "source": "Behavioral Risk Factor Surveillance System" },
+      "2024": { "data_years_start": 2021, "data_years_end": 2021, "source": "Behavioral Risk Factor Surveillance System" },
+      "2023": { "data_years_start": 2020, "data_years_end": 2020, "source": "Behavioral Risk Factor Surveillance System" },
+      "2022": { "data_years_start": 2019, "data_years_end": 2019, "source": "Behavioral Risk Factor Surveillance System" },
+      "2021": { "data_years_start": 2018, "data_years_end": 2018, "source": "Behavioral Risk Factor Surveillance System" },
+      "2020": { "data_years_start": 2017, "data_years_end": 2017, "source": "Behavioral Risk Factor Surveillance System" },
+      "2019": { "data_years_start": 2016, "data_years_end": 2016, "source": "Behavioral Risk Factor Surveillance System" },
+      "2018": { "data_years_start": 2016, "data_years_end": 2016, "source": "Behavioral Risk Factor Surveillance System" }
+    }
+  },
+  {
+    "id": "v036",
+    "measure": "Poor Physical Health Days",
+    "category": "Health Outcomes",
+    "dataset": {
+      "2025": { "data_years_start": 2022, "data_years_end": 2022, "source": "Behavioral Risk Factor Surveillance System" },
+      "2024": { "data_years_start": 2021, "data_years_end": 2021, "source": "Behavioral Risk Factor Surveillance System" },
+      "2023": { "data_years_start": 2020, "data_years_end": 2020, "source": "Behavioral Risk Factor Surveillance System" },
+      "2022": { "data_years_start": 2019, "data_years_end": 2019, "source": "Behavioral Risk Factor Surveillance System" },
+      "2021": { "data_years_start": 2018, "data_years_end": 2018, "source": "Behavioral Risk Factor Surveillance System" },
+      "2020": { "data_years_start": 2017, "data_years_end": 2017, "source": "Behavioral Risk Factor Surveillance System" },
+      "2019": { "data_years_start": 2016, "data_years_end": 2016, "source": "Behavioral Risk Factor Surveillance System" },
+      "2018": { "data_years_start": 2016, "data_years_end": 2016, "source": "Behavioral Risk Factor Surveillance System" }
+    }
+  },
+  {
+    "id": "v004",
+    "measure": "Primary Care Physicians",
+    "category": "Clinical Care",
+    "dataset": {
+      "2025": { "data_years_start": 2021, "data_years_end": 2021, "source": "Area Health Resource File/American Medical Association" },
+      "2024": { "data_years_start": 2021, "data_years_end": 2021, "source": "Area Health Resource File/American Medical Association" },
+      "2023": { "data_years_start": 2020, "data_years_end": 2020, "source": "Area Health Resource File/American Medical Association" },
+      "2022": { "data_years_start": 2019, "data_years_end": 2019, "source": "Area Health Resource File/American Medical Association" },
+      "2021": { "data_years_start": 2018, "data_years_end": 2018, "source": "Area Health Resource File/American Medical Association" },
+      "2020": { "data_years_start": 2017, "data_years_end": 2017, "source": "Area Health Resource File/American Medical Association" },
+      "2019": { "data_years_start": 2016, "data_years_end": 2016, "source": "Area Health Resource File/American Medical Association" },
+      "2018": { "data_years_start": 2015, "data_years_end": 2015, "source": "Area Health Resource File/American Medical Association" }
+    }
+  },
+  {
+    "id": "v154",
+    "measure": "Severe Housing Cost Burden",
+    "category": "Physical Environment",
+    "dataset": {
+      "2025": { "data_years_start": 2019, "data_years_end": 2023, "source": "American Community Survey, five-year estimates" },
+      "2024": { "data_years_start": 2018, "data_years_end": 2022, "source": "American Community Survey, 5-year estimates" },
+      "2023": { "data_years_start": 2017, "data_years_end": 2021, "source": "American Community Survey, 5-year estimates" },
+      "2022": { "data_years_start": 2016, "data_years_end": 2020, "source": "American Community Survey, 5-year estimates" },
+      "2021": { "data_years_start": 2015, "data_years_end": 2019, "source": "American Community Survey, 5-year estimates" },
+      "2020": { "data_years_start": 2014, "data_years_end": 2018, "source": "American Community Survey, 5-year estimates" },
+      "2019": { "data_years_start": 2013, "data_years_end": 2017, "source": "American Community Survey, 5-year estimates" }
+    }
+  },
+  {
+    "id": "v136",
+    "measure": "Severe Housing Problems",
+    "category": "Physical Environment",
+    "dataset": {
+      "2025": { "data_years_start": 2017, "data_years_end": 2021, "source": "Comprehensive Housing Affordability Strategy (CHAS) data" },
+      "2024": { "data_years_start": 2016, "data_years_end": 2020, "source": "Comprehensive Housing Affordability Strategy (CHAS) data" },
+      "2023": { "data_years_start": 2015, "data_years_end": 2019, "source": "Comprehensive Housing Affordability Strategy (CHAS) data" },
+      "2022": { "data_years_start": 2014, "data_years_end": 2018, "source": "Comprehensive Housing Affordability Strategy (CHAS) data" },
+      "2021": { "data_years_start": 2013, "data_years_end": 2017, "source": "Comprehensive Housing Affordability Strategy (CHAS) data" },
+      "2020": { "data_years_start": 2012, "data_years_end": 2016, "source": "Comprehensive Housing Affordability Strategy (CHAS) data" },
+      "2019": { "data_years_start": 2011, "data_years_end": 2015, "source": "Comprehensive Housing Affordability Strategy (CHAS) data" },
+      "2018": { "data_years_start": 2010, "data_years_end": 2014, "source": "Comprehensive Housing Affordability Strategy (CHAS) data" }
+    }
+  },
+  {
+    "id": "v045",
+    "measure": "Sexually Transmitted Infections",
+    "category": "Health Behaviors",
+    "dataset": {
+      "2025": { "data_years_start": 2022, "data_years_end": 2022, "source": "National Center for HIV/AIDS, Viral Hepatitis, STD, and TB Prevention" },
+      "2024": { "data_years_start": 2021, "data_years_end": 2021, "source": "National Center for HIV/AIDS, Viral Hepatitis, STD, and TB Prevention" },
+      "2023": { "data_years_start": 2020, "data_years_end": 2020, "source": "National Center for HIV/AIDS, Viral Hepatitis, STD, and TB Prevention" },
+      "2022": { "data_years_start": 2019, "data_years_end": 2019, "source": "National Center for HIV/AIDS, Viral Hepatitis, STD, and TB Prevention" },
+      "2021": { "data_years_start": 2018, "data_years_end": 2018, "source": "National Center for HIV/AIDS, Viral Hepatitis, STD, and TB Prevention" },
+      "2020": { "data_years_start": 2017, "data_years_end": 2017, "source": "National Center for HIV/AIDS, Viral Hepatitis, STD, and TB Prevention" },
+      "2019": { "data_years_start": 2016, "data_years_end": 2016, "source": "National Center for HIV/AIDS, Viral Hepatitis, STD, and TB Prevention" },
+      "2018": { "data_years_start": 2015, "data_years_end": 2015, "source": "National Center for HIV/AIDS, Viral Hepatitis, STD, and TB prevention" }
+    }
+  },
+  {
+    "id": "v140",
+    "measure": "Social Associations",
+    "category": "Social & Economic Factors",
+    "dataset": {
+      "2025": { "data_years_start": 2022, "data_years_end": 2022, "source": "County Business Patterns" },
+      "2024": { "data_years_start": 2021, "data_years_end": 2021, "source": "County Business Patterns" },
+      "2023": { "data_years_start": 2020, "data_years_end": 2020, "source": "County Business Patterns" },
+      "2022": { "data_years_start": 2019, "data_years_end": 2019, "source": "County Business Patterns" },
+      "2021": { "data_years_start": 2018, "data_years_end": 2018, "source": "County Business Patterns" },
+      "2020": { "data_years_start": 2017, "data_years_end": 2017, "source": "County Business Patterns" },
+      "2019": { "data_years_start": 2016, "data_years_end": 2016, "source": "County Business Patterns" },
+      "2018": { "data_years_start": 2015, "data_years_end": 2015, "source": "County Business Patterns" }
+    }
+  },
+  {
+    "id": "v069",
+    "measure": "Some College",
+    "category": "Social & Economic Factors",
+    "dataset": {
+      "2025": { "data_years_start": 2019, "data_years_end": 2023, "source": "American Community Survey, five-year estimates" },
+      "2024": { "data_years_start": 2018, "data_years_end": 2022, "source": "American Community Survey, 5-year estimates" },
+      "2023": { "data_years_start": 2017, "data_years_end": 2021, "source": "American Community Survey, 5-year estimates" },
+      "2022": { "data_years_start": 2016, "data_years_end": 2020, "source": "American Community Survey, 5-year estimates" },
+      "2021": { "data_years_start": 2015, "data_years_end": 2019, "source": "American Community Survey, 5-year estimates" },
+      "2020": { "data_years_start": 2014, "data_years_end": 2018, "source": "American Community Survey, 5-year estimates" },
+      "2019": { "data_years_start": 2013, "data_years_end": 2017, "source": "American Community Survey, 5-year estimates" },
+      "2018": { "data_years_start": 2012, "data_years_end": 2016, "source": "American Community Survey" }
+    }
+  },
+  {
+    "id": "v156",
+    "measure": "Traffic Volume",
+    "category": "Physical Environment",
+    "dataset": {
+      "2025": { "data_years_start": 2020, "data_years_end": 2020, "source": "EJSCREEN: Environmental Justice Screening and Mapping Tool" },
+      "2024": { "data_years_start": 2023, "data_years_end": 2023, "source": "EJSCREEN: Environmental Justice Screening and Mapping Tool" },
+      "2023": { "data_years_start": 2019, "data_years_end": 2019, "source": "EJSCREEN: Environmental Justice Screening and Mapping Tool" },
+      "2022": { "data_years_start": 2016, "data_years_end": 2020, "source": "EJSCREEN: Environmental Justice Screening and Mapping Tool" },
+      "2021": { "data_years_start": 2019, "data_years_end": 2019, "source": "EJSCREEN: Environmental Justice Screening and Mapping Tool" },
+      "2020": { "data_years_start": 2018, "data_years_end": 2018, "source": "EJSCREEN: Environmental Justice Screening and Mapping Tool" }
+    }
+  },
+  {
+    "id": "v023",
+    "measure": "Unemployment",
+    "category": "Social & Economic Factors",
+    "dataset": {
+      "2025": { "data_years_start": 2023, "data_years_end": 2023, "source": "Bureau of Labor Statistics" },
+      "2024": { "data_years_start": 2022, "data_years_end": 2022, "source": "Bureau of Labor Statistics" },
+      "2023": { "data_years_start": 2021, "data_years_end": 2021, "source": "Bureau of Labor Statistics" },
+      "2022": { "data_years_start": 2020, "data_years_end": 2020, "source": "Bureau of Labor Statistics" },
+      "2021": { "data_years_start": 2019, "data_years_end": 2019, "source": "Bureau of Labor Statistics" },
+      "2020": { "data_years_start": 2018, "data_years_end": 2018, "source": "Bureau of Labor Statistics" },
+      "2019": { "data_years_start": 2017, "data_years_end": 2017, "source": "Bureau of Labor Statistics" },
+      "2018": { "data_years_start": 2016, "data_years_end": 2016, "source": "Bureau of Labor Statistics" }
+    }
+  },
+  {
+    "id": "v085",
+    "measure": "Uninsured",
+    "category": "Clinical Care",
+    "dataset": {
+      "2025": { "data_years_start": 2022, "data_years_end": 2022, "source": "Small Area Health Insurance Estimates" },
+      "2024": { "data_years_start": 2021, "data_years_end": 2021, "source": "Small Area Health Insurance Estimates" },
+      "2023": { "data_years_start": 2020, "data_years_end": 2020, "source": "Small Area Health Insurance Estimates" },
+      "2022": { "data_years_start": 2019, "data_years_end": 2019, "source": "Small Area Health Insurance Estimates" },
+      "2021": { "data_years_start": 2018, "data_years_end": 2018, "source": "Small Area Health Insurance Estimates" },
+      "2020": { "data_years_start": 2017, "data_years_end": 2017, "source": "Small Area Health Insurance Estimates" },
+      "2019": { "data_years_start": 2016, "data_years_end": 2016, "source": "Small Area Health Insurance Estimates" },
+      "2018": { "data_years_start": 2015, "data_years_end": 2015, "source": "Small Area Health Insurance Estimates" }
+    }
+  },
+  {
+    "id": "v003",
+    "measure": "Uninsured Adults",
+    "category": "Clinical Care",
+    "dataset": {
+      "2025": { "data_years_start": 2022, "data_years_end": 2022, "source": "Small Area Health Insurance Estimates" },
+      "2024": { "data_years_start": 2021, "data_years_end": 2021, "source": "Small Area Health Insurance Estimates" },
+      "2023": { "data_years_start": 2020, "data_years_end": 2020, "source": "Small Area Health Insurance Estimates" },
+      "2022": { "data_years_start": 2019, "data_years_end": 2019, "source": "Small Area Health Insurance Estimates" },
+      "2021": { "data_years_start": 2018, "data_years_end": 2018, "source": "Small Area Health Insurance Estimates" },
+      "2020": { "data_years_start": 2017, "data_years_end": 2017, "source": "Small Area Health Insurance Estimates" },
+      "2019": { "data_years_start": 2016, "data_years_end": 2016, "source": "Small Area Health Insurance Estimates" },
+      "2018": { "data_years_start": 2015, "data_years_end": 2015, "source": "Small Area Health Insurance Estimates" }
+    }
+  },
+  {
+    "id": "v122",
+    "measure": "Uninsured Children",
+    "category": "Clinical Care",
+    "dataset": {
+      "2025": { "data_years_start": 2022, "data_years_end": 2022, "source": "Small Area Health Insurance Estimates" },
+      "2024": { "data_years_start": 2021, "data_years_end": 2021, "source": "Small Area Health Insurance Estimates" },
+      "2023": { "data_years_start": 2020, "data_years_end": 2020, "source": "Small Area Health Insurance Estimates" },
+      "2022": { "data_years_start": 2019, "data_years_end": 2019, "source": "Small Area Health Insurance Estimates" },
+      "2021": { "data_years_start": 2018, "data_years_end": 2018, "source": "Small Area Health Insurance Estimates" },
+      "2020": { "data_years_start": 2017, "data_years_end": 2017, "source": "Small Area Health Insurance Estimates" },
+      "2019": { "data_years_start": 2016, "data_years_end": 2016, "source": "Small Area Health Insurance Estimates" },
+      "2018": { "data_years_start": 2015, "data_years_end": 2015, "source": "Small Area Health Insurance Estimates" }
+    }
+  }
+]

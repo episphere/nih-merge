@@ -5,20 +5,7 @@ import { createDropdown } from '../shared/popup';
 import { createOverlay } from '../shared/overlay';
 import { downloadCSV, downloadTSV, downloadJSON } from '../shared/download';
 import { downloadFigurePNG, downloadFigureSVG, getFigureOptions } from '../shared/downloadImage';
-import { renderDataTable, type TableColumn } from '../shared/dataTable';
-import { COMPARISON_FIELD_LABEL } from '../shared/visual';
-
-const DEMOGRAPHICS_COLUMNS: TableColumn[] = [
-  { field: 'state', title: 'State', frozen: true },
-  { field: 'cause', title: COMPARISON_FIELD_LABEL.cause ?? 'Cancer Site', frozen: true },
-  { field: 'race', title: COMPARISON_FIELD_LABEL.race ?? 'Race/Ethnicity', frozen: true },
-  { field: 'sex', title: COMPARISON_FIELD_LABEL.sex ?? 'Sex', frozen: true },
-  { field: 'ageGroup', title: COMPARISON_FIELD_LABEL.ageGroup ?? 'Age Group', frozen: true },
-  { field: 'deaths', title: 'Deaths' },
-  { field: 'population', title: 'Population' },
-  { field: 'crudeRate', title: 'Crude Rate' },
-  { field: 'ageAdjustedRate', title: 'Age-Adjusted Rate' },
-];
+import { renderDataTable, type DataTable } from '../shared/dataTable';
 
 /**
  * Wire the 4 top-control icon buttons to their respective popups/dropdowns/overlays.
@@ -69,10 +56,13 @@ function initFilterButton($state: MapStore<DemographicsState>): void {
 
   btn.addEventListener('click', () => popup.toggle());
 
-  // Show/hide fieldsets based on comparison axes
+  // Show/hide fieldsets based on comparison axes and disable button when no comparisons
   $state.subscribe((state) => {
     barFieldset.classList.toggle('hidden', state.compareBar === 'none');
     facetFieldset.classList.toggle('hidden', state.compareFacet === 'none');
+
+    const hasComparisons = state.compareBar !== 'none' || state.compareFacet !== 'none';
+    btn.toggleAttribute('disabled', !hasComparisons);
   });
 }
 
@@ -125,37 +115,36 @@ function initTableButton(getData?: () => Record<string, unknown>[]): void {
   if (!btn) return;
 
   const overlay = createOverlay({ title: 'Data Table' });
+  let activeTable: DataTable | null = null;
 
-  // Download button in toolbar
-  const downloadBtn = document.createElement('button');
-  downloadBtn.className = 'epi-icon-btn';
-  downloadBtn.type = 'button';
-  downloadBtn.title = 'Download table data';
-  downloadBtn.innerHTML = '<i class="fas fa-download"></i>';
-  overlay.toolbarEl.appendChild(downloadBtn);
+  overlay.onClose(() => {
+    if (activeTable) {
+      activeTable.destroy();
+      activeTable = null;
+    }
+  });
 
-  createDropdown(downloadBtn, [
-    { label: 'CSV (.csv)', onClick: () => getData && downloadCSV(getData(), 'epitracker-demographics.csv') },
-    { label: 'TSV (.tsv)', onClick: () => getData && downloadTSV(getData(), 'epitracker-demographics.tsv') },
-    { label: 'JSON (.json)', onClick: () => getData && downloadJSON(getData(), 'epitracker-demographics.json') },
-  ]);
-
-  btn.addEventListener('click', () => {
+  btn.addEventListener('click', async () => {
     // Set subtitle from current plot title
     const titleEl = document.getElementById('title');
     overlay.subtitleEl.textContent = titleEl?.textContent ?? '';
 
+    // Destroy previous table if any
+    if (activeTable) {
+      await activeTable.destroy();
+      activeTable = null;
+    }
+
+    // Open overlay first so the container has layout dimensions
+    overlay.open();
+
     // Render table with current data
     if (getData) {
       const data = getData();
-      // Filter columns to only those present in the data
-      const dataKeys = data.length > 0 ? new Set(Object.keys(data[0])) : new Set<string>();
-      const activeColumns = DEMOGRAPHICS_COLUMNS.filter(col => dataKeys.has(col.field));
-      renderDataTable(overlay.contentEl, data, activeColumns);
+      activeTable = await renderDataTable(overlay.contentEl, data);
     } else {
       overlay.contentEl.innerHTML = '<p class="padding-3">No data available.</p>';
     }
-    overlay.open();
   });
 }
 

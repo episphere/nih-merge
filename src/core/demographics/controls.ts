@@ -7,7 +7,7 @@ import { fipsName } from '../shared/fips';
 // --- Label formatting ---
 
 function formatLabel(key: string, value: string): string {
-  if (value === 'Total') return 'All';
+  if (value === 'All') return 'All';
   if (value === 'none') return 'None';
 
   if (key === 'compareBar' || key === 'compareFacet') {

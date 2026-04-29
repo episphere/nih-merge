@@ -1,4 +1,4 @@
-import type { Race, Sex, CountyMeasure } from '../../data/types';
+import type { Race, Sex } from '../../data/types';
 
 // --- Palette ---
 
@@ -57,6 +57,12 @@ export const RACE_STYLE: Record<Race, RaceStyle> = {
     labelShort: 'Asian',
     color: PALETTE.red,
     symbol: 'star',
+  },
+  'More than one race': {
+    label: 'More than\none race',
+    labelShort: 'Multiracial',
+    color: PALETTE.grey,
+    symbol: 'diamond2',
   },
 };
 
@@ -156,45 +162,3 @@ export const COMPARISON_FIELD_LABEL: Record<string, string> = {
   cause: 'Cancer Site',
 };
 
-// --- County measure ---
-
-export const COUNTY_MEASURE_LABEL: Record<CountyMeasure, string> = {
-  access_to_exercise_opportunities: 'Access to Exercise Opportunities',
-  adult_obesity: 'Adult Obesity',
-  adult_smoking: 'Adult Smoking',
-  air_pollution_particulate_matter: 'Air Pollution (Particulate Matter)',
-  children_in_poverty: 'Children in Poverty',
-  diabetes_prevalence: 'Diabetes Prevalence',
-  excessive_drinking: 'Excessive Drinking',
-  food_environment_index: 'Food Environment Index',
-  food_insecurity: 'Food Insecurity',
-  high_school_completion: 'High School Completion',
-  homeownership: 'Homeownership',
-  income_inequality: 'Income Inequality',
-  insufficient_sleep: 'Insufficient Sleep',
-  limited_access_to_healthy_foods: 'Limited Access to Healthy Foods',
-  mammography_screening: 'Mammography Screening',
-  median_household_income: 'Median Household Income',
-  percent_american_indian_alaska_native: '% American Indian / Alaska Native',
-  percent_asian: '% Asian',
-  percent_hispanic: '% Hispanic',
-  percent_native_hawaiian_other_pacific_islander: '% Native Hawaiian / Other Pacific Islander',
-  percent_non_hispanic_black: '% Non-Hispanic Black',
-  percent_non_hispanic_white: '% Non-Hispanic White',
-  percent_rural: '% Rural',
-  physical_inactivity: 'Physical Inactivity',
-  poor_mental_health_days: 'Poor Mental Health Days',
-  poor_or_fair_health: 'Poor or Fair Health',
-  poor_physical_health_days: 'Poor Physical Health Days',
-  primary_care_physicians: 'Primary Care Physicians',
-  severe_housing_cost_burden: 'Severe Housing Cost Burden',
-  severe_housing_problems: 'Severe Housing Problems',
-  sexually_transmitted_infections: 'Sexually Transmitted Infections',
-  social_associations: 'Social Associations',
-  some_college: 'Some College',
-  traffic_volume: 'Traffic Volume',
-  unemployment: 'Unemployment',
-  uninsured: 'Uninsured',
-  uninsured_adults: 'Uninsured Adults',
-  uninsured_children: 'Uninsured Children',
-};

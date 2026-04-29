@@ -20,6 +20,6 @@ ALL_STATE_FIPS.sort((a, b) =>
 
 /** Format a FIPS code as a state name. Returns the code itself if unknown. */
 export function fipsName(fips: string): string {
-  if (fips === 'Total') return 'All'
+  if (fips === 'All') return 'All'
   return STATE_FIPS[fips]?.name ?? fips
 }

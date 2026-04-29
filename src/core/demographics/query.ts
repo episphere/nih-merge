@@ -1,5 +1,6 @@
 import { dataManager } from '../../data';
 import type { AgeRow, AgeFilters, FilterValue, CancerSite, Race, Sex, AgeGroup } from '../../data/types';
+import { ALL_AGE_GROUPS } from '../../data/types';
 import type { DemographicsState, ComparisonField } from './state';
 
 // --- Enriched row type (AgeRow + confidence intervals) ---
@@ -16,10 +17,10 @@ export interface EnrichedAgeRow extends AgeRow {
 /**
  * For a given dimension, determine the filter value to send to the data manager:
  * - If the dimension is used as a comparison axis → "*" (get all non-Total values)
- * - Otherwise → use the current state value (either "Total" or a specific value)
+ * - Otherwise → use the current state value (either "All" or a specific value)
  */
 function dimensionFilter<T extends string>(
-  stateValue: T | 'Total',
+  stateValue: T | 'All',
   dimension: string,
   compareBar: ComparisonField | 'none',
   compareFacet: ComparisonField | 'none',
@@ -34,10 +35,10 @@ function buildFilters(state: DemographicsState): AgeFilters {
   const { compareBar, compareFacet } = state;
   return {
     year: state.year,
-    cause: dimensionFilter<CancerSite>(state.cause as CancerSite | 'Total', 'cause', compareBar, compareFacet),
-    race: dimensionFilter<Race>(state.race as Race | 'Total', 'race', compareBar, compareFacet),
-    sex: dimensionFilter<Sex>(state.sex as Sex | 'Total', 'sex', compareBar, compareFacet),
-    ageGroup: dimensionFilter<AgeGroup>(state.ageGroup as AgeGroup | 'Total', 'ageGroup', compareBar, compareFacet),
+    cause: dimensionFilter<CancerSite>(state.cause as CancerSite | 'All', 'cause', compareBar, compareFacet),
+    race: dimensionFilter<Race>(state.race as Race | 'All', 'race', compareBar, compareFacet),
+    sex: dimensionFilter<Sex>(state.sex as Sex | 'All', 'sex', compareBar, compareFacet),
+    ageGroup: dimensionFilter<AgeGroup>(state.ageGroup as AgeGroup | 'All', 'ageGroup', compareBar, compareFacet),
     stateFips: state.stateFips,
   };
 }
@@ -93,6 +94,21 @@ export function applyPlotFilters(state: DemographicsState, data: EnrichedAgeRow[
 }
 
 /**
+ * Returns a comparator that sorts by canonical age-group order when
+ * the field is 'ageGroup', and falls back to lexicographic sort otherwise.
+ */
+export function categoricalSort(field: string): (a: string, b: string) => number {
+  if (field === 'ageGroup') {
+    return (a, b) => {
+      const ai = (ALL_AGE_GROUPS as readonly string[]).indexOf(a);
+      const bi = (ALL_AGE_GROUPS as readonly string[]).indexOf(b);
+      return ai - bi;
+    };
+  }
+  return (a, b) => a.localeCompare(b);
+}
+
+/**
  * Derive the available filter options from the actual query results.
  * Returns the distinct values for each active comparison axis.
  */
@@ -101,10 +117,10 @@ export function deriveFilterOptions(
   data: EnrichedAgeRow[],
 ): { compareBarFilterOptions: string[]; compareFacetFilterOptions: string[] } {
   const barOpts = state.compareBar !== 'none'
-    ? [...new Set(data.map(row => row[state.compareBar as keyof EnrichedAgeRow] as string))].sort()
+    ? [...new Set(data.map(row => row[state.compareBar as keyof EnrichedAgeRow] as string))].sort(categoricalSort(state.compareBar))
     : [];
   const facetOpts = state.compareFacet !== 'none'
-    ? [...new Set(data.map(row => row[state.compareFacet as keyof EnrichedAgeRow] as string))].sort()
+    ? [...new Set(data.map(row => row[state.compareFacet as keyof EnrichedAgeRow] as string))].sort(categoricalSort(state.compareFacet))
     : [];
   return { compareBarFilterOptions: barOpts, compareFacetFilterOptions: facetOpts };
 }

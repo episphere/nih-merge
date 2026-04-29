@@ -3,11 +3,15 @@ import { createDashboardStore } from '../shared/state/createStore';
 import { syncStoreToURL } from '../shared/state/urlSync';
 import { onResize } from '../shared/resizeObserver';
 import { CHARACTERISTICS_DEFAULTS, resolveCharacteristics, type CharacteristicsState } from './state';
-import { initControls, setQuantileFieldGroups } from './controls';
+import { initControls, setQuantileFieldGroups, setQuantileFieldNames } from './controls';
 import { initTopControls } from './topControls';
 import { fetchData, applyPlotFilters, deriveFilterOptions, type EnrichedQuantileRow } from './query';
 import { renderPlot } from './plot';
-import { loadQuantileDetails, getQuantileDetail, buildFieldGroupMap, formatQuantileRange, type QuantileDetailsIndex, type QuantileDetail } from './quantileDetails';
+import {
+  loadQuantileDetails, getQuantileDetailForYear, preloadVintageAssignments,
+  buildFieldGroupMap, buildFieldNameMap, formatQuantileRange,
+  type QuantileDetailsIndex, type QuantileDetail,
+} from './quantileDetails';
 import { createPlotTooltip, type PlotTooltipField } from '../shared/plotTooltip';
 import { COMPARISON_FIELD_LABEL, CHARACTERISTICS_MEASURE_STYLE } from '../shared/visual';
 
@@ -23,7 +27,7 @@ initTopControls($state, update, () => lastData as unknown as Record<string, unkn
 
 // 4. URL sync
 const URL_KEYS: (keyof typeof CHARACTERISTICS_DEFAULTS & string)[] = [
-  'cause', 'race', 'sex', 'quantileField', 'quantileNumber',
+  'cause', 'race', 'sex', 'quantileField', 'quantileNumber', 'year',
   'compareColor', 'compareFacet', 'measure',
   'showCI', 'showLines', 'startZero',
 ];
@@ -31,7 +35,7 @@ syncStoreToURL($state, update, URL_KEYS);
 
 // 5. Render loop with query-key separation
 const QUERY_KEYS: (keyof CharacteristicsState)[] = [
-  'cause', 'race', 'sex', 'quantileField', 'quantileNumber',
+  'cause', 'race', 'sex', 'quantileField', 'quantileNumber', 'year',
   'compareColor', 'compareFacet',
 ];
 
@@ -48,10 +52,14 @@ function querySnapshot(state: CharacteristicsState): string {
   return QUERY_KEYS.map(k => String(state[k])).join('\0');
 }
 
-// Load quantile details once at startup
-loadQuantileDetails().then((index) => {
+// Load quantile details and vintage assignments at startup
+Promise.all([
+  loadQuantileDetails(),
+  preloadVintageAssignments(CHARACTERISTICS_DEFAULTS.year),
+]).then(([index]) => {
   quantileDetails = index;
   setQuantileFieldGroups(buildFieldGroupMap(index));
+  setQuantileFieldNames(buildFieldNameMap(index));
   // Re-emit so the combo box rebuilds with <optgroup> structure
   update({});
   render();
@@ -64,6 +72,12 @@ $state.subscribe(async (state) => {
   if (needsFetch) {
     prevQuerySnapshot = snap;
     const version = ++renderVersion;
+
+    // Pre-load vintage assignments for the selected year (async, non-blocking for render)
+    preloadVintageAssignments(state.year).then(() => {
+      if (version === renderVersion) render();
+    });
+
     const data = await fetchData(state);
     if (version !== renderVersion) return; // stale
     lastData = data;
@@ -85,7 +99,7 @@ $state.subscribe(async (state) => {
 function currentDetail(): QuantileDetail | undefined {
   if (!quantileDetails) return undefined;
   const state = $state.get();
-  return getQuantileDetail(quantileDetails, state.quantileField, state.quantileNumber);
+  return getQuantileDetailForYear(quantileDetails, state.quantileField, state.quantileNumber, state.year);
 }
 
 const plotTooltip = createPlotTooltip();
@@ -93,7 +107,8 @@ const plotTooltip = createPlotTooltip();
 function render(): void {
   const state = $state.get();
   const filtered = applyPlotFilters(state, lastData);
-  renderPlot(state, filtered, currentDetail());
+  const detail = currentDetail();
+  renderPlot(state, filtered, detail);
 
   // Bind tooltip to dot marks
   const plotEl = document.getElementById('plot')!;
@@ -110,11 +125,10 @@ function render(): void {
   }
 
   // Quantile with range
-  const detail = currentDetail();
   fields.push({
     label: 'Quantile',
     value: (row) => {
-      const q = String(row['quantile'] ?? '');
+      const q = String(row['quantile_bin'] ?? '');
       if (!detail) return q;
       const idx = parseInt(q, 10) - 1;
       const range = detail.quantileRanges[idx];
@@ -139,6 +153,7 @@ function render(): void {
     "g[aria-label='dot'] :is(circle, path)",
     filtered as unknown as Record<string, unknown>[],
     fields,
+    { proximity: 14 },
   );
 }
 

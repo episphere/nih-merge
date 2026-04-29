@@ -8,6 +8,7 @@ export const ALL_RACES = [
   "Hispanic",
   "American Indian or Alaska Native",
   "Native Hawaiian or Other Pacific Islander",
+  "More than one race",
 ] as const;
 export type Race = (typeof ALL_RACES)[number];
 
@@ -30,6 +31,7 @@ export const ALL_CANCER_SITES = [
   "Melanoma of the Skin",
   "Myeloid and Monocytic Leukemia",
   "Myeloma",
+  "Non-Hodgkin Lymphoma",
   "Non-Melanoma Skin",
   "Oral Cavity and Pharynx",
   "Other",
@@ -57,63 +59,30 @@ export type Year = (typeof ALL_YEARS)[number];
 export const ALL_QUANTILE_TYPES = ["3", "4", "5", "10"] as const;
 export type QuantileType = (typeof ALL_QUANTILE_TYPES)[number];
 
-export const ALL_COUNTY_MEASURES = [
-  "access_to_exercise_opportunities",
-  "adult_obesity",
-  "adult_smoking",
-  "air_pollution_particulate_matter",
-  "children_in_poverty",
-  "diabetes_prevalence",
-  "excessive_drinking",
-  "food_environment_index",
-  "food_insecurity",
-  "high_school_completion",
-  "homeownership",
-  "income_inequality",
-  "insufficient_sleep",
-  "limited_access_to_healthy_foods",
-  "mammography_screening",
-  "median_household_income",
-  "percent_american_indian_alaska_native",
-  "percent_asian",
-  "percent_hispanic",
-  "percent_native_hawaiian_other_pacific_islander",
-  "percent_non_hispanic_black",
-  "percent_non_hispanic_white",
-  "percent_rural",
-  "physical_inactivity",
-  "poor_mental_health_days",
-  "poor_or_fair_health",
-  "poor_physical_health_days",
-  "primary_care_physicians",
-  "severe_housing_cost_burden",
-  "severe_housing_problems",
-  "sexually_transmitted_infections",
-  "social_associations",
-  "some_college",
-  "traffic_volume",
-  "unemployment",
-  "uninsured",
-  "uninsured_adults",
-  "uninsured_children",
+export const ALL_FIELD_IDS = [
+  "v002", "v003", "v004", "v009", "v011", "v021", "v023", "v024",
+  "v036", "v042", "v044", "v045", "v049", "v050", "v054", "v055",
+  "v056", "v058", "v060", "v063", "v069", "v070", "v080", "v081",
+  "v083", "v085", "v122", "v125", "v126", "v132", "v133", "v136",
+  "v139", "v140", "v143", "v153", "v154", "v156",
 ] as const;
-export type CountyMeasure = (typeof ALL_COUNTY_MEASURES)[number];
+export type FieldId = (typeof ALL_FIELD_IDS)[number];
 
 // --- Filter helpers ---
 
-/** A filter value can be a specific value, an array of values, or "*" for all non-Total values. */
-export type FilterValue<T extends string> = T | "Total" | "*" | T[];
+/** A filter value can be a specific value, an array of values, or "*" for all non-All values. */
+export type FilterValue<T extends string> = T | "All" | "*" | T[];
 
 // --- Row types ---
 
 export interface BaseRow {
-  race: Race | "Total";
-  sex: Sex | "Total";
+  race: Race | "All";
+  sex: Sex | "All";
   population: number;
 }
 
 export interface MortalityRow extends BaseRow {
-  cause: CancerSite | "Total";
+  cause: CancerSite | "All";
   deaths: number;
   crudeRate: number;
   ageAdjustedRate: number;
@@ -126,18 +95,18 @@ export interface CountyRow extends MortalityRow {
 
 export interface AgeRow extends MortalityRow {
   stateFips: string;
-  ageGroup: AgeGroup | "Total";
+  ageGroup: AgeGroup | "All";
 }
 
 export interface QuantileRow extends MortalityRow {
-  countyMeasure: CountyMeasure;
-  quantile: string;
+  field_id: FieldId;
+  quantile_bin: number;
 }
 
 export interface PopulationRow extends BaseRow {
   stateFips: string;
   countyFips: string;
-  ageGroup: AgeGroup | "Total";
+  ageGroup: AgeGroup | "All";
 }
 
 // --- Filter types ---
@@ -163,9 +132,9 @@ export interface AgeFilters extends MortalityFilters {
 }
 
 export interface QuantileFilters extends MortalityFilters {
-  countyMeasure?: FilterValue<CountyMeasure>;
-  quantile?: FilterValue<string>;
+  field_id?: FilterValue<FieldId>;
   quantileType: QuantileType;
+  year: Year;
 }
 
 export interface PopulationFilters extends BaseFilters {
@@ -192,7 +161,7 @@ export interface DataManager {
   /** Age-stratified data (ageGroup, stateFips). */
   ageDomain: DataDomain<AgeFilters, AgeRow>;
 
-  /** County-measure quantile data (countyMeasure, quantile). */
+  /** County-measure quantile data (fieldId, quantileBin). */
   quantileDomain: DataDomain<QuantileFilters, QuantileRow>;
 
   /** Population data — no cause dimension, unsuppressed. */

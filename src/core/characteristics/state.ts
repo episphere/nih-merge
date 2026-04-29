@@ -1,6 +1,6 @@
 import {
-  ALL_CANCER_SITES, ALL_RACES, ALL_COUNTY_MEASURES,
-  type CancerSite, type Race, type Sex, type CountyMeasure,
+  ALL_CANCER_SITES, ALL_RACES, ALL_FIELD_IDS,
+  type CancerSite, type Race, type Sex, type FieldId, type Year,
 } from '../../data/types';
 import { causeSexRule, comparisonMutualExclusionRule, comparisonDisablesFilterRule } from '../shared/state/rules';
 
@@ -18,13 +18,16 @@ export type ComparisonField = 'race' | 'sex';
 
 export interface CharacteristicsState {
   // Filters
-  cause: CancerSite | 'Total';
-  race: Race | 'Total';
-  sex: Sex | 'Total';
+  cause: CancerSite | 'All';
+  race: Race | 'All';
+  sex: Sex | 'All';
 
   // Quantile config
-  quantileField: CountyMeasure;
+  quantileField: FieldId;
   quantileNumber: '3' | '4' | '5' | '10';
+
+  // Mortality year (determines which quantile file to load)
+  year: Year;
 
   // Comparison axes
   compareColor: ComparisonField | 'none';
@@ -45,11 +48,12 @@ export interface CharacteristicsState {
   compareFacetFilterOptions: string[];
 
   // Dropdown options
-  causeOptions: (CancerSite | 'Total')[];
-  raceOptions: (Race | 'Total')[];
-  sexOptions: (Sex | 'Total')[];
-  quantileFieldOptions: CountyMeasure[];
+  causeOptions: (CancerSite | 'All')[];
+  raceOptions: (Race | 'All')[];
+  sexOptions: (Sex | 'All')[];
+  quantileFieldOptions: FieldId[];
   quantileNumberOptions: string[];
+  yearOptions: Year[];
   measureOptions: CharacteristicsMeasure[];
   compareColorOptions: (ComparisonField | 'none')[];
   compareFacetOptions: (ComparisonField | 'none')[];
@@ -74,12 +78,14 @@ const ALL_MEASURES: CharacteristicsMeasure[] = [
 // --- Defaults ---
 
 export const CHARACTERISTICS_DEFAULTS: CharacteristicsState = {
-  cause: 'Total',
-  race: 'Total',
-  sex: 'Total',
+  cause: 'All',
+  race: 'All',
+  sex: 'All',
 
-  quantileField: 'adult_smoking',
+  quantileField: 'v009',
   quantileNumber: '4',
+
+  year: '2022',
 
   compareColor: 'none',
   compareFacet: 'none',
@@ -95,11 +101,12 @@ export const CHARACTERISTICS_DEFAULTS: CharacteristicsState = {
   compareColorFilterOptions: [],
   compareFacetFilterOptions: [],
 
-  causeOptions: ['Total', ...ALL_CANCER_SITES],
-  raceOptions: ['Total', ...ALL_RACES],
-  sexOptions: ['Total', 'Male', 'Female'],
-  quantileFieldOptions: [...ALL_COUNTY_MEASURES],
+  causeOptions: ['All', ...ALL_CANCER_SITES],
+  raceOptions: ['All', ...ALL_RACES],
+  sexOptions: ['All', 'Male', 'Female'],
+  quantileFieldOptions: [...ALL_FIELD_IDS],
   quantileNumberOptions: ['3', '4', '5', '10'],
+  yearOptions: ['2018', '2019', '2020', '2021', '2022'],
   measureOptions: ALL_MEASURES,
   compareColorOptions: ALL_COMPARISON_FIELDS,
   compareFacetOptions: ALL_COMPARISON_FIELDS,

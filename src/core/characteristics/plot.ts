@@ -5,7 +5,7 @@ import type { EnrichedQuantileRow } from './query';
 import type { Race, Sex } from '../../data/types';
 import {
   CHARACTERISTICS_MEASURE_STYLE, COMPARISON_FIELD_LABEL,
-  RACE_STYLE, SEX_STYLE, PALETTE, COUNTY_MEASURE_LABEL,
+  RACE_STYLE, SEX_STYLE, PALETTE,
 } from '../shared/visual';
 import type { QuantileDetail } from './quantileDetails';
 import { formatQuantileRange } from './quantileDetails';
@@ -14,7 +14,7 @@ import { formatQuantileRange } from './quantileDetails';
 
 export function generateTitle(state: CharacteristicsState, detail: QuantileDetail | undefined): string {
   const measure = CHARACTERISTICS_MEASURE_STYLE[state.measure].label;
-  const fieldLabel = detail?.name ?? COUNTY_MEASURE_LABEL[state.quantileField] ?? state.quantileField;
+  const fieldLabel = detail?.name ?? state.quantileField;
 
   const comparisons = [state.compareColor, state.compareFacet]
     .filter(c => c !== 'none')
@@ -28,10 +28,10 @@ export function generateTitle(state: CharacteristicsState, detail: QuantileDetai
     title += ', by ' + comparisons.join(' and ');
   }
 
-  const filters: string[] = ['2018-2022'];
-  if (state.cause !== 'Total') filters.push(state.cause);
-  if (state.race !== 'Total') filters.push(state.race);
-  if (state.sex !== 'Total') filters.push(state.sex);
+  const filters: string[] = [state.year];
+  if (state.cause !== 'All') filters.push(state.cause);
+  if (state.race !== 'All') filters.push(state.race);
+  if (state.sex !== 'All') filters.push(state.sex);
 
   title += ' | ' + filters.join(', ');
 
@@ -77,8 +77,8 @@ function ciFields(measure: CharacteristicsMeasure): { lower: keyof EnrichedQuant
 const MIN_HEIGHT = 450;
 const FONT_SIZE = '14px';
 
-function parseQuantileIndex(q: string): number {
-  return parseInt(q, 10);
+function parseQuantileIndex(q: string | number): number {
+  return typeof q === 'number' ? q : parseInt(q, 10);
 }
 
 // --- Legend ---
@@ -140,8 +140,12 @@ export function renderPlot(
 ): void {
   const plotEl = document.getElementById('plot')!;
   const titleEl = document.getElementById('title')!;
+  const sourceEl = document.getElementById('plot-source')!;
 
   titleEl.textContent = generateTitle(state, detail);
+  sourceEl.textContent = detail
+    ? `County-level measure source: ${detail.source}, ${detail.dataYears}`
+    : '';
 
   if (data.length === 0) {
     const msg = document.createElement('div');
@@ -156,7 +160,7 @@ export function renderPlot(
   const fxField = compareFacet !== 'none' ? compareFacet : null;
 
   // Quantile domain sorted numerically
-  const quantileDomain = [...new Set(data.map(d => d.quantile))].sort(
+  const quantileDomain = [...new Set(data.map(d => d.quantile_bin))].sort(
     (a, b) => parseQuantileIndex(a) - parseQuantileIndex(b),
   );
 
@@ -178,7 +182,7 @@ export function renderPlot(
   const xTickFormat = (v: string) => tickLabels[v] ?? v;
 
   // X-axis label
-  const fieldLabel = detail?.name ?? COUNTY_MEASURE_LABEL[state.quantileField] ?? state.quantileField;
+  const fieldLabel = detail?.name ?? state.quantileField;
   const unitLabel = detail?.unit ? ` (${detail.unit})` : '';
   const xLabel = `${fieldLabel}${unitLabel}`;
 
@@ -225,12 +229,12 @@ export function renderPlot(
   const strokeFn = typeof colorFn === 'function' ? colorFn : undefined;
   const seriesFn = seriesKey(compareColor);
 
-  data.sort((a,b) => Number(a.quantile) - Number(b.quantile));
+  data.sort((a,b) => Number(a.quantile_bin) - Number(b.quantile_bin));
 
   // Optional lines connecting quantile points
   if (showLines && seriesFn) {
     marks.push(Plot.line(data, {
-       x: 'quantile',
+       x: 'quantile_bin',
       y: yField as string,
       stroke: colorFn as never,
       fx: fxField ?? undefined,
@@ -240,7 +244,7 @@ export function renderPlot(
     }));
   } else if (showLines && !seriesFn) {
     marks.push(Plot.line(data, {
-      x: 'quantile',
+      x: 'quantile_bin',
       y: yField as string,
       stroke: DEFAULT_DOT_COLOR,
       fx: fxField ?? undefined,
@@ -252,8 +256,8 @@ export function renderPlot(
   // Confidence interval marks (vertical links)
   if (showCI && ci) {
     marks.push(Plot.link(data, {
-      x1: 'quantile',
-      x2: 'quantile',
+      x1: 'quantile_bin',
+      x2: 'quantile_bin',
       y1: ci.lower as string,
       y2: ci.upper as string,
       fx: fxField ?? undefined,
@@ -264,7 +268,7 @@ export function renderPlot(
 
   // Dot marks
   marks.push(Plot.dot(data, {
-    x: 'quantile',
+    x: 'quantile_bin',
     y: yField as string,
     fill: colorFn as never,
     symbol: symbolFn as never,

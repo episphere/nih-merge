@@ -97,6 +97,16 @@ html {
     background: color("base-lightest");
     color: color("primary");
   }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+
+    &:hover {
+      background: color("white");
+      color: color("base-dark");
+    }
+  }
 }
 
 // --- Popup ---
@@ -278,9 +288,9 @@ html {
   &__panel {
     background: color("white");
     border-radius: units(0.5);
-    width: 95vw;
-    max-width: 1400px;
-    max-height: 90vh;
+    width: 98vw;
+    max-width: none;
+    height: 95vh;
     display: flex;
     flex-direction: column;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
@@ -343,8 +353,8 @@ html {
 
   &__body {
     flex: 1;
+    min-height: 0;
     overflow: auto;
-    overflow-x: hidden;
     padding: units(2) units(3);
   }
 }
@@ -387,78 +397,24 @@ html {
   margin-right: 0.5rem;
 }
 
-// --- Data table ---
+// --- Plot hover effects ---
 
-.epi-data-table {
-  overflow: auto;
-  max-height: 100%;
+// Demographics bar charts: slightly muted by default, brighten on hover
+#plot [aria-label="bar"] rect {
+  opacity: 0.82;
+  transition: opacity 0.15s;
 
-  table {
-    width: max-content;
-    min-width: 100%;
-    border-collapse: collapse;
-    font-size: 0.85rem;
+  &:hover {
+    opacity: 1;
   }
+}
 
-  th,
-  td {
-    padding: units(1) units(1.5);
-    white-space: nowrap;
-    border-bottom: 1px solid color("base-lighter");
-  }
+// Characteristics dot plots: enlarge dot on proximity hover
+#plot [aria-label="dot"] circle {
+  transition: r 0.15s;
 
-  th {
-    position: sticky;
-    top: 0;
-    background: color("base-lightest");
-    font-weight: 600;
-    text-align: left;
-    cursor: pointer;
-    user-select: none;
-    z-index: 2;
-
-    &:hover {
-      background: color("base-light");
-    }
-
-    &.sort-asc::after {
-      content: " \25B2";
-      font-size: 0.65em;
-    }
-
-    &.sort-desc::after {
-      content: " \25BC";
-      font-size: 0.65em;
-    }
-  }
-
-  td.numeric {
-    text-align: right;
-    font-variant-numeric: tabular-nums;
-  }
-
-  // Frozen (sticky) columns
-  .frozen {
-    position: sticky;
-    background: color("white");
-    z-index: 1;
-  }
-
-  th.frozen {
-    z-index: 3;
-    background: color("base-lightest");
-  }
-
-  .frozen-last {
-    border-right: 2px solid color("base-light");
-  }
-
-  tbody tr:hover td {
-    background: color("primary-lighter");
-  }
-
-  tbody tr:hover td.frozen {
-    background: color("primary-lighter");
+  &.epi-dot--active {
+    r: 7;
   }
 }
 

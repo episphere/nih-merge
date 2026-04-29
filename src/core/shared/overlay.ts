@@ -15,6 +15,8 @@ export interface OverlayHandle {
   open(): void;
   close(): void;
   destroy(): void;
+  /** Register a callback invoked on close (before DOM removal). */
+  onClose(cb: () => void): void;
 }
 
 export function createOverlay(options: OverlayOptions = {}): OverlayHandle {
@@ -74,6 +76,8 @@ export function createOverlay(options: OverlayOptions = {}): OverlayHandle {
     if (e.target === el) close();
   });
 
+  const closeCallbacks: (() => void)[] = [];
+
   function onKeyDown(e: KeyboardEvent) {
     if (e.key === 'Escape') close();
   }
@@ -84,6 +88,7 @@ export function createOverlay(options: OverlayOptions = {}): OverlayHandle {
   }
 
   function close() {
+    for (const cb of closeCallbacks) cb();
     el.classList.remove('epi-overlay--open');
     document.removeEventListener('keydown', onKeyDown);
   }
@@ -93,5 +98,9 @@ export function createOverlay(options: OverlayOptions = {}): OverlayHandle {
     el.remove();
   }
 
-  return { el, contentEl, subtitleEl, toolbarEl, open, close, destroy };
+  function onCloseHandler(cb: () => void) {
+    closeCallbacks.push(cb);
+  }
+
+  return { el, contentEl, subtitleEl, toolbarEl, open, close, destroy, onClose: onCloseHandler };
 }

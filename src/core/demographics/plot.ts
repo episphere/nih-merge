@@ -1,7 +1,7 @@
 import * as Plot from '@observablehq/plot';
 import * as d3 from 'd3';
 import type { DemographicsState, ComparisonField, Measure } from './state';
-import type { EnrichedAgeRow } from './query';
+import { categoricalSort, type EnrichedAgeRow } from './query';
 import type { Race, Sex } from '../../data/types';
 import {
   MEASURE_STYLE, COMPARISON_FIELD_LABEL,
@@ -24,11 +24,11 @@ export function generateTitle(state: DemographicsState): string {
   }
 
   const filters: string[] = [state.year];
-  if (state.cause !== 'Total') filters.push(state.cause);
-  if (state.race !== 'Total') filters.push(state.race);
-  if (state.sex !== 'Total') filters.push(state.sex);
-  if (state.ageGroup !== 'Total') filters.push(state.ageGroup);
-  if (state.stateFips !== 'Total') filters.push(fipsName(state.stateFips));
+  if (state.cause !== 'All') filters.push(state.cause);
+  if (state.race !== 'All') filters.push(state.race);
+  if (state.sex !== 'All') filters.push(state.sex);
+  if (state.ageGroup !== 'All') filters.push(state.ageGroup);
+  if (state.stateFips !== 'All') filters.push(fipsName(state.stateFips));
 
   if (filters.length > 0) {
     title += ' | ' + filters.join(', ');
@@ -105,10 +105,10 @@ export function renderPlot(state: DemographicsState, data: EnrichedAgeRow[]): vo
 
   // Domains
   const xDomain = xField
-    ? [...new Set(data.map(d => d[xField] as string))].sort()
+    ? [...new Set(data.map(d => d[xField] as string))].sort(categoricalSort(xField))
     : ['All'];
   const fxDomain = fxField
-    ? [...new Set(data.map(d => d[fxField] as string))].sort()
+    ? [...new Set(data.map(d => d[fxField] as string))].sort(categoricalSort(fxField))
     : null;
 
   // Tick labels for measuring

@@ -21,5 +21,5 @@ export type {
   AgeGroup,
   Year,
   QuantileType,
-  CountyMeasure,
+  FieldId,
 } from './types.ts'

@@ -1,12 +1,36 @@
 import type { MapStore } from 'nanostores';
 import type { CharacteristicsState } from './state';
 import { USAComboBox } from '../../lib/USAComboBox';
-import { CHARACTERISTICS_MEASURE_STYLE, COMPARISON_FIELD_LABEL, COUNTY_MEASURE_LABEL } from '../shared/visual';
+import { CHARACTERISTICS_MEASURE_STYLE, COMPARISON_FIELD_LABEL } from '../shared/visual';
+
+// --- Quantile field metadata ---
+
+/** Module-level group map, set asynchronously after quantile details load. */
+let quantileFieldGroupMap: Map<string, string> | null = null;
+
+/** Module-level name map (field_id → display name), set asynchronously. */
+let quantileFieldNameMap: Map<string, string> | null = null;
+
+/**
+ * Call this once after loading chr_quantile_details.json to enable grouped
+ * rendering in the County Characteristic combo box.
+ */
+export function setQuantileFieldGroups(groupMap: Map<string, string>): void {
+  quantileFieldGroupMap = groupMap;
+}
+
+/**
+ * Call this once after loading chr_quantile_details.json to enable
+ * display-name rendering for field IDs.
+ */
+export function setQuantileFieldNames(nameMap: Map<string, string>): void {
+  quantileFieldNameMap = nameMap;
+}
 
 // --- Label formatting ---
 
 function formatLabel(key: string, value: string): string {
-  if (value === 'Total') return 'All';
+  if (value === 'All') return 'All';
   if (value === 'none') return 'None';
 
   if (key === 'compareColor' || key === 'compareFacet') {
@@ -18,23 +42,10 @@ function formatLabel(key: string, value: string): string {
   }
 
   if (key === 'quantileField') {
-    return COUNTY_MEASURE_LABEL[value as keyof typeof COUNTY_MEASURE_LABEL] ?? value;
+    return quantileFieldNameMap?.get(value) ?? value;
   }
 
   return value;
-}
-
-// --- Quantile field grouping ---
-
-/** Module-level group map, set asynchronously after quantile details load. */
-let quantileFieldGroupMap: Map<string, string> | null = null;
-
-/**
- * Call this once after loading quantile_details.json to enable grouped
- * rendering in the County Characteristic combo box.
- */
-export function setQuantileFieldGroups(groupMap: Map<string, string>): void {
-  quantileFieldGroupMap = groupMap;
 }
 
 // --- Control binding config ---
@@ -56,6 +67,7 @@ const CONTROLS: ControlConfig[] = [
   { id: 'select-select-race',   stateKey: 'race',           optionsKey: 'raceOptions' },
   { id: 'select-quantile-field', stateKey: 'quantileField', optionsKey: 'quantileFieldOptions', comboBoxId: 'combo-quantile-field', grouped: true },
   { id: 'select-quantile-number', stateKey: 'quantileNumber', optionsKey: 'quantileNumberOptions' },
+  { id: 'select-select-year',   stateKey: 'year',           optionsKey: 'yearOptions' },
   { id: 'select-measure',       stateKey: 'measure',        optionsKey: 'measureOptions' },
 ];
 
