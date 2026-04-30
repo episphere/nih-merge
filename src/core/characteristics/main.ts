@@ -14,6 +14,8 @@ import {
 } from './quantileDetails';
 import { createPlotTooltip, type PlotTooltipField } from '../shared/plotTooltip';
 import { COMPARISON_FIELD_LABEL, CHARACTERISTICS_MEASURE_STYLE } from '../shared/visual';
+import { parquetUrl, quantileFile } from '../../data/dataManager';
+import type { TableInfo, TableFilterSpec } from '../shared/tableFilters';
 
 // 1. Layout
 initLayout();
@@ -22,8 +24,20 @@ initLayout();
 const { $state, update } = createDashboardStore(CHARACTERISTICS_DEFAULTS, resolveCharacteristics);
 
 // 3. Controls
+function getTableInfo(): TableInfo {
+  const state = $state.get();
+  const compAxes: string[] = [state.compareColor, state.compareFacet];
+  const filters: TableFilterSpec[] = [
+    { column: 'cause', value: compAxes.includes('cause') ? '*' : state.cause },
+    { column: 'race', value: compAxes.includes('race') ? '*' : state.race },
+    { column: 'sex', value: compAxes.includes('sex') ? '*' : state.sex },
+    { column: 'field_id', value: state.quantileField },
+  ];
+  return { url: parquetUrl(quantileFile(state.quantileNumber, state.year)), filters };
+}
+
 initControls($state, update);
-initTopControls($state, update, () => lastData as unknown as Record<string, unknown>[]);
+initTopControls($state, update, () => lastData as unknown as Record<string, unknown>[], getTableInfo);
 
 // 4. URL sync
 const URL_KEYS: (keyof typeof CHARACTERISTICS_DEFAULTS & string)[] = [

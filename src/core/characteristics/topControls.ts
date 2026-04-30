@@ -5,7 +5,8 @@ import { createDropdown } from '../shared/popup';
 import { createOverlay } from '../shared/overlay';
 import { downloadCSV, downloadTSV, downloadJSON } from '../shared/download';
 import { downloadFigurePNG, downloadFigureSVG, getFigureOptions } from '../shared/downloadImage';
-import { renderDataTable, type DataTable } from '../shared/dataTable';
+import { renderDataTableFromUrl, type DataTable } from '../shared/dataTable';
+import { buildTableFilters, type TableInfo } from '../shared/tableFilters';
 
 /**
  * Wire the 4 top-control icon buttons to their respective popups/dropdowns/overlays.
@@ -14,10 +15,11 @@ export function initTopControls(
   $state: MapStore<CharacteristicsState>,
   update: (change: Partial<CharacteristicsState>) => void,
   getData?: () => Record<string, unknown>[],
+  getTableInfo?: () => TableInfo,
 ): void {
   initFilterButton($state);
   initSettingsButton($state, update);
-  initTableButton(getData);
+  initTableButton(getTableInfo);
   initDownloadButton(getData);
 }
 
@@ -121,7 +123,7 @@ function initSettingsButton(
 
 // --- Table button ---
 
-function initTableButton(getData?: () => Record<string, unknown>[]): void {
+function initTableButton(getTableInfo?: () => TableInfo): void {
   const btn = document.getElementById('btn-table');
   if (!btn) return;
 
@@ -149,10 +151,10 @@ function initTableButton(getData?: () => Record<string, unknown>[]): void {
     // Open overlay first so the container has layout dimensions
     overlay.open();
 
-    // Render table with current data
-    if (getData) {
-      const data = getData();
-      activeTable = await renderDataTable(overlay.contentEl, data);
+    // Render table from parquet URL with filters
+    if (getTableInfo) {
+      const { url, filters } = getTableInfo();
+      activeTable = await renderDataTableFromUrl(overlay.contentEl, url, buildTableFilters(filters));
     } else {
       overlay.contentEl.innerHTML = '<p class="padding-3">No data available.</p>';
     }

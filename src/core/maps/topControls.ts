@@ -4,7 +4,8 @@ import type { MapsState, MapsMeasure } from './state';
 import { createPopup, createDropdown } from '../shared/popup';
 import { createOverlay } from '../shared/overlay';
 import { downloadCSV, downloadTSV, downloadJSON } from '../shared/download';
-import { renderDataTable, type DataTable } from '../shared/dataTable';
+import { renderDataTableFromUrl, type DataTable } from '../shared/dataTable';
+import { buildTableFilters, type TableInfo } from '../shared/tableFilters';
 import { createCheckbox, createSelect } from '../shared/formElements';
 import { USAComboBox } from '../../lib/USAComboBox';
 
@@ -45,10 +46,11 @@ export function initTopControls(
   $state: MapStore<MapsState>,
   update: (change: Partial<MapsState>) => void,
   getData: () => Record<string, unknown>[],
+  getTableInfo?: () => TableInfo,
 ): void {
   initGridEditButton($state, update);
   initSettingsButton($state, update);
-  initTableButton(getData);
+  initTableButton(getTableInfo);
   initDownloadButton(getData);
 }
 
@@ -247,9 +249,7 @@ function initSettingsButton(
 
 // --- Table button ---
 
-function initTableButton(
-  getData: () => Record<string, unknown>[],
-): void {
+function initTableButton(getTableInfo?: () => TableInfo): void {
   const btn = document.getElementById('btn-table');
   if (!btn) return;
 
@@ -273,8 +273,12 @@ function initTableButton(
     // Open overlay first so the container has layout dimensions
     overlay.open();
 
-    const data = getData();
-    activeTable = await renderDataTable(overlay.contentEl, data);
+    if (getTableInfo) {
+      const { url, filters } = getTableInfo();
+      activeTable = await renderDataTableFromUrl(overlay.contentEl, url, buildTableFilters(filters));
+    } else {
+      overlay.contentEl.innerHTML = '<p class="padding-3">No data available.</p>';
+    }
   });
 }
 

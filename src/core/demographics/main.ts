@@ -9,6 +9,8 @@ import { fetchData, applyPlotFilters, deriveFilterOptions, type EnrichedAgeRow }
 import { renderPlot } from './plot';
 import { createPlotTooltip, type PlotTooltipField } from '../shared/plotTooltip';
 import { COMPARISON_FIELD_LABEL, MEASURE_STYLE } from '../shared/visual';
+import { parquetUrl, ageFile } from '../../data/dataManager';
+import type { TableInfo, TableFilterSpec } from '../shared/tableFilters';
 
 // 1. Layout
 initLayout();
@@ -17,8 +19,21 @@ initLayout();
 const { $state, update } = createDashboardStore(DEMOGRAPHICS_DEFAULTS, resolveDemographics);
 
 // 3. Controls
+function getTableInfo(): TableInfo {
+  const state = $state.get();
+  const compAxes = [state.compareBar, state.compareFacet];
+  const filters: TableFilterSpec[] = [
+    { column: 'cause', value: compAxes.includes('cause') ? '*' : state.cause },
+    { column: 'race', value: compAxes.includes('race') ? '*' : state.race },
+    { column: 'sex', value: compAxes.includes('sex') ? '*' : state.sex },
+    { column: 'ageGroup', value: compAxes.includes('ageGroup') ? '*' : state.ageGroup },
+    { column: 'stateFips', value: state.stateFips },
+  ];
+  return { url: parquetUrl(ageFile(state.year)), filters };
+}
+
 initControls($state, update);
-initTopControls($state, update, () => lastData as unknown as Record<string, unknown>[]);
+initTopControls($state, update, () => lastData as unknown as Record<string, unknown>[], getTableInfo);
 
 // 4. URL sync
 const URL_KEYS: (keyof typeof DEMOGRAPHICS_DEFAULTS & string)[] = [

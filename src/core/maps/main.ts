@@ -11,6 +11,8 @@ import { renderMapCard } from './mapPlot';
 import { renderColorLegend } from './colorLegend';
 import { Gridette } from './grid';
 import { initMapTooltip, type MapTooltipHandle } from './mapTooltip';
+import { parquetUrl, countyFile } from '../../data/dataManager';
+import type { TableInfo, TableFilterSpec } from '../shared/tableFilters';
 
 // 1. Layout
 initLayout();
@@ -27,7 +29,33 @@ function getData(): Record<string, unknown>[] {
   return allCardData;
 }
 
-initTopControls($state, update, getData);
+function getTableInfo(): TableInfo {
+  const state = $state.get();
+  const activeCards = state.cards.filter((c) => !c.blank && c.state);
+  const firstCard = activeCards[0];
+  const year = firstCard?.state?.year ?? '2022';
+  const url = parquetUrl(countyFile(year));
+
+  // Build union filters across all active cards
+  const fieldKeys = ['cause', 'sex', 'race', 'stateFips'] as const;
+  const filters: TableFilterSpec[] = [];
+
+  for (const key of fieldKeys) {
+    const values = [...new Set(activeCards.map((c) => c.state![key]))];
+    if (values.length === 1) {
+      filters.push({ column: key, value: values[0] });
+    } else if (values.length > 1) {
+      filters.push({ column: key, value: values });
+    }
+  }
+
+  // Exclude aggregate county rows
+  filters.push({ column: 'countyFips', value: '*' });
+
+  return { url, filters };
+}
+
+initTopControls($state, update, getData, getTableInfo);
 
 // 4. Color legend + in-grid add/remove buttons
 const dashboardEl = document.getElementById('dashboard')!;

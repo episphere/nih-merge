@@ -76,15 +76,19 @@ function applyFilters<TRow>(
 
 // --- File path resolution ---
 
-function countyFile(year: Year): string {
+export function parquetUrl(fileName: string): string {
+  return `${DATA_BASE_URL}${fileName}`
+}
+
+export function countyFile(year: Year): string {
   return `data_with-county_${year}.parquet`
 }
 
-function ageFile(year: Year): string {
+export function ageFile(year: Year): string {
   return `data_with-age_${year}.parquet`
 }
 
-function quantileFile(quantileType: string, year: Year): string {
+export function quantileFile(quantileType: string, year: Year): string {
   return `data_by-measure-quantile_q${quantileType}_${year}.parquet`
 }
 
