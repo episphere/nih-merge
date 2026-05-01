@@ -49,6 +49,14 @@ function getTableInfo(): TableInfo {
     }
   }
 
+  // stateFips="All" means "all states" — convert to '*' so the table
+  // doesn't filter on the literal string "All" (which no county row has).
+  for (const f of filters) {
+    if (f.column === 'stateFips' && f.value === 'All') {
+      f.value = '*';
+    }
+  }
+
   // Exclude aggregate county rows
   filters.push({ column: 'countyFips', value: '*' });
 

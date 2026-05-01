@@ -256,28 +256,25 @@ function initTableButton(getTableInfo?: () => TableInfo): void {
   const overlay = createOverlay({ title: 'Data Table' });
   let activeTable: DataTable | null = null;
 
-  overlay.onClose(() => {
-    if (activeTable) {
-      activeTable.destroy();
-      activeTable = null;
-    }
-  });
-
   btn.addEventListener('click', async () => {
-    // Destroy previous table if any
+    // If table is already loaded, just re-open the overlay
     if (activeTable) {
-      await activeTable.destroy();
-      activeTable = null;
+      overlay.open();
+      return;
     }
 
     // Open overlay first so the container has layout dimensions
     overlay.open();
+    overlay.showLoading();
 
     if (getTableInfo) {
       const { url, filters } = getTableInfo();
       activeTable = await renderDataTableFromUrl(overlay.contentEl, url, buildTableFilters(filters));
+      overlay.hideLoading();
+      overlay.sizeToFit();
     } else {
       overlay.contentEl.innerHTML = '<p class="padding-3">No data available.</p>';
+      overlay.hideLoading();
     }
   });
 }

@@ -15,8 +15,14 @@ export interface OverlayHandle {
   open(): void;
   close(): void;
   destroy(): void;
+  /** Resize panel width to fit the content (capped at 98vw). */
+  sizeToFit(): void;
   /** Register a callback invoked on close (before DOM removal). */
   onClose(cb: () => void): void;
+  /** Hide contentEl and show a loading spinner in the panel. */
+  showLoading(): void;
+  /** Remove the loading spinner and reveal contentEl. */
+  hideLoading(): void;
 }
 
 export function createOverlay(options: OverlayOptions = {}): OverlayHandle {
@@ -98,9 +104,64 @@ export function createOverlay(options: OverlayOptions = {}): OverlayHandle {
     el.remove();
   }
 
+  function sizeToFit() {
+    // Sum column header widths — the actual content columns
+    const colHeaders = contentEl.querySelectorAll('.dt-col-header');
+    if (colHeaders.length === 0) return;
+
+    let columnsWidth = 0;
+    for (const col of colHeaders) {
+      columnsWidth += (col as HTMLElement).offsetWidth;
+    }
+
+    // Add-column "+" button (28px) + scrollbar gutter (var(--dt-scrollbar-width), default 17px)
+    const addColBtn = contentEl.querySelector('.dt-add-column-btn');
+    const addColWidth = addColBtn ? (addColBtn as HTMLElement).offsetWidth : 0;
+    const gutter = contentEl.querySelector('.dt-scrollbar-gutter');
+    const gutterWidth = gutter ? (gutter as HTMLElement).offsetWidth : 0;
+
+    // dt-root border
+    const dtRoot = contentEl.querySelector('.dt-root');
+    const dtBorder = dtRoot ? parseFloat(getComputedStyle(dtRoot).borderLeftWidth) * 2 : 0;
+
+    const tableWidth = columnsWidth + addColWidth + gutterWidth + dtBorder;
+
+    // Overlay body padding + panel border
+    const bodyStyle = getComputedStyle(contentEl);
+    const bodyPadding = parseFloat(bodyStyle.paddingLeft) + parseFloat(bodyStyle.paddingRight);
+    const panelBorder = parseFloat(getComputedStyle(panel).borderLeftWidth) * 2;
+    const needed = Math.ceil(tableWidth + bodyPadding + panelBorder);
+
+    const maxPx = window.innerWidth * 0.98;
+    panel.style.width = Math.min(needed, maxPx) + 'px';
+    panel.style.maxWidth = '98vw';
+  }
+
   function onCloseHandler(cb: () => void) {
     closeCallbacks.push(cb);
   }
 
-  return { el, contentEl, subtitleEl, toolbarEl, open, close, destroy, onClose: onCloseHandler };
+  let spinnerEl: HTMLElement | null = null;
+
+  function showLoading() {
+    contentEl.style.display = 'none';
+    if (!spinnerEl) {
+      spinnerEl = document.createElement('div');
+      spinnerEl.className = 'epi-overlay__spinner';
+      const msg = document.createElement('span');
+      msg.className = 'epi-overlay__spinner-msg';
+      msg.textContent = 'Loading tabular view';
+      spinnerEl.appendChild(msg);
+    }
+    panel.appendChild(spinnerEl);
+  }
+
+  function hideLoading() {
+    if (spinnerEl && spinnerEl.parentNode) {
+      spinnerEl.remove();
+    }
+    contentEl.style.display = '';
+  }
+
+  return { el, contentEl, subtitleEl, toolbarEl, open, close, destroy, sizeToFit, onClose: onCloseHandler, showLoading, hideLoading };
 }

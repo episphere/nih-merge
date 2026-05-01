@@ -119,33 +119,30 @@ function initTableButton(getTableInfo?: () => TableInfo): void {
   const overlay = createOverlay({ title: 'Data Table' });
   let activeTable: DataTable | null = null;
 
-  overlay.onClose(() => {
-    if (activeTable) {
-      activeTable.destroy();
-      activeTable = null;
-    }
-  });
-
   btn.addEventListener('click', async () => {
+    // If table is already loaded, just re-open the overlay
+    if (activeTable) {
+      overlay.open();
+      return;
+    }
+
     // Set subtitle from current plot title
     const titleEl = document.getElementById('title');
     overlay.subtitleEl.textContent = titleEl?.textContent ?? '';
 
-    // Destroy previous table if any
-    if (activeTable) {
-      await activeTable.destroy();
-      activeTable = null;
-    }
-
     // Open overlay first so the container has layout dimensions
     overlay.open();
+    overlay.showLoading();
 
     // Render table from parquet URL with filters
     if (getTableInfo) {
       const { url, filters } = getTableInfo();
       activeTable = await renderDataTableFromUrl(overlay.contentEl, url, buildTableFilters(filters));
+      overlay.hideLoading();
+      overlay.sizeToFit();
     } else {
       overlay.contentEl.innerHTML = '<p class="padding-3">No data available.</p>';
+      overlay.hideLoading();
     }
   });
 }
