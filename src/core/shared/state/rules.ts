@@ -39,17 +39,23 @@ export function causeSexRule(state: CauseSexState, prev: CauseSexState): void {
 
 /**
  * Comparison mutual exclusion: two comparison dimensions can't be the same non-"none" value.
- * If comp1 matches comp2, comp2 resets to "none".
+ * Uses prev state to detect which field changed, and resets the other to "none".
  * Applies to Demographics & Characteristics.
  */
 export function comparisonMutualExclusionRule<T extends Record<string, unknown>>(
   state: T,
-  _prev: T,
+  prev: T,
   comp1Key: string,
   comp2Key: string,
 ): void {
   if (state[comp1Key] !== 'none' && state[comp1Key] === state[comp2Key]) {
-    (state as Record<string, unknown>)[comp2Key] = 'none';
+    const comp1Changed = state[comp1Key] !== prev[comp1Key];
+    const comp2Changed = state[comp2Key] !== prev[comp2Key];
+    if (comp2Changed && !comp1Changed) {
+      (state as Record<string, unknown>)[comp1Key] = 'none';
+    } else {
+      (state as Record<string, unknown>)[comp2Key] = 'none';
+    }
   }
 }
 
