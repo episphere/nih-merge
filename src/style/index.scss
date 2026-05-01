@@ -409,13 +409,9 @@ html {
   }
 }
 
-// Characteristics dot plots: enlarge dot on proximity hover
+// Characteristics dot plots: smooth hover expansion
 #plot [aria-label="dot"] circle {
   transition: r 0.15s;
-
-  &.epi-dot--active {
-    r: 7;
-  }
 }
 
 // --- Color legend (inline in topbar) ---

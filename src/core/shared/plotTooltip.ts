@@ -102,7 +102,42 @@ export function createPlotTooltip(): PlotTooltipHandle {
     cleanupListeners = () => abortController.abort();
   }
 
-  const ACTIVE_CLASS = 'epi-dot--active';
+  const HOVER_RADIUS = 7;
+  const HOVER_SCALE = 1.5;
+
+  function activateDot(el: SVGElement) {
+    if (el instanceof SVGCircleElement) {
+      el.dataset.origR = el.getAttribute('r') ?? '';
+      el.setAttribute('r', String(HOVER_RADIUS));
+    } else {
+      // <path> symbols: scale up around the element's own center
+      const g = el as unknown as SVGGraphicsElement;
+      const bbox = g.getBBox();
+      const cx = bbox.x + bbox.width / 2;
+      const cy = bbox.y + bbox.height / 2;
+      const orig = el.getAttribute('transform') ?? '';
+      el.dataset.origTransform = orig;
+      // Append a scale-about-center to the existing transform
+      el.setAttribute('transform',
+        `${orig} translate(${cx},${cy}) scale(${HOVER_SCALE}) translate(${-cx},${-cy})`);
+    }
+  }
+
+  function deactivateDot(el: SVGElement) {
+    if (el instanceof SVGCircleElement) {
+      const orig = el.dataset.origR;
+      if (orig != null) {
+        el.setAttribute('r', orig);
+        delete el.dataset.origR;
+      }
+    } else {
+      const orig = el.dataset.origTransform;
+      if (orig != null) {
+        el.setAttribute('transform', orig);
+        delete el.dataset.origTransform;
+      }
+    }
+  }
 
   function bindProximity(
     container: HTMLElement,
@@ -119,15 +154,14 @@ export function createPlotTooltip(): PlotTooltipHandle {
       const idx = (el as unknown as { __data__?: number }).__data__;
       if (typeof idx !== 'number' || idx < 0 || idx >= data.length) continue;
 
-      let cx: number, cy: number;
-      if (el instanceof SVGCircleElement) {
-        cx = el.cx.baseVal.value;
-        cy = el.cy.baseVal.value;
-      } else {
-        const bbox = (el as unknown as SVGGraphicsElement).getBBox();
-        cx = bbox.x + bbox.width / 2;
-        cy = bbox.y + bbox.height / 2;
-      }
+      const ctm = (el as unknown as SVGGraphicsElement).getCTM();
+      if (!ctm) continue;
+      const bbox = (el as unknown as SVGGraphicsElement).getBBox();
+      const localCx = bbox.x + bbox.width / 2;
+      const localCy = bbox.y + bbox.height / 2;
+      // Transform from element-local coords to SVG viewport coords
+      const cx = ctm.a * localCx + ctm.c * localCy + ctm.e;
+      const cy = ctm.b * localCx + ctm.d * localCy + ctm.f;
       dots.push({ cx, cy, idx, el });
     }
 
@@ -143,7 +177,7 @@ export function createPlotTooltip(): PlotTooltipHandle {
 
     function deactivate() {
       if (activeDot) {
-        activeDot.el.classList.remove(ACTIVE_CLASS);
+        deactivateDot(activeDot.el);
         activeDot = null;
       }
     }
@@ -172,7 +206,7 @@ export function createPlotTooltip(): PlotTooltipHandle {
         if (activeDot !== bestDot) {
           deactivate();
           activeDot = bestDot;
-          activeDot.el.classList.add(ACTIVE_CLASS);
+          activateDot(activeDot.el);
         }
         showRow(data[bestDot.idx], fields, e.clientX, e.clientY);
       } else {
