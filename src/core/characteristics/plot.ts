@@ -253,8 +253,9 @@ export function renderPlot(
     }));
   }
 
-  // Confidence interval marks (vertical links)
+  // Confidence interval marks (vertical links with horizontal caps)
   if (showCI && ci) {
+    const capHalf = 4; // half-width of cap in pixels
     marks.push(Plot.link(data, {
       x1: 'quantile_bin',
       x2: 'quantile_bin',
@@ -263,6 +264,35 @@ export function renderPlot(
       fx: fxField ?? undefined,
       stroke: strokeFn as never ?? '#333',
       strokeWidth: 1,
+      render: (index, scales, values, dimensions, context, next) => {
+        const g = next!(index, scales, values, dimensions, context);
+        if (g) {
+          // link renders <path> elements with "M x1,y1 L x2,y2" or similar
+          const paths = g.querySelectorAll('path');
+          for (const el of paths) {
+            const d = el.getAttribute('d');
+            if (!d) continue;
+            // Parse "M x1,y1L x2,y2" or "M x1,y1 L x2,y2"
+            const match = d.match(/M\s*([\d.e+-]+)[,\s]([\d.e+-]+)\s*L\s*([\d.e+-]+)[,\s]([\d.e+-]+)/i);
+            if (!match) continue;
+            const x1 = +match[1], y1 = +match[2];
+            const x2 = +match[3], y2 = +match[4];
+            const stroke = el.getAttribute('stroke') || '#333';
+            const cx = (x1 + x2) / 2;
+            for (const y of [y1, y2]) {
+              const cap = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+              cap.setAttribute('x1', String(cx - capHalf));
+              cap.setAttribute('x2', String(cx + capHalf));
+              cap.setAttribute('y1', String(y));
+              cap.setAttribute('y2', String(y));
+              cap.setAttribute('stroke', stroke);
+              cap.setAttribute('stroke-width', '1');
+              g.appendChild(cap);
+            }
+          }
+        }
+        return g;
+      },
     }));
   }
 
