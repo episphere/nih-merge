@@ -112,6 +112,16 @@ export function initMapTooltip(
   function bindCard(container: HTMLElement, cardIndex: number, features: { id: string }[]) {
     const firstGroup = container.querySelector<SVGGElement>("g[aria-label='geo']");
     if (!firstGroup) return;
+    const svg = firstGroup.closest('svg');
+    if (!svg) return;
+
+    // Create a highlight group appended at the end of the SVG so it paints on top of all layers
+    const highlightGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    highlightGroup.setAttribute('aria-label', 'hover-highlight');
+    highlightGroup.style.pointerEvents = 'none';
+    svg.appendChild(highlightGroup);
+
+    let highlightClone: SVGPathElement | null = null;
 
     const paths = firstGroup.querySelectorAll<SVGPathElement>('path');
 
@@ -147,11 +157,22 @@ export function initMapTooltip(
           redDot.style.display = 'none';
         }
 
-        d3.select(path).raise();
+        // Clone the hovered path into the top-level highlight group
+        if (highlightClone) highlightClone.remove();
+        highlightClone = path.cloneNode(false) as SVGPathElement;
+        highlightClone.setAttribute('fill', 'none');
+        highlightClone.setAttribute('stroke', '#1b1b1b');
+        highlightClone.setAttribute('stroke-width', '2');
+        highlightGroup.appendChild(highlightClone);
+
         tooltip.show(e.clientX, e.clientY);
       });
 
       path.addEventListener('mouseleave', () => {
+        if (highlightClone) {
+          highlightClone.remove();
+          highlightClone = null;
+        }
         tooltip.hide();
       });
     }
