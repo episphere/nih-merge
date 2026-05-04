@@ -45,7 +45,7 @@ const URL_KEYS: (keyof typeof CHARACTERISTICS_DEFAULTS & string)[] = [
   'compareColor', 'compareFacet', 'measure',
   'showCI', 'showLines', 'startZero',
 ];
-syncStoreToURL($state, update, URL_KEYS);
+syncStoreToURL($state, update, URL_KEYS, CHARACTERISTICS_DEFAULTS);
 
 // 5. Render loop with query-key separation
 const QUERY_KEYS: (keyof CharacteristicsState)[] = [

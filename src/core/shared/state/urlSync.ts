@@ -13,6 +13,7 @@ export function syncStoreToURL<T extends object>(
   $state: MapStore<T>,
   update: (change: Partial<T>) => void,
   urlKeys: (keyof T & string)[],
+  defaults: Partial<T> = {},
 ): void {
   // Read URL → update store
   const params = new URLSearchParams(window.location.search);
@@ -34,10 +35,14 @@ export function syncStoreToURL<T extends object>(
     debounceTimer = setTimeout(() => {
       const params = new URLSearchParams();
       for (const key of urlKeys) {
-        const value = state[key];
-        params.set(key, serializeValue(value));
+        const serialized = serializeValue(state[key]);
+        const defaultSerialized = key in defaults ? serializeValue(defaults[key]) : undefined;
+        if (serialized !== defaultSerialized) {
+          params.set(key, serialized);
+        }
       }
-      history.replaceState(null, '', '?' + params.toString());
+      const qs = params.toString();
+      history.replaceState(null, '', qs ? '?' + qs : window.location.pathname);
     }, 100);
   });
 }

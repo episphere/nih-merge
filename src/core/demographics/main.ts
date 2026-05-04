@@ -40,7 +40,7 @@ const URL_KEYS: (keyof typeof DEMOGRAPHICS_DEFAULTS & string)[] = [
   'year', 'cause', 'race', 'sex', 'ageGroup',
   'stateFips', 'measure', 'compareBar', 'compareFacet', 'showCI',
 ];
-syncStoreToURL($state, update, URL_KEYS);
+syncStoreToURL($state, update, URL_KEYS, DEMOGRAPHICS_DEFAULTS);
 
 // 5. Render loop with query-key separation
 // Only these keys require a data re-fetch; all others are display-only.
