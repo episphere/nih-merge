@@ -4,7 +4,7 @@ import type { CharacteristicsState, CharacteristicsMeasure, ComparisonField } fr
 import type { EnrichedQuantileRow } from './query';
 import type { Race, Sex } from '../../data/types';
 import {
-  CHARACTERISTICS_MEASURE_STYLE, COMPARISON_FIELD_LABEL,
+  CHARACTERISTICS_MEASURE_STYLE, COMPARISON_FIELD_LABEL, QUANTILE_NAME,
   RACE_STYLE, SEX_STYLE, PALETTE,
 } from '../shared/visual';
 import type { QuantileDetail } from './quantileDetails';
@@ -21,7 +21,7 @@ export function generateTitle(state: CharacteristicsState, detail: QuantileDetai
     .map(c => (COMPARISON_FIELD_LABEL[c] ?? c).toLowerCase());
 
   let title = `US ${measure.toLowerCase()}`;
-  title += ` by ${state.quantileNumber === '4' ? 'quartile' : state.quantileNumber === '3' ? 'tertile' : `${state.quantileNumber}-quantile`}`;
+  title += ` by ${QUANTILE_NAME[state.quantileNumber] ?? `${state.quantileNumber}-quantile`}`;
   title += ` of county-level ${fieldLabel.toLowerCase()}`;
 
   if (comparisons.length > 0) {

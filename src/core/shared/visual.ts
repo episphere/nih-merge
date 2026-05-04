@@ -155,6 +155,13 @@ export const CHARACTERISTICS_MEASURE_STYLE: Record<CharacteristicsMeasure, Measu
 
 // --- Comparison field ---
 
+export const QUANTILE_NAME: Record<string, string> = {
+  '3': 'tertile',
+  '4': 'quartile',
+  '5': 'quintile',
+  '10': 'decile',
+};
+
 export const COMPARISON_FIELD_LABEL: Record<string, string> = {
   race: 'Race/Ethnicity',
   sex: 'Sex',
