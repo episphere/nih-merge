@@ -290,7 +290,7 @@ html {
     border-radius: units(0.5);
     width: 98vw;
     max-width: none;
-    height: 95vh;
+    max-height: 95vh;
     display: flex;
     flex-direction: column;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
