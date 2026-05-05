@@ -166,8 +166,8 @@ function initSettingsButton(
   cutoffInput.type = 'range';
   cutoffInput.className = 'usa-range';
   cutoffInput.id = 'settings-cutoff';
-  cutoffInput.min = '1';
-  cutoffInput.max = '5';
+  cutoffInput.min = '0';
+  cutoffInput.max = '10';
   cutoffInput.step = '0.5';
   cutoffGroup.appendChild(cutoffLabel);
   cutoffGroup.appendChild(cutoffInput);
@@ -208,7 +208,7 @@ function initSettingsButton(
     center.input.checked = state.colorCenterMean;
     exclude.input.checked = state.colorExcludeExtremes;
     cutoffInput.value = String(state.colorExtremeCutoff);
-    cutoffValue.textContent = `±${state.colorExtremeCutoff}σ`;
+    cutoffValue.textContent = `${state.colorExtremeCutoff}% per tail`;
     cutoffGroup.style.display = state.colorExcludeExtremes ? '' : 'none';
     countyOutline.input.checked = state.showOutlineCounty;
     stateOutline.input.checked = state.showOutlineState;

@@ -88,7 +88,7 @@ export const MAPS_DEFAULTS: MapsState = {
   colorReverse: true,
   colorCenterMean: true,
   colorExcludeExtremes: true,
-  colorExtremeCutoff: 3,
+  colorExtremeCutoff: 2,
   showOutlineCounty: false,
   showOutlineState: true,
   showOutlineNation: true,

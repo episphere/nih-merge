@@ -182,21 +182,8 @@ export function computeColorConfig(
     return null;
   }
 
-  let filteredValues = allValues;
-
-  // Initial clip using MAD to remove extreme outliers before computing stats
-  if (state.colorExcludeExtremes) {
-    const median = d3.median(filteredValues)!;
-    const deviations = filteredValues.map((d) => Math.abs(d - median));
-    const MAD = 1.4826 * d3.median(deviations)!;
-    const initialClipDomain = [median - 5 * MAD, median + 5 * MAD];
-    filteredValues = filteredValues.filter(
-      (d) => d > initialClipDomain[0] && d < initialClipDomain[1],
-    );
-  }
-
-  const mean = d3.mean(filteredValues)!;
-  const extent = d3.extent(filteredValues) as [number, number];
+  const mean = d3.mean(allValues)!;
+  const extent = d3.extent(allValues) as [number, number];
 
   let domain: [number, number] = extent;
   let pivot: number | null = null;
@@ -205,15 +192,17 @@ export function computeColorConfig(
     pivot = mean;
   }
 
-  if (state.colorExcludeExtremes && filteredValues.length > 1) {
-    const std = d3.deviation(filteredValues)!;
-    const clipDomain: [number, number] = [
-      mean - state.colorExtremeCutoff * std,
-      mean + state.colorExtremeCutoff * std,
-    ];
+  if (state.colorExcludeExtremes && allValues.length > 1) {
+    // Quantile-based clipping: cutoff is the percentage to clip from each
+    // tail.  This is robust to skewed / zero-inflated distributions where
+    // mean ± k·σ collapses.
+    const tailFraction = state.colorExtremeCutoff / 100;
+    const sorted = Float64Array.from(allValues).sort();
+    const lo = d3.quantile(sorted, tailFraction)!;
+    const hi = d3.quantile(sorted, 1 - tailFraction)!;
     domain = [
-      Math.max(extent[0], clipDomain[0]),
-      Math.min(extent[1], clipDomain[1]),
+      Math.max(extent[0], lo),
+      Math.min(extent[1], hi),
     ];
   }
 
