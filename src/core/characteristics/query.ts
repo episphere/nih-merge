@@ -13,6 +13,14 @@ export interface EnrichedQuantileRow extends QuantileRow {
   ageAdjustedRateRatioRefHigh: number;
   crudeRateRatioRefLow: number;
   crudeRateRatioRefHigh: number;
+  ageAdjustedRateRatioRefLowCiLower: number;
+  ageAdjustedRateRatioRefLowCiUpper: number;
+  ageAdjustedRateRatioRefHighCiLower: number;
+  ageAdjustedRateRatioRefHighCiUpper: number;
+  crudeRateRatioRefLowCiLower: number;
+  crudeRateRatioRefLowCiUpper: number;
+  crudeRateRatioRefHighCiLower: number;
+  crudeRateRatioRefHighCiUpper: number;
 }
 
 
@@ -64,6 +72,14 @@ function addConfidenceIntervals(row: QuantileRow): EnrichedQuantileRow {
   enriched.ageAdjustedRateRatioRefHigh = 0;
   enriched.crudeRateRatioRefLow = 0;
   enriched.crudeRateRatioRefHigh = 0;
+  enriched.ageAdjustedRateRatioRefLowCiLower = 0;
+  enriched.ageAdjustedRateRatioRefLowCiUpper = 0;
+  enriched.ageAdjustedRateRatioRefHighCiLower = 0;
+  enriched.ageAdjustedRateRatioRefHighCiUpper = 0;
+  enriched.crudeRateRatioRefLowCiLower = 0;
+  enriched.crudeRateRatioRefLowCiUpper = 0;
+  enriched.crudeRateRatioRefHighCiLower = 0;
+  enriched.crudeRateRatioRefHighCiUpper = 0;
   return enriched;
 }
 
@@ -88,6 +104,23 @@ function parseQuantileIndex(q: string | number): number {
   return typeof q === 'number' ? q : parseInt(q, 10);
 }
 
+/**
+ * Compute rate ratio CI using the delta method on the log scale.
+ * For RR = R1/R0: SE(ln(RR)) = sqrt(1/D1 + 1/D0)
+ * CI = exp(ln(RR) ± 1.96 * SE(ln(RR)))
+ */
+function ratioCI(rr: number, deathsNum: number, deathsRef: number): { lower: number; upper: number } {
+  if (rr <= 0 || deathsNum <= 0 || deathsRef <= 0) {
+    return { lower: 0, upper: 0 };
+  }
+  const seLnRR = Math.sqrt(1 / deathsNum + 1 / deathsRef);
+  const lnRR = Math.log(rr);
+  return {
+    lower: Math.round(Math.exp(lnRR - 1.96 * seLnRR) * 100) / 100,
+    upper: Math.round(Math.exp(lnRR + 1.96 * seLnRR) * 100) / 100,
+  };
+}
+
 export function addRateRatios(data: EnrichedQuantileRow[], state: CharacteristicsState): void {
   // Group by stratum
   const groups = new Map<string, EnrichedQuantileRow[]>();
@@ -104,16 +137,36 @@ export function addRateRatios(data: EnrichedQuantileRow[], state: Characteristic
   for (const group of groups.values()) {
     group.sort((a, b) => parseQuantileIndex(a.quantile_bin) - parseQuantileIndex(b.quantile_bin));
 
-    const lowestAA = group[0]?.ageAdjustedRate ?? 0;
-    const highestAA = group[group.length - 1]?.ageAdjustedRate ?? 0;
-    const lowestCrude = group[0]?.crudeRate ?? 0;
-    const highestCrude = group[group.length - 1]?.crudeRate ?? 0;
+    const lowest = group[0];
+    const highest = group[group.length - 1];
+    const lowestAA = lowest?.ageAdjustedRate ?? 0;
+    const highestAA = highest?.ageAdjustedRate ?? 0;
+    const lowestCrude = lowest?.crudeRate ?? 0;
+    const highestCrude = highest?.crudeRate ?? 0;
+    const lowestDeaths = lowest?.deaths ?? 0;
+    const highestDeaths = highest?.deaths ?? 0;
 
     for (const row of group) {
       row.ageAdjustedRateRatioRefLow = lowestAA > 0 ? Math.round((row.ageAdjustedRate / lowestAA) * 100) / 100 : 0;
       row.ageAdjustedRateRatioRefHigh = highestAA > 0 ? Math.round((row.ageAdjustedRate / highestAA) * 100) / 100 : 0;
       row.crudeRateRatioRefLow = lowestCrude > 0 ? Math.round((row.crudeRate / lowestCrude) * 100) / 100 : 0;
       row.crudeRateRatioRefHigh = highestCrude > 0 ? Math.round((row.crudeRate / highestCrude) * 100) / 100 : 0;
+
+      const aaRefLowCI = ratioCI(row.ageAdjustedRateRatioRefLow, row.deaths, lowestDeaths);
+      row.ageAdjustedRateRatioRefLowCiLower = aaRefLowCI.lower;
+      row.ageAdjustedRateRatioRefLowCiUpper = aaRefLowCI.upper;
+
+      const aaRefHighCI = ratioCI(row.ageAdjustedRateRatioRefHigh, row.deaths, highestDeaths);
+      row.ageAdjustedRateRatioRefHighCiLower = aaRefHighCI.lower;
+      row.ageAdjustedRateRatioRefHighCiUpper = aaRefHighCI.upper;
+
+      const crudeRefLowCI = ratioCI(row.crudeRateRatioRefLow, row.deaths, lowestDeaths);
+      row.crudeRateRatioRefLowCiLower = crudeRefLowCI.lower;
+      row.crudeRateRatioRefLowCiUpper = crudeRefLowCI.upper;
+
+      const crudeRefHighCI = ratioCI(row.crudeRateRatioRefHigh, row.deaths, highestDeaths);
+      row.crudeRateRatioRefHighCiLower = crudeRefHighCI.lower;
+      row.crudeRateRatioRefHighCiUpper = crudeRefHighCI.upper;
     }
   }
 }

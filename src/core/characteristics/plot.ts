@@ -60,16 +60,24 @@ function seriesKey(field: ComparisonField | 'none'): ((d: EnrichedQuantileRow) =
   return undefined;
 }
 
-/** CI field names for the active measure (only for rate measures, not ratios). */
+/** CI field names for the active measure. */
 function ciFields(measure: CharacteristicsMeasure): { lower: keyof EnrichedQuantileRow; upper: keyof EnrichedQuantileRow } | null {
-  if (measure === 'crudeRate') {
-    return { lower: 'crudeRateCiLower', upper: 'crudeRateCiUpper' };
+  switch (measure) {
+    case 'crudeRate':
+      return { lower: 'crudeRateCiLower', upper: 'crudeRateCiUpper' };
+    case 'ageAdjustedRate':
+      return { lower: 'ageAdjustedRateCiLower', upper: 'ageAdjustedRateCiUpper' };
+    case 'ageAdjustedRateRatioRefLow':
+      return { lower: 'ageAdjustedRateRatioRefLowCiLower', upper: 'ageAdjustedRateRatioRefLowCiUpper' };
+    case 'ageAdjustedRateRatioRefHigh':
+      return { lower: 'ageAdjustedRateRatioRefHighCiLower', upper: 'ageAdjustedRateRatioRefHighCiUpper' };
+    case 'crudeRateRatioRefLow':
+      return { lower: 'crudeRateRatioRefLowCiLower', upper: 'crudeRateRatioRefLowCiUpper' };
+    case 'crudeRateRatioRefHigh':
+      return { lower: 'crudeRateRatioRefHighCiLower', upper: 'crudeRateRatioRefHighCiUpper' };
+    default:
+      return null;
   }
-  if (measure === 'ageAdjustedRate') {
-    return { lower: 'ageAdjustedRateCiLower', upper: 'ageAdjustedRateCiUpper' };
-  }
-  // Rate ratios don't have CIs
-  return null;
 }
 
 // --- Layout ---
