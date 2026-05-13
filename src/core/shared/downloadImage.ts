@@ -19,6 +19,16 @@ export interface FigureOptions {
   filename: string;
 }
 
+export interface MapsFigureOptions {
+  title: string;
+  /** One entry per grid cell in row-major order. null = blank cell. */
+  maps: ({ svg: SVGSVGElement; title: string } | null)[];
+  nRows: number;
+  nCols: number;
+  legendSVGs: SVGSVGElement[];
+  filename: string;
+}
+
 // --- Constants ---
 
 const NS = 'http://www.w3.org/2000/svg';
@@ -229,6 +239,188 @@ export function downloadFigureSVG(options: FigureOptions): void {
     new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' }),
     `${options.filename}.svg`,
   );
+}
+
+// --- Maps grid figure ---
+
+const MAP_TITLE_FONT_SIZE = 12;
+const MAP_GAP = 16;
+
+/** Build a composite SVG for the maps grid layout. */
+function composeMapsFigureSVG(options: MapsFigureOptions): SVGSVGElement {
+  const { title, maps, nRows, nCols, legendSVGs } = options;
+
+  // Determine per-cell size from the first non-null map's bounding box
+  const firstMap = maps.find((m) => m !== null);
+  const firstBBox = firstMap?.svg.getBBox();
+  const cellW = firstBBox ? firstBBox.width + 10 : 300;
+  const cellH = firstBBox ? firstBBox.height + 10 : 200;
+  const contentWidth = nCols * cellW + (nCols - 1) * MAP_GAP;
+
+  let y = PADDING;
+
+  const root = document.createElementNS(NS, 'svg');
+  root.setAttribute('xmlns', NS);
+
+  // --- Title ---
+  const titleCenterX = PADDING + contentWidth / 2;
+  const titleGroup = document.createElementNS(NS, 'text');
+  titleGroup.setAttribute('font-size', String(TITLE_FONT_SIZE));
+  titleGroup.setAttribute('font-weight', 'bold');
+  titleGroup.setAttribute('font-family', FONT_FAMILY);
+  titleGroup.setAttribute('text-anchor', 'middle');
+  titleGroup.setAttribute('x', String(titleCenterX));
+  titleGroup.setAttribute('y', String(y + TITLE_FONT_SIZE));
+  titleGroup.textContent = title;
+  root.appendChild(titleGroup);
+  y += TITLE_FONT_SIZE + 16;
+
+  // --- Maps grid ---
+  let mapIndex = 0;
+  for (let row = 0; row < nRows; row++) {
+    for (let col = 0; col < nCols; col++) {
+      if (mapIndex >= maps.length) break;
+      const entry = maps[mapIndex];
+      mapIndex++;
+
+      // Blank cell — leave empty space
+      if (!entry) continue;
+
+      const { svg, title: cardTitle } = entry;
+
+      const x = PADDING + col * (cellW + MAP_GAP);
+      const cellY = y;
+
+      // Card title
+      if (cardTitle) {
+        const titleEl = document.createElementNS(NS, 'text');
+        titleEl.setAttribute('x', String(x + cellW / 2));
+        titleEl.setAttribute('y', String(cellY + MAP_TITLE_FONT_SIZE));
+        titleEl.setAttribute('font-size', String(MAP_TITLE_FONT_SIZE));
+        titleEl.setAttribute('font-family', FONT_FAMILY);
+        titleEl.setAttribute('text-anchor', 'middle');
+        titleEl.textContent = cardTitle;
+        root.appendChild(titleEl);
+      }
+
+      // Map SVG clone
+      const bbox = svg.getBBox();
+      const bboxPad = 5;
+      const clone = svg.cloneNode(true) as SVGSVGElement;
+      clone.setAttribute('viewBox',
+        `${bbox.x - bboxPad} ${bbox.y - bboxPad} ${bbox.width + bboxPad * 2} ${bbox.height + bboxPad * 2}`);
+      clone.setAttribute('x', String(x));
+      clone.setAttribute('y', String(cellY + MAP_TITLE_FONT_SIZE + 4));
+      clone.setAttribute('width', String(cellW));
+      clone.setAttribute('height', String(cellH));
+      inlineFonts(clone);
+      root.appendChild(clone);
+    }
+    y += MAP_TITLE_FONT_SIZE + 4 + cellH + MAP_GAP;
+  }
+
+  // --- Color legend ---
+  if (legendSVGs.length > 0) {
+    // Measure total legend width so we can center
+    let totalLegendWidth = 0;
+    const legendGap = 8;
+    const legendClones: SVGSVGElement[] = [];
+    for (const lsvg of legendSVGs) {
+      const clone = lsvg.cloneNode(true) as SVGSVGElement;
+      inlineFonts(clone);
+      legendClones.push(clone);
+      const w = parseFloat(lsvg.getAttribute('width') || '0') || lsvg.getBoundingClientRect().width || 200;
+      totalLegendWidth += w + legendGap;
+    }
+    totalLegendWidth -= legendGap; // remove trailing gap
+
+    let lx = PADDING + Math.max(0, (contentWidth - totalLegendWidth) / 2);
+    for (const clone of legendClones) {
+      const w = parseFloat(clone.getAttribute('width') || '200');
+      const h = parseFloat(clone.getAttribute('height') || '30');
+      clone.setAttribute('x', String(lx));
+      clone.setAttribute('y', String(y));
+      clone.setAttribute('width', String(w));
+      clone.setAttribute('height', String(h));
+      root.appendChild(clone);
+      lx += w + legendGap;
+    }
+
+    // Use the max height of legend SVGs to advance y
+    const maxLegendH = Math.max(
+      ...legendSVGs.map((s) => parseFloat(s.getAttribute('height') || '0') || s.getBoundingClientRect().height || 30),
+    );
+    y += maxLegendH + 16;
+  }
+
+  // --- Source text ---
+  const sourceEl = document.createElementNS(NS, 'text');
+  sourceEl.setAttribute('x', String(PADDING));
+  sourceEl.setAttribute('y', String(y + SOURCE_FONT_SIZE));
+  sourceEl.setAttribute('font-size', String(SOURCE_FONT_SIZE));
+  sourceEl.setAttribute('font-style', 'italic');
+  sourceEl.setAttribute('fill', '#666');
+  sourceEl.setAttribute('font-family', FONT_FAMILY);
+  sourceEl.textContent = SOURCE_TEXT;
+  root.appendChild(sourceEl);
+  y += SOURCE_FONT_SIZE + PADDING;
+
+  // --- Background ---
+  const totalWidth = contentWidth + PADDING * 2;
+  const totalHeight = y;
+  root.setAttribute('width', String(totalWidth));
+  root.setAttribute('height', String(totalHeight));
+  root.setAttribute('viewBox', `0 0 ${totalWidth} ${totalHeight}`);
+
+  const bg = document.createElementNS(NS, 'rect');
+  bg.setAttribute('width', '100%');
+  bg.setAttribute('height', '100%');
+  bg.setAttribute('fill', 'white');
+  root.insertBefore(bg, root.firstChild);
+
+  return root;
+}
+
+/** Download the maps figure as an SVG file. */
+export function downloadMapsFigureSVG(options: MapsFigureOptions): void {
+  const svg = composeMapsFigureSVG(options);
+  const svgString = new XMLSerializer().serializeToString(svg);
+  downloadBlob(
+    new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' }),
+    `${options.filename}.svg`,
+  );
+}
+
+/** Download the maps figure as a PNG file (2× resolution). */
+export function downloadMapsFigurePNG(options: MapsFigureOptions): void {
+  const svg = composeMapsFigureSVG(options);
+  const svgString = new XMLSerializer().serializeToString(svg);
+
+  const width = parseFloat(svg.getAttribute('width')!);
+  const height = parseFloat(svg.getAttribute('height')!);
+  const scale = 2;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width * scale;
+  canvas.height = height * scale;
+  const ctx = canvas.getContext('2d')!;
+  ctx.scale(scale, scale);
+
+  const img = new Image();
+  const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+  const url = URL.createObjectURL(svgBlob);
+
+  img.onload = () => {
+    ctx.drawImage(img, 0, 0, width, height);
+    URL.revokeObjectURL(url);
+
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      downloadBlob(blob, `${options.filename}.png`);
+    }, 'image/png');
+  };
+
+  img.src = url;
 }
 
 /** Download the current figure as a PNG file (2× resolution). */

@@ -129,10 +129,13 @@ function initTableButton(getTableInfo?: () => TableInfo): void {
 
   const overlay = createOverlay({ title: 'Data Table' });
   let activeTable: DataTable | null = null;
+  let lastTableKey = '';
 
   btn.addEventListener('click', async () => {
-    // If table is already loaded, just re-open the overlay
-    if (activeTable) {
+    const currentKey = getTableInfo ? JSON.stringify(getTableInfo()) : '';
+
+    // If table is already loaded with the same filters, just re-open
+    if (activeTable && currentKey === lastTableKey) {
       overlay.open();
       return;
     }
@@ -149,6 +152,7 @@ function initTableButton(getTableInfo?: () => TableInfo): void {
     if (getTableInfo) {
       const { url, filters } = getTableInfo();
       activeTable = await renderDataTableFromUrl(overlay.contentEl, url, buildTableFilters(filters));
+      lastTableKey = currentKey;
       overlay.hideLoading();
       overlay.sizeToFit();
     } else {

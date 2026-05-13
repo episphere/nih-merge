@@ -8,6 +8,7 @@ import { renderDataTableFromUrl, type DataTable } from '../shared/dataTable';
 import { buildTableFilters, type TableInfo } from '../shared/tableFilters';
 import { createCheckbox, createSelect } from '../shared/formElements';
 import { USAComboBox } from '../../lib/USAComboBox';
+import { downloadMapsFigurePNG, downloadMapsFigureSVG, type MapsFigureOptions } from '../shared/downloadImage';
 
 // --- Measure labels ---
 
@@ -51,7 +52,7 @@ export function initTopControls(
   initGridEditButton($state, update);
   initSettingsButton($state, update);
   initTableButton(getTableInfo);
-  initDownloadButton(getData);
+  initDownloadButton($state, getData);
 }
 
 // --- Grid edit button ---
@@ -173,6 +174,10 @@ function initSettingsButton(
   cutoffGroup.appendChild(cutoffInput);
   content.appendChild(cutoffGroup);
 
+  // Show zero values checkbox
+  const showZeros = createCheckbox('settings-show-zeros', 'Show Zero Values');
+  content.appendChild(showZeros.wrapper);
+
   // Outline section
   const outlineTitle = document.createElement('span');
   outlineTitle.className = 'usa-legend text-bold';
@@ -210,6 +215,7 @@ function initSettingsButton(
     cutoffInput.value = String(state.colorExtremeCutoff);
     cutoffValue.textContent = `${state.colorExtremeCutoff}% per tail`;
     cutoffGroup.style.display = state.colorExcludeExtremes ? '' : 'none';
+    showZeros.input.checked = state.showZeroValues;
     countyOutline.input.checked = state.showOutlineCounty;
     stateOutline.input.checked = state.showOutlineState;
     nationOutline.input.checked = state.showOutlineNation;
@@ -233,6 +239,9 @@ function initSettingsButton(
   exclude.input.addEventListener('change', () => {
     update({ colorExcludeExtremes: exclude.input.checked });
   });
+  showZeros.input.addEventListener('change', () => {
+    update({ showZeroValues: showZeros.input.checked });
+  });
   cutoffInput.addEventListener('input', () => {
     update({ colorExtremeCutoff: parseFloat(cutoffInput.value) });
   });
@@ -255,10 +264,13 @@ function initTableButton(getTableInfo?: () => TableInfo): void {
 
   const overlay = createOverlay({ title: 'Data Table' });
   let activeTable: DataTable | null = null;
+  let lastTableKey = '';
 
   btn.addEventListener('click', async () => {
-    // If table is already loaded, just re-open the overlay
-    if (activeTable) {
+    const currentKey = getTableInfo ? JSON.stringify(getTableInfo()) : '';
+
+    // If table is already loaded with the same filters, just re-open
+    if (activeTable && currentKey === lastTableKey) {
       overlay.open();
       return;
     }
@@ -270,6 +282,7 @@ function initTableButton(getTableInfo?: () => TableInfo): void {
     if (getTableInfo) {
       const { url, filters } = getTableInfo();
       activeTable = await renderDataTableFromUrl(overlay.contentEl, url, buildTableFilters(filters));
+      lastTableKey = currentKey;
       overlay.hideLoading();
       overlay.sizeToFit();
     } else {
@@ -281,7 +294,60 @@ function initTableButton(getTableInfo?: () => TableInfo): void {
 
 // --- Download button ---
 
+/** Gather map SVGs and metadata from the DOM for image export. */
+function getMapsFigureOptions($state: MapStore<MapsState>): MapsFigureOptions | null {
+  const titleEl = document.getElementById('title');
+  if (!titleEl) return null;
+
+  const title = titleEl.textContent ?? '';
+  const state = $state.get();
+
+  // Collect all grid cells in row-major order (null for blank cards)
+  const maps: ({ svg: SVGSVGElement; title: string } | null)[] = [];
+  const mapGrid = document.getElementById('map-grid');
+  if (!mapGrid) return null;
+
+  let hasAnyMap = false;
+  for (const card of state.cards) {
+    if (card.blank || !card.state) {
+      maps.push(null);
+      continue;
+    }
+    const cardIdx = state.cards.indexOf(card);
+    const cardEl = mapGrid.querySelector(`[data-card-index="${cardIdx}"]`);
+    const svg = cardEl?.querySelector('.map-card__body svg') as SVGSVGElement | null;
+    const titleSpan = cardEl?.querySelector('.map-card__title') as HTMLElement | null;
+    if (svg) {
+      maps.push({ svg, title: titleSpan?.textContent ?? '' });
+      hasAnyMap = true;
+    } else {
+      maps.push(null);
+    }
+  }
+
+  if (!hasAnyMap) return null;
+
+  // Collect legend SVGs
+  const legendEl = document.getElementById('color-legend');
+  const legendSVGs: SVGSVGElement[] = [];
+  if (legendEl) {
+    for (const svg of legendEl.querySelectorAll('svg')) {
+      legendSVGs.push(svg as SVGSVGElement);
+    }
+  }
+
+  return {
+    title,
+    maps,
+    nRows: state.nRows,
+    nCols: state.nCols,
+    legendSVGs,
+    filename: 'epitracker-maps',
+  };
+}
+
 function initDownloadButton(
+  $state: MapStore<MapsState>,
   getData: () => Record<string, unknown>[],
 ): void {
   const btn = document.getElementById('btn-download');
@@ -291,6 +357,21 @@ function initDownloadButton(
     { label: 'Data (.csv)', onClick: () => downloadCSV(getData(), 'epitracker-maps.csv') },
     { label: 'Data (.tsv)', onClick: () => downloadTSV(getData(), 'epitracker-maps.tsv') },
     { label: 'Data (.json)', onClick: () => downloadJSON(getData(), 'epitracker-maps.json') },
+    'separator',
+    {
+      label: 'Image (.png)',
+      onClick: () => {
+        const opts = getMapsFigureOptions($state);
+        if (opts) downloadMapsFigurePNG(opts);
+      },
+    },
+    {
+      label: 'Image (.svg)',
+      onClick: () => {
+        const opts = getMapsFigureOptions($state);
+        if (opts) downloadMapsFigureSVG(opts);
+      },
+    },
   ]);
 }
 
