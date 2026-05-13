@@ -75,8 +75,7 @@ Promise.all([
   setQuantileFieldGroups(buildFieldGroupMap(index));
   setQuantileFieldNames(buildFieldNameMap(index));
   // Re-emit so the combo box rebuilds with <optgroup> structure
-  update({});
-  render();
+  $state.notify();
 });
 
 $state.subscribe(async (state) => {
@@ -98,9 +97,10 @@ $state.subscribe(async (state) => {
 
     // Update filter options from the actual query results
     const filterOptions = deriveFilterOptions(state, data);
+    const currentState = $state.get();
     if (
-      !arraysEqual(state.compareColorFilterOptions, filterOptions.compareColorFilterOptions) ||
-      !arraysEqual(state.compareFacetFilterOptions, filterOptions.compareFacetFilterOptions)
+      !arraysEqual(currentState.compareColorFilterOptions, filterOptions.compareColorFilterOptions) ||
+      !arraysEqual(currentState.compareFacetFilterOptions, filterOptions.compareFacetFilterOptions)
     ) {
       update(filterOptions);
       return; // update() will re-trigger this subscribe; render on the next pass
@@ -124,8 +124,11 @@ function render(): void {
   const detail = currentDetail();
   renderPlot(state, filtered, detail);
 
-  // Bind tooltip to dot marks
+  // Restore visibility after render (clearPlot hides it during resize debounce)
   const plotEl = document.getElementById('plot')!;
+  plotEl.style.visibility = '';
+
+  // Bind tooltip to dot marks
   const fields: PlotTooltipField[] = [];
 
   // Show comparison fields first
@@ -174,7 +177,7 @@ function render(): void {
 // 6. Re-render on resize
 const plotEl = document.getElementById('plot');
 function clearPlot(): void {
-  if (plotEl) plotEl.replaceChildren();
+  if (plotEl) plotEl.style.visibility = 'hidden';
 }
 
 if (plotEl) {

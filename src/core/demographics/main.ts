@@ -93,8 +93,11 @@ function render(): void {
   const filtered = applyPlotFilters(state, lastData);
   renderPlot(state, filtered);
 
-  // Bind tooltip to bar marks
+  // Restore visibility after render (clearPlot hides it during resize debounce)
   const plotEl = document.getElementById('plot')!;
+  plotEl.style.visibility = '';
+
+  // Bind tooltip to bar marks
   const fields: PlotTooltipField[] = [];
 
   // Show comparison fields first
@@ -131,7 +134,7 @@ function render(): void {
 //    so the ResizeObserver catches both horizontal and vertical changes.
 const plotEl = document.getElementById('plot');
 function clearPlot(): void {
-  if (plotEl) plotEl.replaceChildren();
+  if (plotEl) plotEl.style.visibility = 'hidden';
 }
 
 if (plotEl) {

@@ -17,7 +17,8 @@ export function onResize(
 
   const observer = new ResizeObserver(() => {
     const rect = element.getBoundingClientRect();
-    if (rect.width === prevWidth && rect.height === prevHeight) return;
+    // Use a 1px tolerance so sub-pixel changes from our own render don't re-trigger
+    if (Math.abs(rect.width - prevWidth) < 1 && Math.abs(rect.height - prevHeight) < 1) return;
     prevWidth = rect.width;
     prevHeight = rect.height;
 
@@ -28,6 +29,10 @@ export function onResize(
     timer = setTimeout(() => {
       timer = null;
       callback();
+      // Snapshot dimensions after render so the observer ignores our own changes
+      const postRect = element.getBoundingClientRect();
+      prevWidth = postRect.width;
+      prevHeight = postRect.height;
     }, debounceMs);
   });
 
