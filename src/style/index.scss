@@ -276,7 +276,7 @@ html {
   display: none;
   position: fixed;
   inset: 0;
-  z-index: 2000;
+  z-index: 900;
   background: rgba(0, 0, 0, 0.5);
   align-items: center;
   justify-content: center;
@@ -290,7 +290,7 @@ html {
     border-radius: units(0.5);
     width: 98vw;
     max-width: none;
-    max-height: 95vh;
+    height: 95vh;
     display: flex;
     flex-direction: column;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
@@ -355,7 +355,7 @@ html {
   &__body {
     flex: 1;
     min-height: 0;
-    overflow: auto;
+    overflow: hidden;
     padding: units(2) units(3);
   }
 
