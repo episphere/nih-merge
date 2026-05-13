@@ -173,6 +173,7 @@ export function computeColorConfig(
     for (const row of data) {
       const val = row[state.measure] as number | null | undefined;
       if (val != null && Number.isFinite(val)) {
+        if (!state.showZeroValues && val === 0) continue;
         allValues.push(val);
       }
     }

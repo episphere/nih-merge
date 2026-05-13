@@ -47,12 +47,12 @@ export function syncStoreToURL<T extends object>(
   });
 }
 
-function serializeValue(value: unknown): string {
+export function serializeValue(value: unknown): string {
   if (typeof value === 'boolean') return value ? '1' : '0';
   return String(value);
 }
 
-function deserializeValue(raw: string): unknown {
+export function deserializeValue(raw: string): unknown {
   if (raw === '1') return true;
   if (raw === '0') return false;
   return raw;

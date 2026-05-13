@@ -38,6 +38,7 @@ export interface MapsState {
   colorCenterMean: boolean;
   colorExcludeExtremes: boolean;
   colorExtremeCutoff: number;
+  showZeroValues: boolean;
   showOutlineCounty: boolean;
   showOutlineState: boolean;
   showOutlineNation: boolean;
@@ -62,7 +63,7 @@ export interface MapsState {
 
 // --- Defaults ---
 
-const DEFAULT_CARD: CardState = {
+export const DEFAULT_CARD: CardState = {
   year: '2022',
   cause: 'All',
   sex: 'All',
@@ -74,14 +75,13 @@ const DEFAULT_CARD: CardState = {
 function makeDefaultCards(): Card[] {
   return [
     { x: 1, y: 1, blank: false, state: { ...DEFAULT_CARD } },
-    { x: 2, y: 1, blank: true, state: null },
   ];
 }
 
 export const MAPS_DEFAULTS: MapsState = {
   cards: makeDefaultCards(),
   nRows: 1,
-  nCols: 2,
+  nCols: 1,
 
   measure: 'ageAdjustedRate',
   colorScheme: 'RdYlBu',
@@ -89,6 +89,7 @@ export const MAPS_DEFAULTS: MapsState = {
   colorCenterMean: true,
   colorExcludeExtremes: true,
   colorExtremeCutoff: 2,
+  showZeroValues: true,
   showOutlineCounty: false,
   showOutlineState: true,
   showOutlineNation: true,

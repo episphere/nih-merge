@@ -13,6 +13,7 @@ import { Gridette } from './grid';
 import { initMapTooltip, type MapTooltipHandle } from './mapTooltip';
 import { parquetUrl, countyFile } from '../../data/dataManager';
 import type { TableInfo, TableFilterSpec } from '../shared/tableFilters';
+import { syncMapsToURL } from './urlSync';
 
 // 1. Layout
 initLayout();
@@ -22,6 +23,9 @@ const { $state, update } = createDashboardStore(MAPS_DEFAULTS, resolveMaps);
 
 // 3. Controls
 initControls($state, update);
+
+// URL state sync (must come after store creation, before render subscriptions)
+syncMapsToURL($state, update);
 
 // Collect all card data for table/download export
 let allCardData: Record<string, unknown>[] = [];
@@ -203,7 +207,10 @@ $state.subscribe(async (state) => {
     for (const rows of cardDataMap.values()) {
       for (const row of rows) {
         const v = row[state.measure];
-        if (typeof v === 'number' && !Number.isNaN(v)) allValues.push(v);
+        if (typeof v === 'number' && !Number.isNaN(v)) {
+          if (!state.showZeroValues && v === 0) continue;
+          allValues.push(v);
+        }
       }
     }
     mapTooltipHandle.updateHistogram(allValues, colorConfig);

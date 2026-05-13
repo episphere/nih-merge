@@ -18,6 +18,7 @@ interface ChoroplethOptions {
   height: number;
   color: ColorConfig;
   strokeColor: string | null;
+  showZeroValues: boolean;
 }
 
 // --- Choropleth plot ---
@@ -66,6 +67,7 @@ function createChoroplethPlot(
         const row = spatialDataMap.get(d.id);
         if (row && row[measureField] != null) {
           const val = row[measureField] as number;
+          if (!options.showZeroValues && val === 0) return 'white';
           if (val >= color.domain[0] && val <= color.domain[1]) {
             return colorScale(val);
           }
@@ -220,6 +222,7 @@ export function renderMapCard(
     height: bbox.height - 30,
     color: colorConfig,
     strokeColor: globalState.showOutlineCounty ? 'lightgrey' : null,
+    showZeroValues: globalState.showZeroValues,
   });
 
   container.replaceChildren(plot);
