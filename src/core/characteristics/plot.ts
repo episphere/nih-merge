@@ -18,11 +18,11 @@ export function generateTitle(state: CharacteristicsState, detail: QuantileDetai
 
   const comparisons = [state.compareColor, state.compareFacet]
     .filter(c => c !== 'none')
-    .map(c => (COMPARISON_FIELD_LABEL[c] ?? c).toLowerCase());
+    .map(c => (COMPARISON_FIELD_LABEL[c] ?? c));
 
-  let title = `US ${measure.toLowerCase()}`;
+  let title = `US ${measure}`;
   title += ` by ${QUANTILE_NAME[state.quantileNumber] ?? `${state.quantileNumber}-quantile`}`;
-  title += ` of county-level ${fieldLabel.toLowerCase()}`;
+  title += ` of county-level ${fieldLabel}`;
 
   if (comparisons.length > 0) {
     title += ', by ' + comparisons.join(' and ');
