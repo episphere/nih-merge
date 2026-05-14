@@ -26,6 +26,7 @@ export interface DemographicsState {
 
   // Display
   showCI: boolean;
+  showSuppressed: boolean;
 
   // Plot filters — restrict which values appear on the bar/facet axes
   compareBarFilter: Set<string> | null;
@@ -65,6 +66,7 @@ export const DEMOGRAPHICS_DEFAULTS: DemographicsState = {
   compareBar: 'race',
   compareFacet: 'none',
   showCI: false,
+  showSuppressed: true,
 
   compareBarFilter: null,
   compareFacetFilter: null,

@@ -132,24 +132,24 @@ export const CHARACTERISTICS_MEASURE_STYLE: Record<CharacteristicsMeasure, Measu
     plotLabel: 'Crude Mortality (per 100,000)',
   },
   ageAdjustedRateRatioRefLow: {
-    label: 'AA Rate Ratio (ref: lowest quantile)',
-    labelShort: 'AA RR (ref low)',
-    plotLabel: 'Age-Adjusted Rate Ratio (ref: lowest quantile)',
+    label: 'AA Rate Ratio (to lowest quantile)',
+    labelShort: 'AA RR (to low q)',
+    plotLabel: 'Age-Adjusted Rate Ratio (tolowest quantile)',
   },
   ageAdjustedRateRatioRefHigh: {
-    label: 'AA Rate Ratio (ref: highest quantile)',
-    labelShort: 'AA RR (ref high)',
-    plotLabel: 'Age-Adjusted Rate Ratio (ref: highest quantile)',
+    label: 'AA Rate Ratio (to highest quantile)',
+    labelShort: 'AA RR (to high q)',
+    plotLabel: 'Age-Adjusted Rate Ratio (to highest quantile)',
   },
   crudeRateRatioRefLow: {
-    label: 'Crude Rate Ratio (ref: lowest quantile)',
-    labelShort: 'Crude RR (ref low)',
-    plotLabel: 'Crude Rate Ratio (ref: lowest quantile)',
+    label: 'Crude Rate Ratio (to lowest quantile)',
+    labelShort: 'Crude RR (to lowest q)',
+    plotLabel: 'Crude Rate Ratio (to lowest quantile)',
   },
   crudeRateRatioRefHigh: {
-    label: 'Crude Rate Ratio (ref: highest quantile)',
-    labelShort: 'Crude RR (ref high)',
-    plotLabel: 'Crude Rate Ratio (ref: highest quantile)',
+    label: 'Crude Rate Ratio (to highest quantile)',
+    labelShort: 'Crude RR (to high q)',
+    plotLabel: 'Crude Rate Ratio (to highest quantile)',
   },
 };
 

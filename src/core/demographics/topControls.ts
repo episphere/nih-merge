@@ -96,17 +96,40 @@ function initSettingsButton(
   wrapper.appendChild(label);
   content.appendChild(wrapper);
 
+  // "Show suppressed categories" checkbox
+  const wrapper2 = document.createElement('div');
+  wrapper2.className = 'usa-checkbox';
+
+  const input2 = document.createElement('input');
+  input2.type = 'checkbox';
+  input2.className = 'usa-checkbox__input';
+  input2.id = 'checkbox-show-suppressed';
+
+  const label2 = document.createElement('label');
+  label2.className = 'usa-checkbox__label';
+  label2.htmlFor = 'checkbox-show-suppressed';
+  label2.textContent = 'Show suppressed categories';
+
+  wrapper2.appendChild(input2);
+  wrapper2.appendChild(label2);
+  content.appendChild(wrapper2);
+
   const popup = createPopup(btn, content, { title: 'Graph Settings' });
 
   btn.addEventListener('click', () => popup.toggle());
 
-  // Sync checkbox to state
+  // Sync checkboxes to state
   $state.subscribe((state) => {
     input.checked = state.showCI;
+    input2.checked = state.showSuppressed;
   });
 
   input.addEventListener('change', () => {
     update({ showCI: input.checked });
+  });
+
+  input2.addEventListener('change', () => {
+    update({ showSuppressed: input2.checked });
   });
 }
 

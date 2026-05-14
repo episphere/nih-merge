@@ -3,6 +3,7 @@ import * as d3 from 'd3';
 import type { DemographicsState, ComparisonField, Measure } from './state';
 import { categoricalSort, type EnrichedAgeRow } from './query';
 import type { Race, Sex } from '../../data/types';
+import { ALL_RACES, ALL_AGE_GROUPS } from '../../data/types';
 import {
   MEASURE_STYLE, COMPARISON_FIELD_LABEL,
   RACE_STYLE, SEX_STYLE, PALETTE,
@@ -60,6 +61,20 @@ function ciFields(measure: Measure): { lower: keyof EnrichedAgeRow; upper: keyof
   return { lower: 'ageAdjustedRateCiLower', upper: 'ageAdjustedRateCiUpper' };
 }
 
+/** Return the full set of categories for a comparison field (excluding 'All'). */
+function fullDomain(field: ComparisonField, state: DemographicsState): string[] {
+  switch (field) {
+    case 'race':
+      return [...ALL_RACES];
+    case 'sex':
+      return state.sexOptions.filter(s => s !== 'All') as string[];
+    case 'ageGroup':
+      return [...ALL_AGE_GROUPS];
+    case 'cause':
+      return state.causeOptions.filter(c => c !== 'All') as string[];
+  }
+}
+
 // --- Layout sizing ---
 
 const MIN_HEIGHT = 450;
@@ -98,18 +113,35 @@ export function renderPlot(state: DemographicsState, data: EnrichedAgeRow[]): vo
     return;
   }
 
-  const { compareBar, compareFacet, measure, showCI } = state;
+  const { compareBar, compareFacet, measure, showCI, showSuppressed } = state;
   const yField = measure;
   const xField = compareBar !== 'none' ? compareBar : null;
   const fxField = compareFacet !== 'none' ? compareFacet : null;
 
-  // Domains
-  const xDomain = xField
+  // Data-derived domains
+  const dataDomainX = xField
     ? [...new Set(data.map(d => d[xField] as string))].sort(categoricalSort(xField))
     : ['All'];
-  const fxDomain = fxField
+  const dataDomainFx = fxField
     ? [...new Set(data.map(d => d[fxField] as string))].sort(categoricalSort(fxField))
     : null;
+
+  // Full domains (when showSuppressed, use full category set, respecting active filters)
+  let xDomain = dataDomainX;
+  let fxDomain = dataDomainFx;
+
+  if (showSuppressed && xField) {
+    const full = fullDomain(xField, state).sort(categoricalSort(xField));
+    xDomain = state.compareBarFilter
+      ? full.filter(v => state.compareBarFilter!.has(v))
+      : full;
+  }
+  if (showSuppressed && fxField) {
+    const full = fullDomain(fxField, state).sort(categoricalSort(fxField));
+    fxDomain = state.compareFacetFilter
+      ? full.filter(v => state.compareFacetFilter!.has(v))
+      : full;
+  }
 
   // Tick labels for measuring
   const xTickFmt = tickFormat(compareBar);
@@ -151,7 +183,8 @@ export function renderPlot(state: DemographicsState, data: EnrichedAgeRow[]): vo
   const yMax = showCI
     ? d3.max(data, d => d[ci.upper] as number)
     : d3.max(data, d => d[yField] as number);
-  const yDomain: [number, number] = [0, yMax ?? 0];
+  const allZero = !yMax;
+  const yDomain: [number, number] = allZero ? [0, 1] : [0, yMax];
 
   // Marks
   const marks: Plot.Markish[] = [];
@@ -196,6 +229,62 @@ export function renderPlot(state: DemographicsState, data: EnrichedAgeRow[]): vo
     }));
   }
 
+  // Suppressed category labels
+  if (showSuppressed && xField) {
+    const dataXByFx = new Map<string, Set<string>>();
+    for (const d of data) {
+      const fxVal = fxField ? (d[fxField] as string) : '__all__';
+      if (!dataXByFx.has(fxVal)) dataXByFx.set(fxVal, new Set());
+      dataXByFx.get(fxVal)!.add(d[xField] as string);
+    }
+
+    const suppressedData: { x: string; fx?: string }[] = [];
+    const fxValues = fxDomain ?? ['__all__'];
+    for (const fxVal of fxValues) {
+      const presentX = dataXByFx.get(fxVal) ?? new Set();
+      for (const xVal of xDomain) {
+        if (!presentX.has(xVal)) {
+          suppressedData.push(fxField ? { x: xVal, fx: fxVal } : { x: xVal });
+        }
+      }
+    }
+
+    if (suppressedData.length > 0) {
+      marks.push(Plot.text(suppressedData, {
+        x: 'x',
+        y: () => 0,
+        fx: fxField ? 'fx' : undefined,
+        text: () => 'Suppressed',
+        rotate: -90,
+        textAnchor: 'start',
+        dy: -10,
+        fill: '#888',
+        fontSize: 16,
+      }));
+    }
+  }
+
+  // "Zero" labels for data points with y=0 (visible only when all bars are zero)
+  if (allZero) {
+    const zeroData = xField
+      ? data.map(d => ({ x: d[xField] as string, fx: fxField ? d[fxField] as string : undefined }))
+      : data.map(() => ({ x: 'All' as string, fx: undefined as string | undefined }));
+
+    if (zeroData.length > 0) {
+      marks.push(Plot.text(zeroData, {
+        x: 'x',
+        y: () => 0,
+        fx: fxField ? 'fx' : undefined,
+        text: () => 'Zero',
+        rotate: -90,
+        textAnchor: 'start',
+        dy: -10,
+        fill: '#888',
+        fontSize: 16,
+      }));
+    }
+  }
+
   // Render the SVG at the full container width (or plotWidth if wider, for scroll).
   // The centering margins push the chart area to the visual center.
   const svgWidth = Math.max(containerWidth, plotWidth);
@@ -213,10 +302,11 @@ export function renderPlot(state: DemographicsState, data: EnrichedAgeRow[]): vo
       domain: xDomain,
     },
     y: {
-      grid: true,
+      grid: !allZero,
       label: MEASURE_STYLE[measure].plotLabel,
       domain: yDomain,
-      nice: true,
+      nice: !allZero,
+      ticks: allZero ? [] : undefined,
       labelAnchor: 'center',
       labelArrow: 'none',
       labelOffset: 90,

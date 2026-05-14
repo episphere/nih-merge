@@ -38,7 +38,7 @@ initTopControls($state, update, () => lastData as unknown as Record<string, unkn
 // 4. URL sync
 const URL_KEYS: (keyof typeof DEMOGRAPHICS_DEFAULTS & string)[] = [
   'year', 'cause', 'race', 'sex', 'ageGroup',
-  'stateFips', 'measure', 'compareBar', 'compareFacet', 'showCI',
+  'stateFips', 'measure', 'compareBar', 'compareFacet', 'showCI', 'showSuppressed',
 ];
 syncStoreToURL($state, update, URL_KEYS, DEMOGRAPHICS_DEFAULTS);
 
