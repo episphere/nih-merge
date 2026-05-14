@@ -118,7 +118,7 @@ function plotFilterResetRule(
 
 export function resolveDemographics(state: DemographicsState, change: Partial<DemographicsState>): DemographicsState {
   const next = { ...state, ...change };
-  causeSexRule(next, state);
+  causeSexRule(next, state, change);
   comparisonMutualExclusionRule(next as never, state as never, 'compareBar', 'compareFacet');
   comparisonDisablesFilterRule(next as never, state as never, ['compareBar', 'compareFacet']);
   ageForcesCrudeRateRule(next);

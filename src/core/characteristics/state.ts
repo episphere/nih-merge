@@ -135,7 +135,7 @@ function plotFilterResetRule(
 
 export function resolveCharacteristics(state: CharacteristicsState, change: Partial<CharacteristicsState>): CharacteristicsState {
   const next = { ...state, ...change };
-  causeSexRule(next, state);
+  causeSexRule(next, state, change);
   comparisonMutualExclusionRule(next as never, state as never, 'compareColor', 'compareFacet');
   comparisonDisablesFilterRule(next as never, state as never, ['compareColor', 'compareFacet']);
   plotFilterResetRule(next, state);

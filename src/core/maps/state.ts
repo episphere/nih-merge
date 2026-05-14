@@ -165,7 +165,12 @@ export function resolveMaps(state: MapsState, change: Partial<MapsState>): MapsS
     sex: state.editSex,
     sexOptions: state.editSexOptions,
   };
-  causeSexRule(editProxy, prevEditProxy);
+  const editChange = {
+    cause: change.editCause,
+    sex: change.editSex,
+    sexOptions: change.editSexOptions,
+  } as Partial<typeof editProxy>;
+  causeSexRule(editProxy, prevEditProxy, editChange);
   next.editCause = editProxy.cause;
   next.editSex = editProxy.sex;
   next.editSexOptions = editProxy.sexOptions;

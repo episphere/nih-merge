@@ -20,7 +20,7 @@ interface ComparisonState {
  * Breast defaults sex to Female when first selected.
  * Applies to all dashboards.
  */
-export function causeSexRule(state: CauseSexState, prev: CauseSexState): void {
+export function causeSexRule(state: CauseSexState, prev: CauseSexState, change?: Partial<CauseSexState>): void {
   if (state.cause === 'Prostate') {
     state.sexOptions = ['Male'];
     state.sex = 'Male';
@@ -29,7 +29,7 @@ export function causeSexRule(state: CauseSexState, prev: CauseSexState): void {
     state.sex = 'Female';
   } else if (state.cause === 'Breast') {
     state.sexOptions = ['All', 'Male', 'Female'];
-    if (prev.cause !== 'Breast') {
+    if (prev.cause !== 'Breast' && !change?.sex) {
       state.sex = 'Female';
     }
   } else {
