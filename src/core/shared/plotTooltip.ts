@@ -16,6 +16,8 @@ export interface PlotTooltipField {
 export interface PlotTooltipOptions {
   /** When set, tooltip activates within this radius (px) of the nearest mark center. */
   proximity?: number;
+  /** Called when a dot is hovered (with the data row) or unhovered (with null). */
+  onHover?: (row: Record<string, unknown> | null) => void;
 }
 
 export interface PlotTooltipHandle {
@@ -72,7 +74,7 @@ export function createPlotTooltip(): PlotTooltipHandle {
     const elements = container.querySelectorAll<SVGElement>(markSelector);
 
     if (options?.proximity != null) {
-      bindProximity(container, elements, data, fields, options.proximity);
+      bindProximity(container, elements, data, fields, options.proximity, options?.onHover);
     } else {
       bindDirect(elements, data, fields);
     }
@@ -145,6 +147,7 @@ export function createPlotTooltip(): PlotTooltipHandle {
     data: Record<string, unknown>[],
     fields: PlotTooltipField[],
     proximity: number,
+    onHover?: (row: Record<string, unknown> | null) => void,
   ) {
     // Cache element centers, data indices, and DOM references
     interface DotInfo { cx: number; cy: number; idx: number; el: SVGElement }
@@ -179,6 +182,7 @@ export function createPlotTooltip(): PlotTooltipHandle {
       if (activeDot) {
         deactivateDot(activeDot.el);
         activeDot = null;
+        onHover?.(null);
       }
     }
 
@@ -207,6 +211,7 @@ export function createPlotTooltip(): PlotTooltipHandle {
           deactivate();
           activeDot = bestDot;
           activateDot(activeDot.el);
+          onHover?.(data[bestDot.idx]);
         }
         showRow(data[bestDot.idx], fields, e.clientX, e.clientY);
       } else {

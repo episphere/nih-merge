@@ -118,6 +118,59 @@ function currentDetail(): QuantileDetail | undefined {
 
 const plotTooltip = createPlotTooltip();
 
+const HIGHLIGHT_SELECTORS = [
+  "g[aria-label='dot'] :is(circle, path)",
+  "g[aria-label='line'] :is(line, path)",
+  "g[aria-label='link'] :is(line, path)",
+];
+
+function highlightSeries(container: HTMLElement, row: Record<string, unknown> | null): void {
+  if (!row) {
+    // Restore all opacities
+    for (const sel of HIGHLIGHT_SELECTORS) {
+      for (const el of container.querySelectorAll<SVGElement>(sel)) {
+        el.style.opacity = '';
+      }
+    }
+    return;
+  }
+
+  // Get the hovered dot's fill color to identify the series.
+  // The activated dot has dataset.origR or dataset.origTransform set by the tooltip.
+  const dotEls = container.querySelectorAll<SVGElement>("g[aria-label='dot'] :is(circle, path)");
+  let seriesColor: string | null = null;
+  for (const el of dotEls) {
+    if (el.dataset.origR != null || el.dataset.origTransform != null) {
+      seriesColor = el.getAttribute('fill');
+      break;
+    }
+  }
+
+  if (!seriesColor) return;
+
+  for (const sel of HIGHLIGHT_SELECTORS) {
+    const groups = new Set<Element>();
+    for (const el of container.querySelectorAll<SVGElement>(sel)) {
+      const color = el.getAttribute('fill') || el.getAttribute('stroke');
+      const matches = color === seriesColor;
+      el.style.opacity = matches ? '' : '0.15';
+      // Bring matching elements to front within their parent group
+      if (matches && el.parentElement) {
+        groups.add(el.parentElement);
+      }
+    }
+    // Move matching elements to end of their parent (painted on top)
+    for (const parent of groups) {
+      for (const el of parent.children) {
+        const color = (el as SVGElement).getAttribute('fill') || (el as SVGElement).getAttribute('stroke');
+        if (color === seriesColor) {
+          parent.appendChild(el);
+        }
+      }
+    }
+  }
+}
+
 function render(): void {
   const state = $state.get();
   const filtered = applyPlotFilters(state, lastData);
@@ -165,12 +218,19 @@ function render(): void {
   });
 
   // Observable Plot renders dots as circles or paths (for symbols) inside g[aria-label='dot']
+  const useHighlight = state.compareColor !== 'none';
+
   plotTooltip.bind(
     plotEl,
     "g[aria-label='dot'] :is(circle, path)",
     filtered as unknown as Record<string, unknown>[],
     fields,
-    { proximity: 14 },
+    {
+      proximity: 14,
+      onHover: useHighlight ? (row) => {
+        highlightSeries(plotEl, row);
+      } : undefined,
+    },
   );
 }
 
