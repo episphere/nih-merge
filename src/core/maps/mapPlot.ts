@@ -19,6 +19,10 @@ interface ChoroplethOptions {
   color: ColorConfig;
   strokeColor: string | null;
   showZeroValues: boolean;
+  lowOutlierColor: string;
+  highOutlierColor: string;
+  trimmedScheme: string[] | null;
+  stripedExtremes: boolean;
 }
 
 // --- Choropleth plot ---
@@ -29,7 +33,6 @@ function createChoroplethPlot(
   options: ChoroplethOptions,
 ): SVGSVGElement {
   const { color, strokeColor, indexField, measureField } = options;
-  const outlierColor = '#3d3d3d';
 
   const spatialDataMap = d3.index(data, (d) => d[indexField] as string);
 
@@ -46,10 +49,29 @@ function createChoroplethPlot(
     colorDomain = [colorDomain[1], colorDomain[0]];
   }
 
-  const interpolator = (d3 as Record<string, unknown>)[
-    'interpolate' + color.scheme
-  ] as (t: number) => string;
-  const colorScale = d3.scaleSequential(interpolator).domain(colorDomain);
+  // Build color scale: use trimmed scheme array when available, otherwise D3 interpolator
+  let colorScale: (val: number) => string;
+  if (options.trimmedScheme) {
+    const scheme = options.trimmedScheme;
+    const scale = d3
+      .scaleLinear<string>()
+      .domain(scheme.map((_, i) => {
+        const t = i / (scheme.length - 1);
+        return colorDomain[0] + t * (colorDomain[1] - colorDomain[0]);
+      }))
+      .range(scheme)
+      .interpolate(d3.interpolateRgb as unknown as (a: string, b: string) => (t: number) => string);
+    colorScale = (val: number) => scale(val);
+  } else {
+    const interpolator = (d3 as Record<string, unknown>)[
+      'interpolate' + color.scheme
+    ] as (t: number) => string;
+    const seqScale = d3.scaleSequential(interpolator).domain(colorDomain);
+    colorScale = (val: number) => seqScale(val);
+  }
+
+  const lowOutlierColor = options.lowOutlierColor;
+  const highOutlierColor = options.highOutlierColor;
 
   const strokeFn = (feature: { id: string }) => {
     if (strokeColor) {
@@ -71,13 +93,35 @@ function createChoroplethPlot(
           if (val >= color.domain[0] && val <= color.domain[1]) {
             return colorScale(val);
           }
-          return outlierColor;
+          // Outlier: use directional colors
+          if (val < color.domain[0]) return lowOutlierColor;
+          return highOutlierColor;
         }
         return 'white';
       }) as unknown as Plot.ChannelValueSpec,
       strokeWidth: 1,
     }),
   );
+
+  // Stripe overlay for outlier counties
+  if (options.stripedExtremes) {
+    const isOutlier = (d: { id: string }) => {
+      const row = spatialDataMap.get(d.id);
+      if (!row || row[measureField] == null) return false;
+      const val = row[measureField] as number;
+      if (!options.showZeroValues && val === 0) return false;
+      return val < color.domain[0] || val > color.domain[1];
+    };
+    marks.push(
+      Plot.geo(featureCollection as unknown as GeoJSON.FeatureCollection, {
+        filter: isOutlier as unknown as Plot.ChannelValue,
+        fill: 'url(#map-stripes)',
+        stroke: 'none',
+        strokeWidth: 0,
+        pointerEvents: 'none',
+      }),
+    );
+  }
 
   for (const overlay of options.overlays) {
     const fc = Array.isArray(overlay.featureCollection)
@@ -102,6 +146,12 @@ function createChoroplethPlot(
     },
     marks,
   });
+
+  // Inject stripe pattern defs if stripes are enabled
+  if (options.stripedExtremes) {
+    const svgDefs = `<defs><pattern id="map-stripes" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="1" height="8" fill="rgba(255, 255, 255, 1)" /></pattern></defs>`;
+    plot.insertAdjacentHTML('afterbegin', svgDefs);
+  }
 
   const svg = plot as unknown as SVGSVGElement;
   svg.style.maxWidth = 'initial';
@@ -223,6 +273,10 @@ export function renderMapCard(
     color: colorConfig,
     strokeColor: globalState.showOutlineCounty ? 'lightgrey' : null,
     showZeroValues: globalState.showZeroValues,
+    lowOutlierColor: colorConfig.lowOutlierColor ?? '#3d3d3d',
+    highOutlierColor: colorConfig.highOutlierColor ?? '#3d3d3d',
+    trimmedScheme: colorConfig.trimmedScheme,
+    stripedExtremes: globalState.stripedExtremes,
   });
 
   container.replaceChildren(plot);

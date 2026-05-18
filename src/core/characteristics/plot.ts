@@ -199,7 +199,7 @@ export function renderPlot(
 
   // Margins
   const marginTop = fxField ? 80 : 50;
-  const marginBottom = 150;
+  const marginBottom = 130;//150;
   const marginLeft = 130;
   const marginRight = 20;
 

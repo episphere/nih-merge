@@ -39,6 +39,7 @@ export interface MapsState {
   colorExcludeExtremes: boolean;
   colorExtremeCutoff: number;
   showZeroValues: boolean;
+  stripedExtremes: boolean;
   showOutlineCounty: boolean;
   showOutlineState: boolean;
   showOutlineNation: boolean;
@@ -90,6 +91,7 @@ export const MAPS_DEFAULTS: MapsState = {
   colorExcludeExtremes: true,
   colorExtremeCutoff: 2,
   showZeroValues: true,
+  stripedExtremes: false,
   showOutlineCounty: false,
   showOutlineState: true,
   showOutlineNation: true,

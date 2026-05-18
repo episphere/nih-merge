@@ -6,7 +6,7 @@ import { DEFAULT_CARD, MAPS_DEFAULTS, type Card, type CardState, type MapsState 
 const URL_KEYS: (keyof MapsState & string)[] = [
   'nRows', 'nCols', 'measure', 'colorScheme', 'colorReverse',
   'colorCenterMean', 'colorExcludeExtremes', 'colorExtremeCutoff',
-  'showZeroValues', 'showOutlineCounty', 'showOutlineState', 'showOutlineNation',
+  'showZeroValues', 'stripedExtremes', 'showOutlineCounty', 'showOutlineState', 'showOutlineNation',
 ];
 
 /** Fields in CardState that are serialized to URL. */

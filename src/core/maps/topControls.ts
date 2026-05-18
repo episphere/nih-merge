@@ -153,6 +153,9 @@ function initSettingsButton(
   const exclude = createCheckbox('settings-exclude', 'Exclude Extreme Values');
   content.appendChild(exclude.wrapper);
 
+  const stripedExtremes = createCheckbox('settings-striped-extremes', 'Striped Extreme Values');
+  content.appendChild(stripedExtremes.wrapper);
+
   // Cutoff range
   const cutoffGroup = document.createElement('div');
   cutoffGroup.className = 'usa-form-group';
@@ -215,6 +218,8 @@ function initSettingsButton(
     cutoffInput.value = String(state.colorExtremeCutoff);
     cutoffValue.textContent = `${state.colorExtremeCutoff}% per tail`;
     cutoffGroup.style.display = state.colorExcludeExtremes ? '' : 'none';
+    stripedExtremes.input.checked = state.stripedExtremes;
+    stripedExtremes.wrapper.style.display = state.colorExcludeExtremes ? '' : 'none';
     showZeros.input.checked = state.showZeroValues;
     countyOutline.input.checked = state.showOutlineCounty;
     stateOutline.input.checked = state.showOutlineState;
@@ -238,6 +243,9 @@ function initSettingsButton(
   });
   exclude.input.addEventListener('change', () => {
     update({ colorExcludeExtremes: exclude.input.checked });
+  });
+  stripedExtremes.input.addEventListener('change', () => {
+    update({ stripedExtremes: stripedExtremes.input.checked });
   });
   showZeros.input.addEventListener('change', () => {
     update({ showZeroValues: showZeros.input.checked });

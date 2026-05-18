@@ -2,6 +2,7 @@ import * as d3 from 'd3';
 import { dataManager } from '../../data/dataManager';
 import type { CountyFilters, CountyRow, PopulationFilters, PopulationRow } from '../../data/types';
 import type { Card, CardState, MapsMeasure, MapsState } from './state';
+import { buildTrimmedColorScheme, sampleInterpolator } from './trimmedScheme';
 
 // --- GeoJSON types ---
 
@@ -31,6 +32,9 @@ export interface ColorConfig {
   domain: [number, number];
   pivot: number | null;
   valid: boolean;
+  trimmedScheme: string[] | null;
+  lowOutlierColor: string | null;
+  highOutlierColor: string | null;
 }
 
 // --- GeoJSON loading (cached) ---
@@ -209,11 +213,36 @@ export function computeColorConfig(
 
   const valid = Number.isFinite(mean) && domain.every((d) => Number.isFinite(d));
 
+  // Build trimmed color scheme when excluding extremes
+  let trimmedScheme: string[] | null = null;
+  let lowOutlierColor: string | null = null;
+  let highOutlierColor: string | null = null;
+
+  if (state.colorExcludeExtremes && valid) {
+    try {
+      const sampled = sampleInterpolator(state.colorScheme, 16);
+      const trimResult = buildTrimmedColorScheme(sampled, 0.1, 0.1);
+      trimmedScheme = trimResult.scheme;
+      if (state.colorReverse) {
+        lowOutlierColor = trimResult.rightOutlier;
+        highOutlierColor = trimResult.leftOutlier;
+      } else {
+        lowOutlierColor = trimResult.leftOutlier;
+        highOutlierColor = trimResult.rightOutlier;
+      }
+    } catch {
+      // Fall back to no trimming if colorjs.io fails
+    }
+  }
+
   return {
     scheme: state.colorScheme,
     reverse: state.colorReverse,
     domain,
     pivot,
     valid,
+    trimmedScheme,
+    lowOutlierColor,
+    highOutlierColor,
   };
 }

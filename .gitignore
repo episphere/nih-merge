@@ -29,3 +29,4 @@ planning/
 src/data/convert.py
 src/data/old_data
 epitracker/
+/src/data/less_old_data
