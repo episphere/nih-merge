@@ -3,6 +3,7 @@ import { dataManager } from '../../data/dataManager';
 import type { CountyFilters, CountyRow, PopulationFilters, PopulationRow } from '../../data/types';
 import type { Card, CardState, MapsMeasure, MapsState } from './state';
 import { buildTrimmedColorScheme, sampleInterpolator } from './trimmedScheme';
+import { getSchemeReverse } from './topControls';
 
 // --- GeoJSON types ---
 
@@ -213,6 +214,10 @@ export function computeColorConfig(
 
   const valid = Number.isFinite(mean) && domain.every((d) => Number.isFinite(d));
 
+  // XOR: if the scheme is auto-reversed, the user toggle flips it back
+  const schemeReverse = getSchemeReverse(state.colorScheme);
+  const effectiveReverse = schemeReverse !== state.colorReverse;
+
   // Build trimmed color scheme when excluding extremes
   let trimmedScheme: string[] | null = null;
   let lowOutlierColor: string | null = null;
@@ -223,7 +228,7 @@ export function computeColorConfig(
       const sampled = sampleInterpolator(state.colorScheme, 16);
       const trimResult = buildTrimmedColorScheme(sampled, 0.1, 0.1);
       trimmedScheme = trimResult.scheme;
-      if (state.colorReverse) {
+      if (effectiveReverse) {
         lowOutlierColor = trimResult.rightOutlier;
         highOutlierColor = trimResult.leftOutlier;
       } else {
@@ -237,7 +242,7 @@ export function computeColorConfig(
 
   return {
     scheme: state.colorScheme,
-    reverse: state.colorReverse,
+    reverse: effectiveReverse,
     domain,
     pivot,
     valid,

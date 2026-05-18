@@ -86,7 +86,7 @@ export const MAPS_DEFAULTS: MapsState = {
 
   measure: 'ageAdjustedRate',
   colorScheme: 'RdYlBu',
-  colorReverse: true,
+  colorReverse: false,
   colorCenterMean: true,
   colorExcludeExtremes: true,
   colorExtremeCutoff: 2,

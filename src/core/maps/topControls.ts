@@ -21,16 +21,16 @@ const MEASURE_LABELS: Record<MapsMeasure, string> = {
 
 // --- Color scheme options ---
 
-const COLOR_SCHEMES: { value: string; label: string }[] = [
-  { value: 'RdYlBu', label: 'Red-Yellow-Blue' },
-  { value: 'RdYlGn', label: 'Red-Yellow-Green' },
-  { value: 'RdBu', label: 'Red-Blue' },
-  { value: 'PiYG', label: 'Pink-Yellow-Green' },
-  { value: 'PRGn', label: 'Purple-Green' },
-  { value: 'BrBG', label: 'Brown-Blue-Green' },
-  { value: 'Spectral', label: 'Spectral' },
+const COLOR_SCHEMES: { value: string; label: string; reverse?: boolean }[] = [
+  { value: 'RdYlBu', label: 'Blue-Yellow-Red', reverse: true },
+  { value: 'RdYlGn', label: 'Green-Yellow-Red', reverse: true },
+  { value: 'RdBu', label: 'Blue-Red', reverse: true },
+  { value: 'PiYG', label: 'Green-Yellow-Pink', reverse: true },
+  { value: 'PRGn', label: 'Green-Purple', reverse: true },
+  { value: 'BrBG', label: 'Blue-Green-Brown', reverse: true },
+  { value: 'Spectral', label: 'Spectral', reverse: true },
   { value: 'RdPu', label: 'Red-Purple' },
-  { value: 'YlGnBu', label: 'Yellow-Green-Blue' },
+  { value: 'YlGnBu', label: 'Blue-Green-Yellow', reverse: true },
   { value: 'YlOrRd', label: 'Yellow-Orange-Red' },
   { value: 'Blues', label: 'Blues' },
   { value: 'Greens', label: 'Greens' },
@@ -39,6 +39,15 @@ const COLOR_SCHEMES: { value: string; label: string }[] = [
   { value: 'Purples', label: 'Purples' },
   { value: 'Greys', label: 'Greys' },
 ];
+
+const schemeReverseMap = new Map(
+  COLOR_SCHEMES.filter((s) => s.reverse).map((s) => [s.value, true]),
+);
+
+/** Check whether a color scheme should be auto-reversed. */
+export function getSchemeReverse(schemeName: string): boolean {
+  return schemeReverseMap.has(schemeName);
+}
 
 
 // --- Public ---
@@ -406,11 +415,12 @@ function createSchemeGradient(scheme: string, width: number, height: number): SV
   ] as ((t: number) => string) | undefined;
 
   if (interpolator) {
+    const shouldReverse = schemeReverseMap.has(scheme);
     for (let i = 0; i <= GRADIENT_STOPS; i++) {
       const t = i / GRADIENT_STOPS;
       const stop = document.createElementNS(ns, 'stop');
       stop.setAttribute('offset', `${(t * 100).toFixed(0)}%`);
-      stop.setAttribute('stop-color', interpolator(t));
+      stop.setAttribute('stop-color', interpolator(shouldReverse ? 1 - t : t));
       linearGrad.appendChild(stop);
     }
   }
