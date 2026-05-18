@@ -41,28 +41,42 @@ export function initMapTooltip(
   // Histogram state
   let redDot: SVGCircleElement | null = null;
   let histogramXScale: d3.ScaleLinear<number, number> | null = null;
+  let storedAllValues: number[] = [];
+  let storedColorConfig: ColorConfig | null = null;
+  type HistogramMode = 'normal' | 'expand-low' | 'expand-high';
+  let currentHistogramMode: HistogramMode = 'normal';
 
-  function buildHistogram(values: number[], colorConfig: ColorConfig) {
+  function buildHistogram(values: number[], colorConfig: ColorConfig, mode: HistogramMode = 'normal') {
     histogramContainer.replaceChildren();
     histogramXScale = null;
     redDot = null;
+    currentHistogramMode = mode;
 
     if (values.length === 0) return;
 
     const [lo, hi] = colorConfig.domain;
-    const filtered = values.filter((v) => v >= lo && v <= hi);
+
+    let filtered: number[];
+    if (mode === 'expand-low') {
+      filtered = values.filter((v) => v <= hi);
+    } else if (mode === 'expand-high') {
+      filtered = values.filter((v) => v >= lo);
+    } else {
+      filtered = values.filter((v) => v >= lo && v <= hi);
+    }
     if (filtered.length === 0) return;
 
     const extent = d3.extent(filtered) as [number, number];
 
-    const plot = Plot.plot({
+    const plotOptions = {
+      style: { fontSize: '12px' },
       width: 150,
       height: 60,
       marginTop: 2,
-      marginRight: 2,
+      marginRight: 15,
       marginBottom: 18,
-      marginLeft: 2,
-      x: { domain: extent, ticks: 3, tickSize: 3 },
+      marginLeft: 15,
+      x: { domain: extent, ticks: [lo, hi], tickSize: 3 },
       y: { axis: null },
       marks: [
         Plot.rectY(
@@ -76,13 +90,15 @@ export function initMapTooltip(
           } as Plot.RectYOptions,
         ),
       ],
-    });
+    };
+    const plot = Plot.plot(plotOptions as Parameters<typeof Plot.plot>[0]);
 
     const svg = plot as unknown as SVGSVGElement;
     svg.style.display = 'block';
     histogramContainer.appendChild(svg);
 
-    histogramXScale = d3.scaleLinear().domain(extent).range([2, 148]);
+    // range matches plot margins: marginLeft=15, width=150, marginRight=15 → [15, 135]
+    histogramXScale = d3.scaleLinear().domain(extent).range([15, 135]);
 
     const svgNS = 'http://www.w3.org/2000/svg';
     redDot = document.createElementNS(svgNS, 'circle');
@@ -94,6 +110,17 @@ export function initMapTooltip(
   }
 
   function positionRedDot(value: number) {
+    if (!storedColorConfig || storedAllValues.length === 0) return;
+
+    const [lo, hi] = storedColorConfig.domain;
+    let neededMode: HistogramMode = 'normal';
+    if (value < lo) neededMode = 'expand-low';
+    else if (value > hi) neededMode = 'expand-high';
+
+    if (neededMode !== currentHistogramMode) {
+      buildHistogram(storedAllValues, storedColorConfig, neededMode);
+    }
+
     if (!redDot || !histogramXScale) return;
     redDot.setAttribute('cx', String(histogramXScale(value)));
     redDot.style.display = '';
@@ -180,7 +207,10 @@ export function initMapTooltip(
 
   return {
     updateHistogram(allValues: number[], colorConfig: ColorConfig) {
-      buildHistogram(allValues, colorConfig);
+      storedAllValues = allValues;
+      storedColorConfig = colorConfig;
+      currentHistogramMode = 'normal';
+      buildHistogram(allValues, colorConfig, 'normal');
     },
     bindCard,
     destroy() {
