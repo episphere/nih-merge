@@ -71,7 +71,7 @@ function buildForm(): HTMLElement {
 
   // Apply button
   const btnGroup = document.createElement('div');
-  btnGroup.className = 'margin-top-2';
+  btnGroup.className = 'margin-top-2 display-flex flex-justify-end';
   const btn = document.createElement('button');
   btn.className = 'usa-button';
   btn.type = 'button';
@@ -142,6 +142,11 @@ export function openCardEditor(
   // Create overlay
   const overlayTitle = card.blank ? 'Add New Map' : 'Edit Map';
   overlay = createOverlay({ title: overlayTitle, maxWidth: '500px' });
+  // Size panel to content instead of filling the viewport (default for table overlays)
+  const panel = overlay.contentEl.parentElement!;
+  panel.style.height = 'auto';
+  panel.style.maxHeight = '95vh';
+  overlay.contentEl.style.overflow = 'auto';
   const form = buildForm();
   overlay.contentEl.appendChild(form);
 

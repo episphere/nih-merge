@@ -91,7 +91,7 @@ export const MAPS_DEFAULTS: MapsState = {
   colorExcludeExtremes: true,
   colorExtremeCutoff: 2,
   showZeroValues: true,
-  stripedExtremes: false,
+  stripedExtremes: true,
   showOutlineCounty: false,
   showOutlineState: true,
   showOutlineNation: true,
