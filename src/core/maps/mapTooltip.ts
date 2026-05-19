@@ -156,16 +156,19 @@ export function initMapTooltip(
     densityContainer.appendChild(svg);
 
     // Grab rendered path elements for highlight toggling.
-    // Plot renders each areaY mark as a separate <g> containing one <path>.
+    // Plot renders each areaY mark as a separate <g aria-label="area"> containing one <path>.
     const markPaths: SVGPathElement[] = [];
-    for (const g of svg.querySelectorAll<SVGGElement>('g[aria-label]')) {
-      const label = g.getAttribute('aria-label') ?? '';
-      if (label === 'x-axis' || label === 'y-axis') continue;
+    for (const g of svg.querySelectorAll<SVGGElement>('g[aria-label="area"]')) {
       const p = g.querySelector<SVGPathElement>('path');
       if (p) markPaths.push(p);
     }
     for (let i = 0; i < cardIndices.length && i < markPaths.length; i++) {
-      densityPaths.set(cardIndices[i], markPaths[i]);
+      const path = markPaths[i];
+      // Apply initial opacity via inline style so we have full control
+      // (Observable Plot may set fill-opacity as an inline style, which
+      // takes precedence over SVG presentation attributes).
+      path.style.fillOpacity = String(defaultOpacity);
+      densityPaths.set(cardIndices[i], path);
     }
 
     // Build x scale matching Plot's margins for red dot positioning
@@ -209,7 +212,7 @@ export function initMapTooltip(
       } else {
         opacity = 0.15;
       }
-      path.setAttribute('fill-opacity', String(opacity));
+      path.style.fillOpacity = String(opacity);
     }
   }
 
