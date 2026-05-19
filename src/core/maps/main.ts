@@ -10,7 +10,7 @@ import { fetchAllCardData, computeColorConfig, loadGeoJSON, type ColorConfig } f
 import { renderMapCard } from './mapPlot';
 import { renderColorLegend } from './colorLegend';
 import { Gridette } from './grid';
-import { initMapTooltip, type MapTooltipHandle } from './mapTooltip';
+import { initMapTooltip, type MapTooltipHandle, type CardDensityData } from './mapTooltip';
 import { parquetUrl, countyFile } from '../../data/dataManager';
 import type { TableInfo, TableFilterSpec } from '../shared/tableFilters';
 import { syncMapsToURL } from './urlSync';
@@ -201,19 +201,23 @@ $state.subscribe(async (state) => {
   renderColorLegend(legendEl, colorConfig, state);
   updateTitles(state);
 
-  // Update tooltip histogram with all values from all cards
+  // Update tooltip density plot with per-card values
   if (colorConfig && colorConfig.valid) {
-    const allValues: number[] = [];
-    for (const rows of cardDataMap.values()) {
+    const cardData: CardDensityData[] = [];
+    for (const [cardIndex, rows] of cardDataMap.entries()) {
+      const values: number[] = [];
       for (const row of rows) {
         const v = row[state.measure];
         if (typeof v === 'number' && !Number.isNaN(v)) {
           if (!state.showZeroValues && v === 0) continue;
-          allValues.push(v);
+          values.push(v);
         }
       }
+      if (values.length > 0) {
+        cardData.push({ cardIndex, values });
+      }
     }
-    mapTooltipHandle.updateHistogram(allValues, colorConfig);
+    mapTooltipHandle.updateDensity(cardData, colorConfig);
   }
 
   render();

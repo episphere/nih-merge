@@ -3,10 +3,10 @@ import type { Race, Sex } from '../../data/types';
 // --- Palette ---
 
 export const PALETTE = {
-  orange: '#E69F00',
   teal: '#009E73',
   blue: '#0072B2',
   pink: '#CC79A7',
+  orange: '#E69F00',
   skyBlue: '#56B4E9',
   red: '#D55E00',
   grey: '#999999',
