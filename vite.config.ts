@@ -57,14 +57,14 @@ function buildOutputRestructure(): Plugin {
         if (fileName === 'src/pages/index.html') {
           // Moving from src/pages/index.html → index.html (up two levels)
           // Fix relative paths: ../../X → ./X
-          chunk.source = (chunk.source as string).replace(/(?:\.\.\/)+(?=assets\/)/g, './')
+          chunk.source = (chunk.source as string).replace(/(?:\.\.\/)+(?=(assets|images)\/)/g, './')
           chunk.fileName = 'index.html'
         } else {
           for (const page of pages) {
             if (fileName === `src/pages/${page}.html`) {
               // Moving from src/pages/X.html → X/index.html (up one level)
               // Fix relative paths: ../../X → ../X
-              chunk.source = (chunk.source as string).replace(/(?:\.\.\/)+(?=assets\/)/g, '../')
+              chunk.source = (chunk.source as string).replace(/(?:\.\.\/)+(?=(assets|images)\/)/g, '../')
               chunk.fileName = `${page}/index.html`
               break
             }
