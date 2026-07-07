@@ -5,11 +5,14 @@
  * attribution, then exports as SVG or renders to Canvas at 2× for PNG.
  */
 
+import { plotSymbolPath } from './plotSymbols';
+
 // --- Types ---
 
 export interface LegendItem {
   color: string;
   label: string;
+  symbol?: string;
 }
 
 export interface FigureOptions {
@@ -142,12 +145,11 @@ function composeFigureSVG(options: FigureOptions): SVGSVGElement {
     for (const item of legend) {
       const cx = xCursor + LEGEND_SWATCH_R;
 
-      const circle = document.createElementNS(NS, 'circle');
-      circle.setAttribute('cx', String(cx));
-      circle.setAttribute('cy', '0');
-      circle.setAttribute('r', String(LEGEND_SWATCH_R));
-      circle.setAttribute('fill', item.color);
-      legendGroup.appendChild(circle);
+      const symbol = document.createElementNS(NS, 'path');
+      symbol.setAttribute('d', plotSymbolPath(item.symbol));
+      symbol.setAttribute('fill', item.color);
+      symbol.setAttribute('transform', `translate(${cx}, 0)`);
+      legendGroup.appendChild(symbol);
 
       const text = document.createElementNS(NS, 'text');
       text.setAttribute('x', String(cx + LEGEND_SWATCH_R + 4));
@@ -207,17 +209,21 @@ export function getFigureOptions(filename: string): FigureOptions | null {
   const title = titleEl.textContent ?? '';
 
   // Extract legend items from the HTML legend (characteristics only)
-  const legendEl = plotEl?.querySelector('.epi-legend');
+  const legendEl = document.getElementById('plot-legend')?.querySelector('.epi-legend')
+    ?? plotEl?.querySelector('.epi-legend');
   let legend: LegendItem[] | undefined;
   if (legendEl) {
     legend = [];
     for (const item of legendEl.children) {
+      const itemEl = item as HTMLElement;
       const swatch = item.querySelector('span:first-child') as HTMLElement | null;
       const label = item.querySelector('span:last-child') as HTMLElement | null;
-      if (swatch && label) {
+      const color = itemEl.dataset.legendColor ?? swatch?.style.backgroundColor;
+      if (color && label) {
         legend.push({
-          color: swatch.style.backgroundColor,
+          color,
           label: label.textContent ?? '',
+          symbol: itemEl.dataset.legendSymbol,
         });
       }
     }

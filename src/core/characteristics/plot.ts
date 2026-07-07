@@ -7,6 +7,7 @@ import {
   CHARACTERISTICS_MEASURE_STYLE, COMPARISON_FIELD_LABEL, QUANTILE_NAME,
   RACE_STYLE, SEX_STYLE, PALETTE,
 } from '../shared/visual';
+import { plotSymbolPath } from '../shared/plotSymbols';
 import type { QuantileDetail } from './quantileDetails';
 import { formatQuantileRange } from './quantileDetails';
 
@@ -91,6 +92,24 @@ function parseQuantileIndex(q: string | number): number {
 
 // --- Legend ---
 
+function buildLegendMarker(color: string, symbol: string): SVGSVGElement {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '-8 -8 16 16');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.setAttribute('focusable', 'false');
+  svg.style.width = '14px';
+  svg.style.height = '14px';
+  svg.style.display = 'block';
+  svg.style.flex = '0 0 auto';
+
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('d', plotSymbolPath(symbol));
+  path.setAttribute('fill', color);
+  svg.appendChild(path);
+
+  return svg;
+}
+
 function buildLegend(state: CharacteristicsState, data: EnrichedQuantileRow[]): HTMLElement | null {
   if (state.compareColor === 'none') return null;
 
@@ -109,29 +128,34 @@ function buildLegend(state: CharacteristicsState, data: EnrichedQuantileRow[]): 
     const item = document.createElement('div');
     item.style.display = 'flex';
     item.style.alignItems = 'center';
-    item.style.gap = '4px';
+    item.style.gap = '5px';
 
-    const swatch = document.createElement('span');
-    swatch.style.width = '12px';
-    swatch.style.height = '12px';
-    swatch.style.borderRadius = '50%';
-    swatch.style.display = 'inline-block';
+    let color: string = DEFAULT_DOT_COLOR;
+    let symbol = 'circle';
+    let labelText = value;
 
     if (field === 'race') {
-      swatch.style.backgroundColor = RACE_STYLE[value as Race].color;
+      const style = RACE_STYLE[value as Race];
+      color = style.color;
+      symbol = style.symbol;
+      labelText = style.labelShort ?? value;
     } else if (field === 'sex') {
-      swatch.style.backgroundColor = SEX_STYLE[value as Sex].color;
+      const style = SEX_STYLE[value as Sex];
+      color = style.color;
+      symbol = style.symbol;
+      labelText = style.label;
     }
+
+    item.dataset.legendColor = color;
+    item.dataset.legendSymbol = symbol;
+
+    const marker = buildLegendMarker(color, symbol);
 
     const label = document.createElement('span');
     label.style.fontSize = '12px';
-    if (field === 'race') {
-      label.textContent = RACE_STYLE[value as Race]?.labelShort ?? value;
-    } else {
-      label.textContent = value;
-    }
+    label.textContent = labelText;
 
-    item.appendChild(swatch);
+    item.appendChild(marker);
     item.appendChild(label);
     container.appendChild(item);
   }
@@ -147,6 +171,7 @@ export function renderPlot(
   detail: QuantileDetail | undefined,
 ): void {
   const plotEl = document.getElementById('plot')!;
+  const legendEl = document.getElementById('plot-legend');
   const titleEl = document.getElementById('title')!;
   const sourceEl = document.getElementById('plot-source')!;
 
@@ -156,6 +181,7 @@ export function renderPlot(
     : '';
 
   if (data.length === 0) {
+    legendEl?.replaceChildren();
     const msg = document.createElement('div');
     msg.className = 'grid-row flex-align-center flex-justify-center height-full';
     msg.textContent = 'No data available for current selection.';
@@ -194,8 +220,18 @@ export function renderPlot(
   const unitLabel = detail?.unit ? ` (${detail.unit})` : '';
   const xLabel = `${fieldLabel}${unitLabel}`;
 
+  // Render the legend before measuring so the plot row reflects the remaining
+  // height in the grid container.
+  const legend = buildLegend(state, data);
+  if (legendEl) {
+    legendEl.replaceChildren();
+    if (legend) legendEl.appendChild(legend);
+  }
+
   // Height
-  const height = Math.max(MIN_HEIGHT, plotEl.clientHeight);
+  const availableHeight = plotEl.clientHeight;
+  const height = availableHeight > 0 ? Math.max(1, availableHeight - 1) : MIN_HEIGHT;
+  console.log(height, MIN_HEIGHT, plotEl.clientHeight)
 
   // Margins
   const marginTop = fxField ? 80 : 50;
@@ -362,12 +398,6 @@ export function renderPlot(
   const wrapper = document.createElement('div');
   wrapper.style.width = '100%';
   wrapper.appendChild(svg);
-
-  // Legend
-  const legend = buildLegend(state, data);
-  if (legend) {
-    wrapper.appendChild(legend);
-  }
 
   plotEl.replaceChildren(wrapper);
   svg.removeAttribute('viewBox');
