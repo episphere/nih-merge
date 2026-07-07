@@ -11,7 +11,7 @@ function copyParquetFiles() {
     name: 'copy-parquet',
     closeBundle() {
       const srcDir = resolve(__dirname, 'src/data')
-      const destDir = resolve(__dirname, 'nih-merge/data')
+      const destDir = resolve(__dirname, 'nih-merge/assets')
       mkdirSync(destDir, { recursive: true })
       for (const file of readdirSync(srcDir)) {
         if (file.endsWith('.parquet')) {
