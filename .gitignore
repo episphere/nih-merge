@@ -29,4 +29,5 @@ planning/
 src/data/convert.py
 src/data/old_data
 epitracker/
+nih-merge/
 /src/data/less_old_data

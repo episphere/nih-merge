@@ -11,7 +11,7 @@ function copyParquetFiles() {
     name: 'copy-parquet',
     closeBundle() {
       const srcDir = resolve(__dirname, 'src/data')
-      const destDir = resolve(__dirname, 'epitracker/data')
+      const destDir = resolve(__dirname, 'nih-merge/data')
       mkdirSync(destDir, { recursive: true })
       for (const file of readdirSync(srcDir)) {
         if (file.endsWith('.parquet')) {
@@ -92,7 +92,7 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: 'epitracker',
+    outDir: 'nih-merge',
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'src/pages/index.html'),

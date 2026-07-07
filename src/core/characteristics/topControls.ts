@@ -169,11 +169,11 @@ function initDownloadButton(getData?: () => Record<string, unknown>[]): void {
   if (!btn) return;
 
   createDropdown(btn, [
-    { label: 'Data (.csv)', onClick: () => getData && downloadCSV(getData(), 'epitracker-characteristics.csv') },
-    { label: 'Data (.tsv)', onClick: () => getData && downloadTSV(getData(), 'epitracker-characteristics.tsv') },
-    { label: 'Data (.json)', onClick: () => getData && downloadJSON(getData(), 'epitracker-characteristics.json') },
+    { label: 'Data (.csv)', onClick: () => getData && downloadCSV(getData(), 'nih-merge-characteristics.csv') },
+    { label: 'Data (.tsv)', onClick: () => getData && downloadTSV(getData(), 'nih-merge-characteristics.tsv') },
+    { label: 'Data (.json)', onClick: () => getData && downloadJSON(getData(), 'nih-merge-characteristics.json') },
     'separator',
-    { label: 'Image (.png)', onClick: () => { const o = getFigureOptions('epitracker-characteristics'); if (o) downloadFigurePNG(o); } },
-    { label: 'Image (.svg)', onClick: () => { const o = getFigureOptions('epitracker-characteristics'); if (o) downloadFigureSVG(o); } },
+    { label: 'Image (.png)', onClick: () => { const o = getFigureOptions('nih-merge-characteristics'); if (o) downloadFigurePNG(o); } },
+    { label: 'Image (.svg)', onClick: () => { const o = getFigureOptions('nih-merge-characteristics'); if (o) downloadFigureSVG(o); } },
   ]);
 }

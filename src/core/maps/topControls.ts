@@ -359,7 +359,7 @@ function getMapsFigureOptions($state: MapStore<MapsState>): MapsFigureOptions | 
     nRows: state.nRows,
     nCols: state.nCols,
     legendSVGs,
-    filename: 'epitracker-maps',
+    filename: 'nih-merge-maps',
   };
 }
 
@@ -371,9 +371,9 @@ function initDownloadButton(
   if (!btn) return;
 
   createDropdown(btn, [
-    { label: 'Data (.csv)', onClick: () => downloadCSV(getData(), 'epitracker-maps.csv') },
-    { label: 'Data (.tsv)', onClick: () => downloadTSV(getData(), 'epitracker-maps.tsv') },
-    { label: 'Data (.json)', onClick: () => downloadJSON(getData(), 'epitracker-maps.json') },
+    { label: 'Data (.csv)', onClick: () => downloadCSV(getData(), 'nih-merge-maps.csv') },
+    { label: 'Data (.tsv)', onClick: () => downloadTSV(getData(), 'nih-merge-maps.tsv') },
+    { label: 'Data (.json)', onClick: () => downloadJSON(getData(), 'nih-merge-maps.json') },
     'separator',
     {
       label: 'Image (.png)',
