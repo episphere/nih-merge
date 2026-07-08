@@ -1,4 +1,4 @@
-import { asyncBufferFromUrl, parquetReadObjects } from 'hyparquet'
+import { parquetReadObjects, type AsyncBuffer } from 'hyparquet'
 import type {
   DataManager,
   FilterValue,
@@ -32,7 +32,7 @@ function loadParquet(fileName: string): Promise<Record<string, unknown>[]> {
 }
 
 async function fetchAndParse(url: string): Promise<Record<string, unknown>[]> {
-  const file = await asyncBufferFromUrl({ url })
+  const file = await fetchParquetBuffer(url)
   const rows = await parquetReadObjects({ file })
   // Convert BigInt values to Number (hyparquet returns int64 columns as BigInt)
   for (const row of rows) {
@@ -43,6 +43,24 @@ async function fetchAndParse(url: string): Promise<Record<string, unknown>[]> {
     }
   }
   return rows
+}
+
+async function fetchParquetBuffer(url: string): Promise<AsyncBuffer> {
+  const response = await fetch(url)
+  if (!response.ok) {
+    throw new Error(`fetch failed ${response.status} for ${url}`)
+  }
+
+  // GitHub Pages gzips .parquet responses and reports the compressed
+  // Content-Length on HEAD requests. Fetching the full response gives
+  // hyparquet the decompressed bytes and the correct byte length.
+  const buffer = await response.arrayBuffer()
+  return {
+    byteLength: buffer.byteLength,
+    slice(start, end) {
+      return buffer.slice(start, end)
+    },
+  }
 }
 
 // --- Filtering ---

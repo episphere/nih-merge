@@ -31,9 +31,14 @@ export async function renderDataTableFromUrl(
   filters: Filter[],
 ): Promise<DataTable> {
   container.innerHTML = '';
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to load table data: ${response.status}`);
+  }
+  const source = await response.blob();
   const table = await createDataTable({
     container,
-    source: url,
+    source,
     sourceFormat: 'parquet',
     persistence: false,
     presets: false,
