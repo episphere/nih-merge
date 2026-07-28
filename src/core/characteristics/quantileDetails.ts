@@ -229,26 +229,38 @@ export function getFieldIds(index: QuantileDetailsIndex): string[] {
   return [...ids].sort();
 }
 
+const MAX_QUANTILE_FRACTION_DIGITS = 6;
+
+function formatQuantileNumber(value: number, fractionDigits: number): string {
+  return new Intl.NumberFormat('en-US', {
+    maximumFractionDigits: fractionDigits,
+    notation: 'standard',
+  }).format(value);
+}
+
+/**
+ * Start with one decimal place, adding only enough precision to distinguish
+ * the two ends of a narrow range. This keeps most percentage labels compact
+ * without collapsing small ranges to the same displayed value.
+ */
+function quantileFractionDigits([low, high]: [number, number]): number {
+  for (let digits = 1; digits < MAX_QUANTILE_FRACTION_DIGITS; digits++) {
+    if (formatQuantileNumber(low, digits) !== formatQuantileNumber(high, digits)) {
+      return digits;
+    }
+  }
+  return MAX_QUANTILE_FRACTION_DIGITS;
+}
+
 /**
  * Format a quantile range as a tick label string, e.g. "10.5 – 20.3".
  */
 export function formatQuantileRange(range: [number, number], unit: string): string {
-  const decimals = (v: number): number => {
-    if (v === 0 || v % 1 === 0) return 0;
-    const s = Math.abs(v).toString();
-    const dot = s.indexOf('.');
-    return dot === -1 ? 0 : s.length - dot - 1;
+  const fractionDigits = quantileFractionDigits(range);
+  const fmt = (value: number): string => {
+    const formatted = formatQuantileNumber(value, fractionDigits);
+    return unit === '%' ? `${formatted}%` : formatted;
   };
 
-  // Use enough decimals so both values are distinguishable, minimum 0
-  const precision = Math.max(decimals(range[0]), decimals(range[1]));
-
-  const useExp = precision > 3 || Math.abs(range[0]) >= 10_000 || Math.abs(range[1]) >= 10_000;
-
-  const fmt = (v: number) => {
-    if (useExp) return v.toExponential(2);
-    if (unit === '%') return `${v.toFixed(Math.max(precision, 1))}%`;
-    return precision === 0 ? String(v) : v.toFixed(precision);
-  };
   return `${fmt(range[0])} – ${fmt(range[1])}`;
 }
