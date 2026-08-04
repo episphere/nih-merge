@@ -1,5 +1,5 @@
-import { dataManager } from '../../data';
-import type { QuantileRow, QuantileFilters, FilterValue, CancerSite, Race, Sex } from '../../data/types';
+import { dataManager } from '../../data-access';
+import type { QuantileRow, QuantileFilters, FilterValue, CancerSite, Race, Sex } from '../../domain/mortality';
 import type { CharacteristicsState, ComparisonField, CharacteristicsMeasure } from './state';
 
 // --- Enriched row type ---
@@ -46,7 +46,7 @@ function buildFilters(state: CharacteristicsState): QuantileFilters {
     cause: dimensionFilter<CancerSite>(state.cause as CancerSite | 'All', 'cause', compareColor, compareFacet),
     race: dimensionFilter<Race>(state.race as Race | 'All', 'race', compareColor, compareFacet),
     sex: dimensionFilter<Sex>(state.sex as Sex | 'All', 'sex', compareColor, compareFacet),
-    field_id: state.quantileField,
+    chr_field_id: state.quantileField,
   };
 }
 

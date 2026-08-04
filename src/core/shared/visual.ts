@@ -1,4 +1,4 @@
-import type { Race, Sex } from '../../data/types';
+import type { Race, Sex } from '../../domain/mortality';
 
 // --- Palette ---
 
@@ -168,4 +168,3 @@ export const COMPARISON_FIELD_LABEL: Record<string, string> = {
   ageGroup: 'Age Group',
   cause: 'Cancer Site',
 };
-

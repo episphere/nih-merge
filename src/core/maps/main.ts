@@ -11,7 +11,7 @@ import { renderMapCard } from './mapPlot';
 import { renderColorLegend } from './colorLegend';
 import { Gridette } from './grid';
 import { initMapTooltip, type MapTooltipHandle, type CardDensityData } from './mapTooltip';
-import { parquetUrl, countyFile } from '../../data/dataManager';
+import { dataAssetUrl, countyFile } from '../../data-access';
 import type { TableInfo, TableFilterSpec } from '../shared/tableFilters';
 import { syncMapsToURL } from './urlSync';
 
@@ -38,7 +38,7 @@ function getTableInfo(): TableInfo {
   const activeCards = state.cards.filter((c) => !c.blank && c.state);
   const firstCard = activeCards[0];
   const year = firstCard?.state?.year ?? '2022';
-  const url = parquetUrl(countyFile(year));
+  const url = dataAssetUrl(countyFile(year));
 
   // Build union filters across all active cards
   const fieldKeys = ['cause', 'sex', 'race', 'stateFips'] as const;

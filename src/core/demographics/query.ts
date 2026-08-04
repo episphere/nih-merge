@@ -1,6 +1,6 @@
-import { dataManager } from '../../data';
-import type { AgeRow, AgeFilters, FilterValue, CancerSite, Race, Sex, AgeGroup } from '../../data/types';
-import { ALL_AGE_GROUPS } from '../../data/types';
+import { dataManager } from '../../data-access';
+import type { AgeRow, AgeFilters, FilterValue, CancerSite, Race, Sex, AgeGroup } from '../../domain/mortality';
+import { ALL_AGE_GROUPS } from '../../domain/mortality';
 import type { DemographicsState, ComparisonField } from './state';
 
 // --- Enriched row type (AgeRow + confidence intervals) ---

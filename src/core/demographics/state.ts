@@ -1,7 +1,7 @@
 import {
   ALL_CANCER_SITES, ALL_RACES, ALL_AGE_GROUPS,
   type Year, type CancerSite, type Race, type Sex, type AgeGroup,
-} from '../../data/types';
+} from '../../domain/mortality';
 import { ALL_STATE_FIPS } from '../shared/fips';
 import { causeSexRule, comparisonMutualExclusionRule, comparisonDisablesFilterRule } from '../shared/state/rules';
 

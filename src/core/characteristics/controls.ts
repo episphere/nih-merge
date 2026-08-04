@@ -8,8 +8,11 @@ import { CHARACTERISTICS_MEASURE_STYLE, COMPARISON_FIELD_LABEL } from '../shared
 /** Module-level group map, set asynchronously after quantile details load. */
 let quantileFieldGroupMap: Map<string, string> | null = null;
 
-/** Module-level name map (field_id → display name), set asynchronously. */
+/** Module-level name map (chr_field_id → display name), set asynchronously. */
 let quantileFieldNameMap: Map<string, string> | null = null;
+
+/** Incremented whenever the asynchronously loaded field metadata changes. */
+let quantileFieldMetadataVersion = 0;
 
 /**
  * Call this once after loading chr_quantile_details.json to enable grouped
@@ -17,6 +20,7 @@ let quantileFieldNameMap: Map<string, string> | null = null;
  */
 export function setQuantileFieldGroups(groupMap: Map<string, string>): void {
   quantileFieldGroupMap = groupMap;
+  quantileFieldMetadataVersion++;
 }
 
 /**
@@ -25,6 +29,7 @@ export function setQuantileFieldGroups(groupMap: Map<string, string>): void {
  */
 export function setQuantileFieldNames(nameMap: Map<string, string>): void {
   quantileFieldNameMap = nameMap;
+  quantileFieldMetadataVersion++;
 }
 
 // --- Label formatting ---
@@ -78,13 +83,14 @@ function populateSelect(
   options: string[],
   stateKey: string,
   groupMap?: Map<string, string> | null,
+  force = false,
 ): boolean {
   const current = Array.from(selectEl.options).map(o => o.value);
   const changed = options.length !== current.length || options.some((v, i) => v !== current[i]);
 
   // Also re-populate when groups become available but <optgroup>s aren't present yet
   const hasOptgroups = selectEl.querySelector('optgroup') !== null;
-  if (!changed && !(groupMap && !hasOptgroups)) return false;
+  if (!force && !changed && !(groupMap && !hasOptgroups)) return false;
 
   selectEl.innerHTML = '';
 
@@ -141,13 +147,18 @@ function bindSelect(
   $state: MapStore<CharacteristicsState>,
   update: (change: Partial<CharacteristicsState>) => void,
 ): void {
+  let renderedMetadataVersion = -1;
+
   $state.subscribe((state) => {
     const options = state[config.optionsKey] as string[];
     const currentValue = state[config.stateKey] as string;
     const disabled = state.disabledFilters.includes(config.stateKey);
 
     const groupMap = config.grouped ? quantileFieldGroupMap : null;
-    populateSelect(selectEl, options, config.stateKey, groupMap);
+    const refreshLabels = config.stateKey === 'quantileField'
+      && renderedMetadataVersion !== quantileFieldMetadataVersion;
+    populateSelect(selectEl, options, config.stateKey, groupMap, refreshLabels);
+    renderedMetadataVersion = quantileFieldMetadataVersion;
     selectEl.value = currentValue;
     selectEl.disabled = disabled;
   });
@@ -168,6 +179,7 @@ function bindComboBox(
 ): void {
   let comboBox: USAComboBox | null = null;
   let syncing = false;
+  let renderedMetadataVersion = -1;
 
   $state.subscribe((state) => {
     const options = state[config.optionsKey] as string[];
@@ -175,7 +187,10 @@ function bindComboBox(
     const disabled = state.disabledFilters.includes(config.stateKey);
 
     const groupMap = config.grouped ? quantileFieldGroupMap : null;
-    const optionsChanged = populateSelect(selectEl, options, config.stateKey, groupMap);
+    const refreshLabels = config.stateKey === 'quantileField'
+      && renderedMetadataVersion !== quantileFieldMetadataVersion;
+    const optionsChanged = populateSelect(selectEl, options, config.stateKey, groupMap, refreshLabels);
+    renderedMetadataVersion = quantileFieldMetadataVersion;
     selectEl.value = currentValue;
     selectEl.disabled = disabled;
 

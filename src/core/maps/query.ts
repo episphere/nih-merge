@@ -1,6 +1,7 @@
 import * as d3 from 'd3';
-import { dataManager } from '../../data/dataManager';
-import type { CountyFilters, CountyRow, PopulationFilters, PopulationRow } from '../../data/types';
+import { dataManager } from '../../data-access';
+import { geographyUrl } from '../../data-access/geography';
+import type { CountyFilters, CountyRow, PopulationFilters, PopulationRow } from '../../domain/mortality';
 import type { Card, CardState, MapsMeasure, MapsState } from './state';
 import { buildTrimmedColorScheme, sampleInterpolator } from './trimmedScheme';
 import { getSchemeReverse } from './topControls';
@@ -45,9 +46,9 @@ let geoDataPromise: Promise<GeoData> | null = null;
 export function loadGeoJSON(): Promise<GeoData> {
   if (!geoDataPromise) {
     geoDataPromise = Promise.all([
-      d3.json(new URL('../../data/geography/states.geojson', import.meta.url).href) as Promise<GeoFeatureCollection>,
-      d3.json(new URL('../../data/geography/counties.geojson', import.meta.url).href) as Promise<GeoFeatureCollection>,
-      d3.json(new URL('../../data/geography/nation.geojson', import.meta.url).href) as Promise<GeoFeatureCollection>,
+      d3.json(geographyUrl('states.geojson')) as Promise<GeoFeatureCollection>,
+      d3.json(geographyUrl('counties.geojson')) as Promise<GeoFeatureCollection>,
+      d3.json(geographyUrl('nation.geojson')) as Promise<GeoFeatureCollection>,
     ]).then(([stateGeoJSON, countyGeoJSON, nationGeoJSON]) => ({
       stateGeoJSON,
       countyGeoJSON,

@@ -1,23 +1,23 @@
 import { defineConfig } from 'vite'
 import { resolve } from 'node:path'
-import { copyFileSync, mkdirSync, readdirSync } from 'node:fs'
+import { cpSync, mkdirSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import type { Plugin } from 'vite'
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
-function copyParquetFiles() {
+function copyDataAssets() {
   return {
-    name: 'copy-parquet',
+    name: 'copy-data-assets',
     closeBundle() {
       const srcDir = resolve(__dirname, 'src/data')
-      const destDir = resolve(__dirname, 'nih-merge/assets')
+      const destDir = resolve(__dirname, 'nih-merge/assets/data')
       mkdirSync(destDir, { recursive: true })
-      for (const file of readdirSync(srcDir)) {
-        if (file.endsWith('.parquet')) {
-          copyFileSync(resolve(srcDir, file), resolve(destDir, file))
-        }
-      }
+      cpSync(srcDir, destDir, {
+        recursive: true,
+        force: true,
+        filter: (source) => !source.endsWith('.DS_Store'),
+      })
     },
   }
 }
@@ -103,5 +103,5 @@ export default defineConfig({
       },
     },
   },
-  plugins: [devCleanUrls(), buildOutputRestructure(), copyParquetFiles()],
+  plugins: [devCleanUrls(), buildOutputRestructure(), copyDataAssets()],
 })

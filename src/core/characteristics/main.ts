@@ -9,12 +9,12 @@ import { fetchData, applyPlotFilters, deriveFilterOptions, type EnrichedQuantile
 import { renderPlot } from './plot';
 import {
   loadQuantileDetails, getQuantileDetailForYear, preloadVintageAssignments,
-  buildFieldGroupMap, buildFieldNameMap, formatQuantileRange,
+  buildFieldGroupMap, buildFieldNameMap, formatQuantileRange, getFieldName,
   type QuantileDetailsIndex, type QuantileDetail,
-} from './quantileDetails';
+} from '../../data-access';
 import { createPlotTooltip, type PlotTooltipField } from '../shared/plotTooltip';
 import { COMPARISON_FIELD_LABEL, CHARACTERISTICS_MEASURE_STYLE } from '../shared/visual';
-import { parquetUrl, quantileFile } from '../../data/dataManager';
+import { dataAssetUrl, quantileFile } from '../../data-access';
 import type { TableInfo, TableFilterSpec } from '../shared/tableFilters';
 
 // 1. Layout
@@ -31,9 +31,9 @@ function getTableInfo(): TableInfo {
     { column: 'cause', value: compAxes.includes('cause') ? '*' : state.cause },
     { column: 'race', value: compAxes.includes('race') ? '*' : state.race },
     { column: 'sex', value: compAxes.includes('sex') ? '*' : state.sex },
-    { column: 'field_id', value: state.quantileField },
+    { column: 'chr_field_id', value: state.quantileField },
   ];
-  return { url: parquetUrl(quantileFile(state.quantileNumber, state.year)), filters };
+  return { url: dataAssetUrl(quantileFile(state.quantileNumber, state.year)), filters };
 }
 
 initControls($state, update);
@@ -175,7 +175,10 @@ function render(): void {
   const state = $state.get();
   const filtered = applyPlotFilters(state, lastData);
   const detail = currentDetail();
-  renderPlot(state, filtered, detail);
+  const fieldName = quantileDetails
+    ? getFieldName(quantileDetails, state.quantileField)
+    : state.quantileField;
+  renderPlot(state, filtered, detail, fieldName);
 
   // Restore visibility after render (clearPlot hides it during resize debounce)
   const plotEl = document.getElementById('plot')!;

@@ -2,20 +2,23 @@ import * as Plot from '@observablehq/plot';
 import * as d3 from 'd3';
 import type { CharacteristicsState, CharacteristicsMeasure, ComparisonField } from './state';
 import type { EnrichedQuantileRow } from './query';
-import type { Race, Sex } from '../../data/types';
+import type { Race, Sex } from '../../domain/mortality';
 import {
   CHARACTERISTICS_MEASURE_STYLE, COMPARISON_FIELD_LABEL, QUANTILE_NAME,
   RACE_STYLE, SEX_STYLE, PALETTE,
 } from '../shared/visual';
 import { plotSymbolPath } from '../shared/plotSymbols';
-import type { QuantileDetail } from './quantileDetails';
-import { formatQuantileRange } from './quantileDetails';
+import { formatQuantileRange, type QuantileDetail } from '../../data-access';
 
 // --- Title generation ---
 
-export function generateTitle(state: CharacteristicsState, detail: QuantileDetail | undefined): string {
+export function generateTitle(
+  state: CharacteristicsState,
+  detail: QuantileDetail | undefined,
+  fieldName: string = state.quantileField,
+): string {
   const measure = CHARACTERISTICS_MEASURE_STYLE[state.measure].label;
-  const fieldLabel = detail?.name ?? state.quantileField;
+  const fieldLabel = detail?.name ?? fieldName;
 
   const comparisons = [state.compareColor, state.compareFacet]
     .filter(c => c !== 'none')
@@ -169,13 +172,14 @@ export function renderPlot(
   state: CharacteristicsState,
   data: EnrichedQuantileRow[],
   detail: QuantileDetail | undefined,
+  fieldName: string = state.quantileField,
 ): void {
   const plotEl = document.getElementById('plot')!;
   const legendEl = document.getElementById('plot-legend');
   const titleEl = document.getElementById('title')!;
   const sourceEl = document.getElementById('plot-source')!;
 
-  titleEl.textContent = generateTitle(state, detail);
+  titleEl.textContent = generateTitle(state, detail, fieldName);
   sourceEl.textContent = detail
     ? `County-level measure source: ${detail.source}, ${detail.dataYears}`
     : '';
@@ -216,7 +220,7 @@ export function renderPlot(
   const xTickFormat = (v: string) => tickLabels[v] ?? v;
 
   // X-axis label
-  const fieldLabel = detail?.name ?? state.quantileField;
+  const fieldLabel = detail?.name ?? fieldName;
   const unitLabel = detail?.unit ? ` (${detail.unit})` : '';
   const xLabel = `${fieldLabel}${unitLabel}`;
 

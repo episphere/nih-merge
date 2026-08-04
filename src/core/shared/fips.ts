@@ -1,4 +1,4 @@
-import stateFipsCsv from '../../data/state-fips.csv?raw'
+import { stateFipsCsv } from '../../data-access/geography'
 
 interface StateInfo {
   name: string

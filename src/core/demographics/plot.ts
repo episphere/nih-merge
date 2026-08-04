@@ -2,8 +2,8 @@ import * as Plot from '@observablehq/plot';
 import * as d3 from 'd3';
 import type { DemographicsState, ComparisonField, Measure } from './state';
 import { categoricalSort, type EnrichedAgeRow } from './query';
-import type { Race, Sex } from '../../data/types';
-import { ALL_RACES, ALL_AGE_GROUPS } from '../../data/types';
+import type { Race, Sex } from '../../domain/mortality';
+import { ALL_RACES, ALL_AGE_GROUPS } from '../../domain/mortality';
 import {
   MEASURE_STYLE, COMPARISON_FIELD_LABEL,
   RACE_STYLE, SEX_STYLE, PALETTE,

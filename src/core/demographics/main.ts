@@ -9,7 +9,7 @@ import { fetchData, applyPlotFilters, deriveFilterOptions, type EnrichedAgeRow }
 import { renderPlot } from './plot';
 import { createPlotTooltip, type PlotTooltipField } from '../shared/plotTooltip';
 import { COMPARISON_FIELD_LABEL, MEASURE_STYLE } from '../shared/visual';
-import { parquetUrl, ageFile } from '../../data/dataManager';
+import { dataAssetUrl, ageFile } from '../../data-access';
 import type { TableInfo, TableFilterSpec } from '../shared/tableFilters';
 
 // 1. Layout
@@ -29,7 +29,7 @@ function getTableInfo(): TableInfo {
     { column: 'ageGroup', value: compAxes.includes('ageGroup') ? '*' : state.ageGroup },
     { column: 'stateFips', value: state.stateFips },
   ];
-  return { url: parquetUrl(ageFile(state.year)), filters };
+  return { url: dataAssetUrl(ageFile(state.year)), filters };
 }
 
 initControls($state, update);

@@ -1,4 +1,4 @@
-import type { CancerSite, Sex } from '../../../data/types';
+import type { CancerSite, Sex } from '../../../domain/mortality';
 
 const FEMALE_ONLY_CANCERS: CancerSite[] = ['Cervix Uteri', 'Corpus and Uterus', 'Ovary'];
 
