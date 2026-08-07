@@ -152,7 +152,19 @@ const mapTooltipHandle: MapTooltipHandle = initMapTooltip((cardIndex, featureId)
   if (!data) return null;
   const indexField = card.state.spatialLevel === 'county' ? 'countyFips' : 'stateFips';
   const row = data.find((r) => r[indexField] === featureId);
-  return { row, spatialLevel: card.state.spatialLevel, measure: state.measure };
+  const isConnecticutCounty = card.state.spatialLevel === 'county' && featureId.startsWith('09');
+  const hasNoConnecticutCountyData = isConnecticutCounty
+    && (state.measure === 'ageAdjustedRate' || state.measure === 'crudeRate' || state.measure === 'population')
+    && (card.state.year === '2018-2024' || Number(card.state.year) >= 2020);
+
+  return {
+    row,
+    spatialLevel: card.state.spatialLevel,
+    measure: state.measure,
+    unavailableMessage: hasNoConnecticutCountyData
+      ? 'No county-level rates available for Connecticut after 2019 (see documentation)'
+      : undefined,
+  };
 });
 
 // 6. Render loop with query-key separation

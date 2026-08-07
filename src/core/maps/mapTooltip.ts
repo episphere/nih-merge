@@ -15,6 +15,7 @@ export interface CardInfo {
   row: Record<string, unknown> | undefined;
   spatialLevel: 'county' | 'state';
   measure: string;
+  unavailableMessage?: string;
 }
 
 export interface CardDensityData {
@@ -221,7 +222,11 @@ export function initMapTooltip(
     return String(val);
   }
 
-  function bindCard(container: HTMLElement, cardIndex: number, features: { id: string }[]) {
+  function bindCard(
+    container: HTMLElement,
+    cardIndex: number,
+    features: { id: string; properties?: { name?: string } }[],
+  ) {
     const firstGroup = container.querySelector<SVGGElement>("g[aria-label='geo']");
     if (!firstGroup) return;
     const svg = firstGroup.closest('svg');
@@ -245,11 +250,11 @@ export function initMapTooltip(
       path.addEventListener('mousemove', (e: MouseEvent) => {
         const featureId = feature.id;
         const info = getCardInfo(cardIndex, featureId);
-        if (!info?.row) return;
+        if (!info) return;
 
-        const val = info.row[info.measure] as number | undefined;
+        const val = info.row?.[info.measure] as number | undefined;
 
-        let name = (info.row['regionName'] as string) ?? featureId;
+        let name = (info.row?.['regionName'] as string) ?? feature.properties?.name ?? featureId;
         if (info.spatialLevel === 'county' && featureId.length === 5) {
           const stateFips = featureId.slice(0, 2);
           const stateName = fipsName(stateFips);
@@ -259,9 +264,10 @@ export function initMapTooltip(
         }
 
         nameEl.textContent = name;
-        valueEl.textContent = val != null ? formatValue(val) : 'N/A';
+        valueEl.textContent = info.unavailableMessage ?? (val != null ? formatValue(val) : 'Not Applicable');
+        densityContainer.style.display = val != null && !info.unavailableMessage ? '' : 'none';
 
-        if (val != null) {
+        if (val != null && !info.unavailableMessage) {
           positionRedDot(val);
         } else if (redDot) {
           redDot.style.display = 'none';
