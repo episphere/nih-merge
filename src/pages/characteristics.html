@@ -76,6 +76,9 @@
 
               <h3 class="nci-heading-h3">Select</h3>
 
+              <label class="usa-label text-bold usa-label-short-margin" for="select-select-year">Year</label>
+              <select class="usa-select" name="select-select-year" id="select-select-year" disabled></select>
+
               <label class="usa-label text-bold usa-label-short-margin" for="select-select-cause">Cancer Site</label>
               <div id="combo-select-cause" class="usa-combo-box">
                 <select class="usa-select" name="select-select-cause" id="select-select-cause" disabled></select>
@@ -127,7 +130,9 @@
             <div id="plot-container-container" class="margin-x-0 margin-y-1 height-full display-flex flex-justify-center">
               <div id="plot-container" style="display: grid; grid-template-rows: auto 1fr auto auto; min-height: 550px;">
                 <h3 id="title" class="margin-0 padding-top-2 padding-x-3 text-center"></h3>
-                <div id="plot" style="overflow-x: auto; overflow-y: hidden; min-height: 0;"></div>
+                <div id="plot" style="overflow-x: auto; overflow-y: hidden; min-height: 0;" aria-busy="true">
+                  <div class="epi-plot-loading" role="status">Loading plot data</div>
+                </div>
                 <div id="plot-legend"></div>
                 <p id="plot-source" class="margin-0 margin-top-1 padding-x-3 padding-bottom-1 text-right" style="font-size: 11px; color: #888;"></p>
               </div>

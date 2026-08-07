@@ -1,5 +1,5 @@
 import {
-  ALL_CANCER_SITES, ALL_RACES, ALL_AGE_GROUPS,
+  ALL_CANCER_SITES, ALL_RACES, ALL_AGE_GROUPS, ALL_YEARS,
   type Year, type CancerSite, type Race, type Sex, type AgeGroup,
 } from '../../domain/mortality';
 import { ALL_STATE_FIPS } from '../shared/fips';
@@ -73,7 +73,7 @@ export const DEMOGRAPHICS_DEFAULTS: DemographicsState = {
   compareBarFilterOptions: [],
   compareFacetFilterOptions: [],
 
-  yearOptions: ['2022'],
+  yearOptions: [...ALL_YEARS],
   causeOptions: ['All', ...ALL_CANCER_SITES],
   raceOptions: ['All', ...ALL_RACES],
   sexOptions: ['All', 'Male', 'Female'],

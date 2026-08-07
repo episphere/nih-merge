@@ -1,5 +1,5 @@
 import {
-  ALL_CANCER_SITES, ALL_RACES, ALL_FIELD_IDS,
+  ALL_CANCER_SITES, ALL_RACES, ALL_FIELD_IDS, ALL_YEARS,
   type CancerSite, type Race, type Sex, type FieldId, type Year,
 } from '../../domain/mortality';
 import { causeSexRule, comparisonMutualExclusionRule, comparisonDisablesFilterRule } from '../shared/state/rules';
@@ -106,7 +106,7 @@ export const CHARACTERISTICS_DEFAULTS: CharacteristicsState = {
   sexOptions: ['All', 'Male', 'Female'],
   quantileFieldOptions: [...ALL_FIELD_IDS],
   quantileNumberOptions: ['3', '4', '5', '10'],
-  yearOptions: ['2018', '2019', '2020', '2021', '2022'],
+  yearOptions: [...ALL_YEARS],
   measureOptions: ALL_MEASURES,
   compareColorOptions: ALL_COMPARISON_FIELDS,
   compareFacetOptions: ALL_COMPARISON_FIELDS,

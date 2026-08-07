@@ -1,5 +1,5 @@
 import {
-  ALL_CANCER_SITES, ALL_RACES,
+  ALL_CANCER_SITES, ALL_RACES, ALL_YEARS,
   type Year, type CancerSite, type Race, type Sex,
 } from '../../domain/mortality';
 import { ALL_STATE_FIPS } from '../shared/fips';
@@ -108,7 +108,7 @@ export const MAPS_DEFAULTS: MapsState = {
   editCauseOptions: ['All', ...ALL_CANCER_SITES],
   editRaceOptions: ['All', ...ALL_RACES],
   editStateFipsOptions: ['All', ...ALL_STATE_FIPS],
-  editYearOptions: ['2022'],
+  editYearOptions: [...ALL_YEARS],
   measureOptions: ['ageAdjustedRate', 'crudeRate', 'deaths', 'population'],
 };
 
