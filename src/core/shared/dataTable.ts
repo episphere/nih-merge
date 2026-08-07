@@ -3,6 +3,7 @@
  */
 import { createDataTable, type DataTable, type Filter } from '@jeyabbalas/data-table';
 import '@jeyabbalas/data-table/styles';
+import { queryParquet } from '../../data-access/duckdb-parquet';
 
 export type { DataTable };
 
@@ -30,25 +31,31 @@ export async function renderDataTableFromUrl(
   url: string,
   filters: Filter[],
 ): Promise<DataTable> {
-  container.innerHTML = '';
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Failed to load table data: ${response.status}`);
-  }
-  const source = await response.blob();
-  const table = await createDataTable({
-    container,
-    source,
-    sourceFormat: 'parquet',
-    persistence: false,
-    presets: false,
-    undoRedo: true,
-    expressionFilter: false,
-    colorScheme: 'light',
-  });
+  const clauses: string[] = [];
+  const parameters: unknown[] = [];
+
   for (const filter of filters) {
-    console.log(filter);
-    table.actions.addFilter(filter);
+    const column = `"${filter.column.replaceAll('"', '""')}"`;
+    if (filter.type === 'point') {
+      if (filter.value === null) {
+        clauses.push(`${column} IS NULL`);
+      } else {
+        clauses.push(`${column} = ?`);
+        parameters.push(filter.value);
+      }
+    } else if (filter.type === 'set' || filter.type === 'not-set') {
+      if (filter.values.length === 0) {
+        clauses.push(filter.type === 'set' ? 'FALSE' : 'TRUE');
+      } else {
+        const operator = filter.type === 'set' ? 'IN' : 'NOT IN';
+        clauses.push(`${column} ${operator} (${filter.values.map(() => '?').join(', ')})`);
+        parameters.push(...filter.values);
+      }
+    } else {
+      throw new Error(`Unsupported initial table filter: ${filter.type}`);
+    }
   }
-  return table;
+
+  const rows = await queryParquet(url, [], clauses.length > 0 ? clauses.join(' AND ') : 'TRUE', parameters);
+  return renderDataTable(container, rows);
 }

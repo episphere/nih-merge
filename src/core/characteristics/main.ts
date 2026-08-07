@@ -57,6 +57,7 @@ let lastData: EnrichedQuantileRow[] = [];
 let renderVersion = 0;
 let prevQuerySnapshot = '';
 let quantileDetails: QuantileDetailsIndex | null = null;
+let hasCompletedInitialFetch = false;
 
 function arraysEqual(a: string[], b: string[]): boolean {
   return a.length === b.length && a.every((v, i) => v === b[i]);
@@ -94,6 +95,7 @@ $state.subscribe(async (state) => {
     const data = await fetchData(state);
     if (version !== renderVersion) return; // stale
     lastData = data;
+    hasCompletedInitialFetch = true;
 
     // Update filter options from the actual query results
     const filterOptions = deriveFilterOptions(state, data);
@@ -172,16 +174,21 @@ function highlightSeries(container: HTMLElement, row: Record<string, unknown> | 
 }
 
 function render(): void {
+  // Metadata and resize callbacks can run before the first mortality query.
+  // Do not interpret the initial empty array as a completed no-data result.
+  if (!hasCompletedInitialFetch) return;
+
   const state = $state.get();
   const filtered = applyPlotFilters(state, lastData);
   const detail = currentDetail();
   const fieldName = quantileDetails
     ? getFieldName(quantileDetails, state.quantileField)
     : state.quantileField;
+  const plotEl = document.getElementById('plot')!;
+  plotEl.setAttribute('aria-busy', 'false');
   renderPlot(state, filtered, detail, fieldName);
 
   // Restore visibility after render (clearPlot hides it during resize debounce)
-  const plotEl = document.getElementById('plot')!;
   plotEl.style.visibility = '';
 
   // Bind tooltip to dot marks

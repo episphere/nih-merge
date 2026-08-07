@@ -1,55 +1,95 @@
-import { parquetReadObjects, type AsyncBuffer } from 'hyparquet'
 import type {
   AgeFilters, AgeRow, CountyFilters, CountyRow, DataManager, FilterValue,
   MortalityFilters, MortalityRow, PopulationFilters, PopulationRow,
   QuantileFilters, QuantileRow,
 } from '../domain/mortality'
 import { ageFile, countyFile, dataAssetUrl, populationFile, quantileFile } from './assets'
+import { queryParquet } from './duckdb-parquet'
 
-const cache = new Map<string, Promise<Record<string, unknown>[]>>()
+const COUNTY_COLUMNS = [
+  'stateFips', 'countyFips', 'cause', 'race', 'sex',
+  'deaths', 'population', 'crudeRate', 'ageAdjustedRate',
+] as const
+const AGE_COLUMNS = [
+  'stateFips', 'cause', 'race', 'sex', 'ageGroup',
+  'deaths', 'population', 'crudeRate', 'ageAdjustedRate',
+] as const
+const QUANTILE_COLUMNS = [
+  'chr_field_id', 'quantile_bin', 'cause', 'race', 'sex',
+  'deaths', 'population', 'crudeRate', 'ageAdjustedRate',
+] as const
+const POPULATION_COLUMNS = [
+  'stateFips', 'countyFips', 'race', 'sex', 'ageGroup', 'population',
+] as const
 
-async function fetchParquetBuffer(url: string): Promise<AsyncBuffer> {
-  const response = await fetch(url)
-  if (!response.ok) throw new Error(`fetch failed ${response.status} for ${url}`)
-  const buffer = await response.arrayBuffer()
-  return { byteLength: buffer.byteLength, slice(start, end) { return buffer.slice(start, end) } }
+interface SqlFilter {
+  column: string
+  value: FilterValue<string> | undefined
 }
 
-async function loadParquet(fileName: string): Promise<Record<string, unknown>[]> {
-  const url = dataAssetUrl(fileName)
-  let pending = cache.get(url)
-  if (!pending) {
-    pending = fetchParquetBuffer(url).then((file) => parquetReadObjects({ file })).then((rows) => {
-      for (const row of rows) for (const key in row) if (typeof row[key] === 'bigint') row[key] = Number(row[key])
-      return rows
-    })
-    cache.set(url, pending)
-    pending.catch(() => cache.delete(url))
+function buildWhere(filters: SqlFilter[]): { sql: string; parameters: string[] } {
+  const clauses: string[] = []
+  const parameters: string[] = []
+
+  for (const { column, value } of filters) {
+    const identifier = `"${column}"`
+    if (value === undefined || value === 'All') {
+      clauses.push(`${identifier} = ?`)
+      parameters.push('All')
+    } else if (value === '*') {
+      clauses.push(`${identifier} <> ?`)
+      parameters.push('All')
+    } else if (Array.isArray(value)) {
+      if (value.length === 0) {
+        clauses.push('FALSE')
+      } else {
+        clauses.push(`${identifier} IN (${value.map(() => '?').join(', ')})`)
+        parameters.push(...value)
+      }
+    } else {
+      clauses.push(`${identifier} = ?`)
+      parameters.push(value)
+    }
   }
-  return pending
+
+  return { sql: clauses.join(' AND '), parameters }
 }
 
-function matchesFilter<T extends string>(rowValue: T | 'All', filterValue: FilterValue<T> | undefined): boolean {
-  if (filterValue === undefined || filterValue === 'All') return rowValue === 'All'
-  if (filterValue === '*') return rowValue !== 'All'
-  return Array.isArray(filterValue) ? (filterValue as string[]).includes(rowValue) : rowValue === filterValue
-}
-
-function applyFilters<TRow>(rows: Record<string, unknown>[], filters: [string, FilterValue<string> | undefined][]): TRow[] {
-  return rows.filter((row) => filters.every(([field, value]) => matchesFilter(row[field] as string, value))) as TRow[]
+async function queryFile<TRow>(
+  fileName: string,
+  columns: readonly string[],
+  filters: SqlFilter[],
+): Promise<TRow[]> {
+  const where = buildWhere(filters)
+  return queryParquet(dataAssetUrl(fileName), columns, where.sql, where.parameters) as Promise<TRow[]>
 }
 
 async function queryCounty(filters: CountyFilters): Promise<CountyRow[]> {
-  return applyFilters(await loadParquet(countyFile(filters.year)), [['cause', filters.cause], ['race', filters.race], ['sex', filters.sex], ['stateFips', filters.stateFips], ['countyFips', filters.countyFips]])
+  return queryFile(countyFile(filters.year), COUNTY_COLUMNS, [
+    { column: 'cause', value: filters.cause }, { column: 'race', value: filters.race },
+    { column: 'sex', value: filters.sex }, { column: 'stateFips', value: filters.stateFips },
+    { column: 'countyFips', value: filters.countyFips },
+  ])
 }
 async function queryAge(filters: AgeFilters): Promise<AgeRow[]> {
-  return applyFilters(await loadParquet(ageFile(filters.year)), [['cause', filters.cause], ['race', filters.race], ['sex', filters.sex], ['stateFips', filters.stateFips], ['ageGroup', filters.ageGroup]])
+  return queryFile(ageFile(filters.year), AGE_COLUMNS, [
+    { column: 'cause', value: filters.cause }, { column: 'race', value: filters.race },
+    { column: 'sex', value: filters.sex }, { column: 'stateFips', value: filters.stateFips },
+    { column: 'ageGroup', value: filters.ageGroup },
+  ])
 }
 async function queryQuantile(filters: QuantileFilters): Promise<QuantileRow[]> {
-  return applyFilters(await loadParquet(quantileFile(filters.quantileType, filters.year)), [['cause', filters.cause], ['race', filters.race], ['sex', filters.sex], ['chr_field_id', filters.chr_field_id]])
+  return queryFile(quantileFile(filters.quantileType, filters.year), QUANTILE_COLUMNS, [
+    { column: 'cause', value: filters.cause }, { column: 'race', value: filters.race },
+    { column: 'sex', value: filters.sex }, { column: 'chr_field_id', value: filters.chr_field_id },
+  ])
 }
 async function queryPopulation(filters: PopulationFilters): Promise<PopulationRow[]> {
-  return applyFilters(await loadParquet(populationFile(filters.year)), [['race', filters.race], ['sex', filters.sex], ['stateFips', filters.stateFips], ['countyFips', filters.countyFips], ['ageGroup', filters.ageGroup]])
+  return queryFile(populationFile(filters.year), POPULATION_COLUMNS, [
+    { column: 'race', value: filters.race }, { column: 'sex', value: filters.sex },
+    { column: 'stateFips', value: filters.stateFips }, { column: 'countyFips', value: filters.countyFips },
+    { column: 'ageGroup', value: filters.ageGroup },
+  ])
 }
 async function queryMortality(filters: MortalityFilters): Promise<MortalityRow[]> {
   return (await queryAge(filters)).map(({ race, sex, population, cause, deaths, crudeRate, ageAdjustedRate }) => ({ race, sex, population, cause, deaths, crudeRate, ageAdjustedRate }))

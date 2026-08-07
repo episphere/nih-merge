@@ -128,7 +128,9 @@
             <div id="plot-container-container" class="margin-x-0 margin-y-1 height-full display-flex flex-justify-center">
               <div id="plot-container" style="display: grid; grid-template-rows: auto 1fr; width: 100%;">
                 <h3 id="title" class="margin-0 padding-top-2 padding-x-3 text-center"></h3>
-                <div id="plot" style="overflow-x: auto; overflow-y: hidden;"></div>
+                <div id="plot" style="overflow-x: auto; overflow-y: hidden;" aria-busy="true">
+                  <div class="epi-plot-loading" role="status">Loading plot data</div>
+                </div>
               </div>
             </div>
           </div>

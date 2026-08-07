@@ -52,6 +52,7 @@ const QUERY_KEYS: (keyof DemographicsState)[] = [
 let lastData: EnrichedAgeRow[] = [];
 let renderVersion = 0;
 let prevQuerySnapshot: string = '';
+let hasCompletedInitialFetch = false;
 
 function arraysEqual(a: string[], b: string[]): boolean {
   return a.length === b.length && a.every((v, i) => v === b[i]);
@@ -71,6 +72,7 @@ $state.subscribe(async (state) => {
     const data = await fetchData(state);
     if (version !== renderVersion) return; // stale
     lastData = data;
+    hasCompletedInitialFetch = true;
 
     // Update filter options from the actual query results (only if changed to avoid loop)
     const filterOptions = deriveFilterOptions(state, data);
@@ -89,12 +91,17 @@ $state.subscribe(async (state) => {
 const plotTooltip = createPlotTooltip();
 
 function render(): void {
+  // Resize observers may fire while DuckDB is still loading the first file.
+  // An empty array is not a real no-data result until that query completes.
+  if (!hasCompletedInitialFetch) return;
+
   const state = $state.get();
   const filtered = applyPlotFilters(state, lastData);
+  const plotEl = document.getElementById('plot')!;
+  plotEl.setAttribute('aria-busy', 'false');
   renderPlot(state, filtered);
 
   // Restore visibility after render (clearPlot hides it during resize debounce)
-  const plotEl = document.getElementById('plot')!;
   plotEl.style.visibility = '';
 
   // Bind tooltip to bar marks
