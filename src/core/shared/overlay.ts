@@ -144,7 +144,6 @@ export function createOverlay(options: OverlayOptions = {}): OverlayHandle {
   let spinnerEl: HTMLElement | null = null;
 
   function showLoading() {
-    contentEl.style.display = 'none';
     if (!spinnerEl) {
       spinnerEl = document.createElement('div');
       spinnerEl.className = 'epi-overlay__spinner';
@@ -153,6 +152,10 @@ export function createOverlay(options: OverlayOptions = {}): OverlayHandle {
       msg.textContent = 'Loading tabular view';
       spinnerEl.appendChild(msg);
     }
+    // Keep the body laid out while loading. Virtualized content mounted in a
+    // display:none container measures a zero-height viewport and renders no
+    // rows until the first scroll event forces a recalculation.
+    spinnerEl.style.top = `${header.offsetHeight}px`;
     panel.appendChild(spinnerEl);
   }
 
@@ -160,7 +163,6 @@ export function createOverlay(options: OverlayOptions = {}): OverlayHandle {
     if (spinnerEl && spinnerEl.parentNode) {
       spinnerEl.remove();
     }
-    contentEl.style.display = '';
   }
 
   return { el, contentEl, subtitleEl, toolbarEl, open, close, destroy, sizeToFit, onClose: onCloseHandler, showLoading, hideLoading };
