@@ -123,6 +123,25 @@ function createChoroplethPlot(
     );
   }
 
+  // Suppressed mortality values have a data row, but their death count is
+  // null. Distinguish them from genuinely missing geography (no row) with a
+  // grey stripe overlay on the white base fill.
+  if (measureField !== 'population') {
+    const isSuppressed = (d: { id: string }) => {
+      const row = spatialDataMap.get(d.id);
+      return row != null && row.deaths == null;
+    };
+    marks.push(
+      Plot.geo(featureCollection as unknown as GeoJSON.FeatureCollection, {
+        filter: isSuppressed as unknown as Plot.ChannelValue,
+        fill: 'url(#map-suppressed-stripes)',
+        stroke: 'none',
+        strokeWidth: 0,
+        pointerEvents: 'none',
+      }),
+    );
+  }
+
   for (const overlay of options.overlays) {
     const fc = Array.isArray(overlay.featureCollection)
       ? { type: 'FeatureCollection' as const, features: overlay.featureCollection }
@@ -147,10 +166,17 @@ function createChoroplethPlot(
     marks,
   });
 
-  // Inject stripe pattern defs if stripes are enabled
-  if (options.stripedExtremes) {
-    const svgDefs = `<defs><pattern id="map-stripes" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="1" height="8" fill="rgba(255, 255, 255, 1)" /></pattern></defs>`;
-    plot.insertAdjacentHTML('afterbegin', svgDefs);
+  // Inject patterns for optional outlier stripes and suppressed-value stripes.
+  const stripePatterns = [
+    options.stripedExtremes
+      ? '<pattern id="map-stripes" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="1" height="8" fill="rgba(255, 255, 255, 1)" /></pattern>'
+      : '',
+    measureField !== 'population'
+      ? '<pattern id="map-suppressed-stripes" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="1" height="8" fill="#a9aeb1" /></pattern>'
+      : '',
+  ].join('');
+  if (stripePatterns) {
+    plot.insertAdjacentHTML('afterbegin', `<defs>${stripePatterns}</defs>`);
   }
 
   const svg = plot as unknown as SVGSVGElement;
