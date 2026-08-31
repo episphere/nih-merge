@@ -1,7 +1,7 @@
 [
   {
     "chr_vintage": "2018",
-    "chr_field_id": "v002",
+    "field_id": "v002",
     "measure": "Poor or Fair Health",
     "category": "Health Outcomes",
     "data_years": "2016",
@@ -122,7 +122,7 @@
   },
   {
     "chr_vintage": "2018",
-    "chr_field_id": "v003",
+    "field_id": "v003",
     "measure": "Uninsured Adults",
     "category": "Clinical Care",
     "data_years": "2015",
@@ -243,7 +243,7 @@
   },
   {
     "chr_vintage": "2018",
-    "chr_field_id": "v004",
+    "field_id": "v004",
     "measure": "Primary Care Physicians",
     "category": "Clinical Care",
     "data_years": "2015",
@@ -364,7 +364,7 @@
   },
   {
     "chr_vintage": "2018",
-    "chr_field_id": "v009",
+    "field_id": "v009",
     "measure": "Adult Smoking",
     "category": "Health Behaviors",
     "data_years": "2016",
@@ -485,7 +485,7 @@
   },
   {
     "chr_vintage": "2018",
-    "chr_field_id": "v011",
+    "field_id": "v011",
     "measure": "Adult Obesity",
     "category": "Health Behaviors",
     "data_years": "2014",
@@ -606,7 +606,7 @@
   },
   {
     "chr_vintage": "2018",
-    "chr_field_id": "v021",
+    "field_id": "v021",
     "measure": "High School Graduation",
     "category": "Social & Economic Factors",
     "data_years": "2014-2015",
@@ -727,7 +727,7 @@
   },
   {
     "chr_vintage": "2018",
-    "chr_field_id": "v023",
+    "field_id": "v023",
     "measure": "Unemployment",
     "category": "Social & Economic Factors",
     "data_years": "2016",
@@ -848,7 +848,7 @@
   },
   {
     "chr_vintage": "2018",
-    "chr_field_id": "v024",
+    "field_id": "v024",
     "measure": "Children in Poverty",
     "category": "Social & Economic Factors",
     "data_years": "2016",
@@ -969,7 +969,7 @@
   },
   {
     "chr_vintage": "2018",
-    "chr_field_id": "v036",
+    "field_id": "v036",
     "measure": "Poor Physical Health Days",
     "category": "Health Outcomes",
     "data_years": "2016",
@@ -1090,7 +1090,7 @@
   },
   {
     "chr_vintage": "2018",
-    "chr_field_id": "v042",
+    "field_id": "v042",
     "measure": "Poor Mental Health Days",
     "category": "Health Outcomes",
     "data_years": "2016",
@@ -1211,7 +1211,7 @@
   },
   {
     "chr_vintage": "2018",
-    "chr_field_id": "v044",
+    "field_id": "v044",
     "measure": "Income Inequality",
     "category": "Social & Economic Factors",
     "data_years": "2012-2016",
@@ -1332,7 +1332,7 @@
   },
   {
     "chr_vintage": "2018",
-    "chr_field_id": "v045",
+    "field_id": "v045",
     "measure": "Sexually Transmitted Infections",
     "category": "Health Behaviors",
     "data_years": "2015",
@@ -1453,7 +1453,7 @@
   },
   {
     "chr_vintage": "2018",
-    "chr_field_id": "v049",
+    "field_id": "v049",
     "measure": "Excessive Drinking",
     "category": "Health Behaviors",
     "data_years": "2016",
@@ -1574,7 +1574,7 @@
   },
   {
     "chr_vintage": "2018",
-    "chr_field_id": "v050",
+    "field_id": "v050",
     "measure": "Mammography Screening",
     "category": "Clinical Care",
     "data_years": "2014",
@@ -1695,7 +1695,7 @@
   },
   {
     "chr_vintage": "2018",
-    "chr_field_id": "v054",
+    "field_id": "v054",
     "measure": "% Non-Hispanic Black",
     "category": "Demographics",
     "data_years": "2016",
@@ -1816,7 +1816,7 @@
   },
   {
     "chr_vintage": "2018",
-    "chr_field_id": "v055",
+    "field_id": "v055",
     "measure": "% American Indian & Alaska Native",
     "category": "Demographics",
     "data_years": "2016",
@@ -1937,7 +1937,7 @@
   },
   {
     "chr_vintage": "2018",
-    "chr_field_id": "v056",
+    "field_id": "v056",
     "measure": "% Hispanic",
     "category": "Demographics",
     "data_years": "2016",
@@ -2058,7 +2058,7 @@
   },
   {
     "chr_vintage": "2018",
-    "chr_field_id": "v058",
+    "field_id": "v058",
     "measure": "% Rural",
     "category": "Demographics",
     "data_years": "2010",
@@ -2179,7 +2179,7 @@
   },
   {
     "chr_vintage": "2018",
-    "chr_field_id": "v060",
+    "field_id": "v060",
     "measure": "Diabetes Prevalence",
     "category": "Health Outcomes",
     "data_years": "2015",
@@ -2300,7 +2300,7 @@
   },
   {
     "chr_vintage": "2018",
-    "chr_field_id": "v063",
+    "field_id": "v063",
     "measure": "Median Household Income",
     "category": "Social & Economic Factors",
     "data_years": "2016",
@@ -2421,7 +2421,7 @@
   },
   {
     "chr_vintage": "2018",
-    "chr_field_id": "v069",
+    "field_id": "v069",
     "measure": "Some College",
     "category": "Social & Economic Factors",
     "data_years": "2012-2016",
@@ -2542,7 +2542,7 @@
   },
   {
     "chr_vintage": "2018",
-    "chr_field_id": "v070",
+    "field_id": "v070",
     "measure": "Physical Inactivity",
     "category": "Health Behaviors",
     "data_years": "2014",
@@ -2663,7 +2663,7 @@
   },
   {
     "chr_vintage": "2018",
-    "chr_field_id": "v080",
+    "field_id": "v080",
     "measure": "% Native Hawaiian/Other Pacific Islander",
     "category": "Demographics",
     "data_years": "2016",
@@ -2784,7 +2784,7 @@
   },
   {
     "chr_vintage": "2018",
-    "chr_field_id": "v081",
+    "field_id": "v081",
     "measure": "% Asian",
     "category": "Demographics",
     "data_years": "2016",
@@ -2905,7 +2905,7 @@
   },
   {
     "chr_vintage": "2018",
-    "chr_field_id": "v083",
+    "field_id": "v083",
     "measure": "Limited Access to Healthy Foods",
     "category": "Health Behaviors",
     "data_years": "2015",
@@ -3026,7 +3026,7 @@
   },
   {
     "chr_vintage": "2018",
-    "chr_field_id": "v085",
+    "field_id": "v085",
     "measure": "Uninsured",
     "category": "Clinical Care",
     "data_years": "2015",
@@ -3147,7 +3147,7 @@
   },
   {
     "chr_vintage": "2018",
-    "chr_field_id": "v122",
+    "field_id": "v122",
     "measure": "Uninsured Children",
     "category": "Clinical Care",
     "data_years": "2015",
@@ -3268,7 +3268,7 @@
   },
   {
     "chr_vintage": "2018",
-    "chr_field_id": "v125",
+    "field_id": "v125",
     "measure": "Air Pollution - Particulate Matter",
     "category": "Physical Environment",
     "data_years": "2012",
@@ -3389,7 +3389,7 @@
   },
   {
     "chr_vintage": "2018",
-    "chr_field_id": "v126",
+    "field_id": "v126",
     "measure": "% Non-Hispanic White",
     "category": "Demographics",
     "data_years": "2016",
@@ -3510,7 +3510,7 @@
   },
   {
     "chr_vintage": "2018",
-    "chr_field_id": "v132",
+    "field_id": "v132",
     "measure": "Access to Exercise Opportunities",
     "category": "Health Behaviors",
     "data_years": "2010, 2016",
@@ -3631,7 +3631,7 @@
   },
   {
     "chr_vintage": "2018",
-    "chr_field_id": "v133",
+    "field_id": "v133",
     "measure": "Food Environment Index",
     "category": "Health Behaviors",
     "data_years": "2015",
@@ -3752,7 +3752,7 @@
   },
   {
     "chr_vintage": "2018",
-    "chr_field_id": "v136",
+    "field_id": "v136",
     "measure": "Severe Housing Problems",
     "category": "Physical Environment",
     "data_years": "2010-2014",
@@ -3873,7 +3873,7 @@
   },
   {
     "chr_vintage": "2018",
-    "chr_field_id": "v139",
+    "field_id": "v139",
     "measure": "Food Insecurity",
     "category": "Health Behaviors",
     "data_years": "2015",
@@ -3994,7 +3994,7 @@
   },
   {
     "chr_vintage": "2018",
-    "chr_field_id": "v140",
+    "field_id": "v140",
     "measure": "Social Associations",
     "category": "Social & Economic Factors",
     "data_years": "2015",
@@ -4115,7 +4115,7 @@
   },
   {
     "chr_vintage": "2018",
-    "chr_field_id": "v143",
+    "field_id": "v143",
     "measure": "Insufficient Sleep",
     "category": "Health Behaviors",
     "data_years": "2016",
@@ -4236,7 +4236,7 @@
   },
   {
     "chr_vintage": "2019",
-    "chr_field_id": "v002",
+    "field_id": "v002",
     "measure": "Poor or Fair Health",
     "category": "Health Outcomes",
     "data_years": "2016",
@@ -4357,7 +4357,7 @@
   },
   {
     "chr_vintage": "2019",
-    "chr_field_id": "v003",
+    "field_id": "v003",
     "measure": "Uninsured Adults",
     "category": "Clinical Care",
     "data_years": "2016",
@@ -4478,7 +4478,7 @@
   },
   {
     "chr_vintage": "2019",
-    "chr_field_id": "v004",
+    "field_id": "v004",
     "measure": "Primary Care Physicians",
     "category": "Clinical Care",
     "data_years": "2016",
@@ -4599,7 +4599,7 @@
   },
   {
     "chr_vintage": "2019",
-    "chr_field_id": "v009",
+    "field_id": "v009",
     "measure": "Adult Smoking",
     "category": "Health Behaviors",
     "data_years": "2016",
@@ -4720,7 +4720,7 @@
   },
   {
     "chr_vintage": "2019",
-    "chr_field_id": "v011",
+    "field_id": "v011",
     "measure": "Adult Obesity",
     "category": "Health Behaviors",
     "data_years": "2015",
@@ -4841,7 +4841,7 @@
   },
   {
     "chr_vintage": "2019",
-    "chr_field_id": "v021",
+    "field_id": "v021",
     "measure": "High School Graduation",
     "category": "Social & Economic Factors",
     "data_years": "2016-2017",
@@ -4962,7 +4962,7 @@
   },
   {
     "chr_vintage": "2019",
-    "chr_field_id": "v023",
+    "field_id": "v023",
     "measure": "Unemployment",
     "category": "Social & Economic Factors",
     "data_years": "2017",
@@ -5083,7 +5083,7 @@
   },
   {
     "chr_vintage": "2019",
-    "chr_field_id": "v024",
+    "field_id": "v024",
     "measure": "Children in Poverty",
     "category": "Social & Economic Factors",
     "data_years": "2017",
@@ -5204,7 +5204,7 @@
   },
   {
     "chr_vintage": "2019",
-    "chr_field_id": "v036",
+    "field_id": "v036",
     "measure": "Poor Physical Health Days",
     "category": "Health Outcomes",
     "data_years": "2016",
@@ -5325,7 +5325,7 @@
   },
   {
     "chr_vintage": "2019",
-    "chr_field_id": "v042",
+    "field_id": "v042",
     "measure": "Poor Mental Health Days",
     "category": "Health Outcomes",
     "data_years": "2016",
@@ -5446,7 +5446,7 @@
   },
   {
     "chr_vintage": "2019",
-    "chr_field_id": "v044",
+    "field_id": "v044",
     "measure": "Income Inequality",
     "category": "Social & Economic Factors",
     "data_years": "2013-2017",
@@ -5567,7 +5567,7 @@
   },
   {
     "chr_vintage": "2019",
-    "chr_field_id": "v045",
+    "field_id": "v045",
     "measure": "Sexually Transmitted Infections",
     "category": "Health Behaviors",
     "data_years": "2016",
@@ -5688,7 +5688,7 @@
   },
   {
     "chr_vintage": "2019",
-    "chr_field_id": "v049",
+    "field_id": "v049",
     "measure": "Excessive Drinking",
     "category": "Health Behaviors",
     "data_years": "2016",
@@ -5809,7 +5809,7 @@
   },
   {
     "chr_vintage": "2019",
-    "chr_field_id": "v050",
+    "field_id": "v050",
     "measure": "Mammography Screening",
     "category": "Clinical Care",
     "data_years": "2016",
@@ -5930,7 +5930,7 @@
   },
   {
     "chr_vintage": "2019",
-    "chr_field_id": "v054",
+    "field_id": "v054",
     "measure": "% Non-Hispanic Black",
     "category": "Demographics",
     "data_years": "2017",
@@ -6051,7 +6051,7 @@
   },
   {
     "chr_vintage": "2019",
-    "chr_field_id": "v055",
+    "field_id": "v055",
     "measure": "% American Indian & Alaska Native",
     "category": "Demographics",
     "data_years": "2017",
@@ -6172,7 +6172,7 @@
   },
   {
     "chr_vintage": "2019",
-    "chr_field_id": "v056",
+    "field_id": "v056",
     "measure": "% Hispanic",
     "category": "Demographics",
     "data_years": "2017",
@@ -6293,7 +6293,7 @@
   },
   {
     "chr_vintage": "2019",
-    "chr_field_id": "v058",
+    "field_id": "v058",
     "measure": "% Rural",
     "category": "Demographics",
     "data_years": "2010",
@@ -6414,7 +6414,7 @@
   },
   {
     "chr_vintage": "2019",
-    "chr_field_id": "v060",
+    "field_id": "v060",
     "measure": "Diabetes Prevalence",
     "category": "Health Outcomes",
     "data_years": "2015",
@@ -6535,7 +6535,7 @@
   },
   {
     "chr_vintage": "2019",
-    "chr_field_id": "v063",
+    "field_id": "v063",
     "measure": "Median Household Income",
     "category": "Social & Economic Factors",
     "data_years": "2017",
@@ -6656,7 +6656,7 @@
   },
   {
     "chr_vintage": "2019",
-    "chr_field_id": "v069",
+    "field_id": "v069",
     "measure": "Some College",
     "category": "Social & Economic Factors",
     "data_years": "2013-2017",
@@ -6777,7 +6777,7 @@
   },
   {
     "chr_vintage": "2019",
-    "chr_field_id": "v070",
+    "field_id": "v070",
     "measure": "Physical Inactivity",
     "category": "Health Behaviors",
     "data_years": "2015",
@@ -6898,7 +6898,7 @@
   },
   {
     "chr_vintage": "2019",
-    "chr_field_id": "v080",
+    "field_id": "v080",
     "measure": "% Native Hawaiian/Other Pacific Islander",
     "category": "Demographics",
     "data_years": "2017",
@@ -7019,7 +7019,7 @@
   },
   {
     "chr_vintage": "2019",
-    "chr_field_id": "v081",
+    "field_id": "v081",
     "measure": "% Asian",
     "category": "Demographics",
     "data_years": "2017",
@@ -7140,7 +7140,7 @@
   },
   {
     "chr_vintage": "2019",
-    "chr_field_id": "v083",
+    "field_id": "v083",
     "measure": "Limited Access to Healthy Foods",
     "category": "Health Behaviors",
     "data_years": "2015",
@@ -7261,7 +7261,7 @@
   },
   {
     "chr_vintage": "2019",
-    "chr_field_id": "v085",
+    "field_id": "v085",
     "measure": "Uninsured",
     "category": "Clinical Care",
     "data_years": "2016",
@@ -7382,7 +7382,7 @@
   },
   {
     "chr_vintage": "2019",
-    "chr_field_id": "v122",
+    "field_id": "v122",
     "measure": "Uninsured Children",
     "category": "Clinical Care",
     "data_years": "2016",
@@ -7503,7 +7503,7 @@
   },
   {
     "chr_vintage": "2019",
-    "chr_field_id": "v125",
+    "field_id": "v125",
     "measure": "Air Pollution - Particulate Matter",
     "category": "Physical Environment",
     "data_years": "2014",
@@ -7624,7 +7624,7 @@
   },
   {
     "chr_vintage": "2019",
-    "chr_field_id": "v126",
+    "field_id": "v126",
     "measure": "% Non-Hispanic White",
     "category": "Demographics",
     "data_years": "2017",
@@ -7745,7 +7745,7 @@
   },
   {
     "chr_vintage": "2019",
-    "chr_field_id": "v132",
+    "field_id": "v132",
     "measure": "Access to Exercise Opportunities",
     "category": "Health Behaviors",
     "data_years": "2010, 2018",
@@ -7866,7 +7866,7 @@
   },
   {
     "chr_vintage": "2019",
-    "chr_field_id": "v133",
+    "field_id": "v133",
     "measure": "Food Environment Index",
     "category": "Health Behaviors",
     "data_years": "2015, 2016",
@@ -7987,7 +7987,7 @@
   },
   {
     "chr_vintage": "2019",
-    "chr_field_id": "v136",
+    "field_id": "v136",
     "measure": "Severe Housing Problems",
     "category": "Physical Environment",
     "data_years": "2011-2015",
@@ -8108,7 +8108,7 @@
   },
   {
     "chr_vintage": "2019",
-    "chr_field_id": "v139",
+    "field_id": "v139",
     "measure": "Food Insecurity",
     "category": "Health Behaviors",
     "data_years": "2016",
@@ -8229,7 +8229,7 @@
   },
   {
     "chr_vintage": "2019",
-    "chr_field_id": "v140",
+    "field_id": "v140",
     "measure": "Social Associations",
     "category": "Social & Economic Factors",
     "data_years": "2016",
@@ -8350,7 +8350,7 @@
   },
   {
     "chr_vintage": "2019",
-    "chr_field_id": "v143",
+    "field_id": "v143",
     "measure": "Insufficient Sleep",
     "category": "Health Behaviors",
     "data_years": "2016",
@@ -8471,7 +8471,7 @@
   },
   {
     "chr_vintage": "2019",
-    "chr_field_id": "v153",
+    "field_id": "v153",
     "measure": "Homeownership",
     "category": "Physical Environment",
     "data_years": "2013-2017",
@@ -8592,7 +8592,7 @@
   },
   {
     "chr_vintage": "2019",
-    "chr_field_id": "v154",
+    "field_id": "v154",
     "measure": "Severe Housing Cost Burden",
     "category": "Physical Environment",
     "data_years": "2013-2017",
@@ -8713,7 +8713,7 @@
   },
   {
     "chr_vintage": "2020",
-    "chr_field_id": "v002",
+    "field_id": "v002",
     "measure": "Poor or Fair Health",
     "category": "Health Outcomes",
     "data_years": "2017",
@@ -8834,7 +8834,7 @@
   },
   {
     "chr_vintage": "2020",
-    "chr_field_id": "v003",
+    "field_id": "v003",
     "measure": "Uninsured Adults",
     "category": "Clinical Care",
     "data_years": "2017",
@@ -8955,7 +8955,7 @@
   },
   {
     "chr_vintage": "2020",
-    "chr_field_id": "v004",
+    "field_id": "v004",
     "measure": "Primary Care Physicians",
     "category": "Clinical Care",
     "data_years": "2017",
@@ -9076,7 +9076,7 @@
   },
   {
     "chr_vintage": "2020",
-    "chr_field_id": "v009",
+    "field_id": "v009",
     "measure": "Adult Smoking",
     "category": "Health Behaviors",
     "data_years": "2017",
@@ -9197,7 +9197,7 @@
   },
   {
     "chr_vintage": "2020",
-    "chr_field_id": "v011",
+    "field_id": "v011",
     "measure": "Adult Obesity",
     "category": "Health Behaviors",
     "data_years": "2016",
@@ -9318,7 +9318,7 @@
   },
   {
     "chr_vintage": "2020",
-    "chr_field_id": "v021",
+    "field_id": "v021",
     "measure": "High School Graduation",
     "category": "Social & Economic Factors",
     "data_years": "Varies",
@@ -9439,7 +9439,7 @@
   },
   {
     "chr_vintage": "2020",
-    "chr_field_id": "v023",
+    "field_id": "v023",
     "measure": "Unemployment",
     "category": "Social & Economic Factors",
     "data_years": "2018",
@@ -9560,7 +9560,7 @@
   },
   {
     "chr_vintage": "2020",
-    "chr_field_id": "v024",
+    "field_id": "v024",
     "measure": "Children in Poverty",
     "category": "Social & Economic Factors",
     "data_years": "2018",
@@ -9681,7 +9681,7 @@
   },
   {
     "chr_vintage": "2020",
-    "chr_field_id": "v036",
+    "field_id": "v036",
     "measure": "Poor Physical Health Days",
     "category": "Health Outcomes",
     "data_years": "2017",
@@ -9802,7 +9802,7 @@
   },
   {
     "chr_vintage": "2020",
-    "chr_field_id": "v042",
+    "field_id": "v042",
     "measure": "Poor Mental Health Days",
     "category": "Health Outcomes",
     "data_years": "2017",
@@ -9923,7 +9923,7 @@
   },
   {
     "chr_vintage": "2020",
-    "chr_field_id": "v044",
+    "field_id": "v044",
     "measure": "Income Inequality",
     "category": "Social & Economic Factors",
     "data_years": "2014-2018",
@@ -10044,7 +10044,7 @@
   },
   {
     "chr_vintage": "2020",
-    "chr_field_id": "v045",
+    "field_id": "v045",
     "measure": "Sexually Transmitted Infections",
     "category": "Health Behaviors",
     "data_years": "2017",
@@ -10165,7 +10165,7 @@
   },
   {
     "chr_vintage": "2020",
-    "chr_field_id": "v049",
+    "field_id": "v049",
     "measure": "Excessive Drinking",
     "category": "Health Behaviors",
     "data_years": "2017",
@@ -10286,7 +10286,7 @@
   },
   {
     "chr_vintage": "2020",
-    "chr_field_id": "v050",
+    "field_id": "v050",
     "measure": "Mammography Screening",
     "category": "Clinical Care",
     "data_years": "2017",
@@ -10407,7 +10407,7 @@
   },
   {
     "chr_vintage": "2020",
-    "chr_field_id": "v054",
+    "field_id": "v054",
     "measure": "% Non-Hispanic Black",
     "category": "Demographics",
     "data_years": "2018",
@@ -10528,7 +10528,7 @@
   },
   {
     "chr_vintage": "2020",
-    "chr_field_id": "v055",
+    "field_id": "v055",
     "measure": "% American Indian & Alaska Native",
     "category": "Demographics",
     "data_years": "2018",
@@ -10649,7 +10649,7 @@
   },
   {
     "chr_vintage": "2020",
-    "chr_field_id": "v056",
+    "field_id": "v056",
     "measure": "% Hispanic",
     "category": "Demographics",
     "data_years": "2018",
@@ -10770,7 +10770,7 @@
   },
   {
     "chr_vintage": "2020",
-    "chr_field_id": "v058",
+    "field_id": "v058",
     "measure": "% Rural",
     "category": "Demographics",
     "data_years": "2010",
@@ -10891,7 +10891,7 @@
   },
   {
     "chr_vintage": "2020",
-    "chr_field_id": "v060",
+    "field_id": "v060",
     "measure": "Diabetes Prevalence",
     "category": "Health Outcomes",
     "data_years": "2016",
@@ -11012,7 +11012,7 @@
   },
   {
     "chr_vintage": "2020",
-    "chr_field_id": "v063",
+    "field_id": "v063",
     "measure": "Median Household Income",
     "category": "Social & Economic Factors",
     "data_years": "2018",
@@ -11133,7 +11133,7 @@
   },
   {
     "chr_vintage": "2020",
-    "chr_field_id": "v069",
+    "field_id": "v069",
     "measure": "Some College",
     "category": "Social & Economic Factors",
     "data_years": "2014-2018",
@@ -11254,7 +11254,7 @@
   },
   {
     "chr_vintage": "2020",
-    "chr_field_id": "v070",
+    "field_id": "v070",
     "measure": "Physical Inactivity",
     "category": "Health Behaviors",
     "data_years": "2016",
@@ -11375,7 +11375,7 @@
   },
   {
     "chr_vintage": "2020",
-    "chr_field_id": "v080",
+    "field_id": "v080",
     "measure": "% Native Hawaiian/Other Pacific Islander",
     "category": "Demographics",
     "data_years": "2018",
@@ -11496,7 +11496,7 @@
   },
   {
     "chr_vintage": "2020",
-    "chr_field_id": "v081",
+    "field_id": "v081",
     "measure": "% Asian",
     "category": "Demographics",
     "data_years": "2018",
@@ -11617,7 +11617,7 @@
   },
   {
     "chr_vintage": "2020",
-    "chr_field_id": "v083",
+    "field_id": "v083",
     "measure": "Limited Access to Healthy Foods",
     "category": "Health Behaviors",
     "data_years": "2015",
@@ -11738,7 +11738,7 @@
   },
   {
     "chr_vintage": "2020",
-    "chr_field_id": "v085",
+    "field_id": "v085",
     "measure": "Uninsured",
     "category": "Clinical Care",
     "data_years": "2017",
@@ -11859,7 +11859,7 @@
   },
   {
     "chr_vintage": "2020",
-    "chr_field_id": "v122",
+    "field_id": "v122",
     "measure": "Uninsured Children",
     "category": "Clinical Care",
     "data_years": "2017",
@@ -11980,7 +11980,7 @@
   },
   {
     "chr_vintage": "2020",
-    "chr_field_id": "v125",
+    "field_id": "v125",
     "measure": "Air Pollution - Particulate Matter",
     "category": "Physical Environment",
     "data_years": "2014",
@@ -12101,7 +12101,7 @@
   },
   {
     "chr_vintage": "2020",
-    "chr_field_id": "v126",
+    "field_id": "v126",
     "measure": "% Non-Hispanic White",
     "category": "Demographics",
     "data_years": "2018",
@@ -12222,7 +12222,7 @@
   },
   {
     "chr_vintage": "2020",
-    "chr_field_id": "v132",
+    "field_id": "v132",
     "measure": "Access to Exercise Opportunities",
     "category": "Health Behaviors",
     "data_years": "2010, 2019",
@@ -12343,7 +12343,7 @@
   },
   {
     "chr_vintage": "2020",
-    "chr_field_id": "v133",
+    "field_id": "v133",
     "measure": "Food Environment Index",
     "category": "Health Behaviors",
     "data_years": "2015, 2017",
@@ -12464,7 +12464,7 @@
   },
   {
     "chr_vintage": "2020",
-    "chr_field_id": "v136",
+    "field_id": "v136",
     "measure": "Severe Housing Problems",
     "category": "Physical Environment",
     "data_years": "2012-2016",
@@ -12585,7 +12585,7 @@
   },
   {
     "chr_vintage": "2020",
-    "chr_field_id": "v139",
+    "field_id": "v139",
     "measure": "Food Insecurity",
     "category": "Health Behaviors",
     "data_years": "2017",
@@ -12706,7 +12706,7 @@
   },
   {
     "chr_vintage": "2020",
-    "chr_field_id": "v140",
+    "field_id": "v140",
     "measure": "Social Associations",
     "category": "Social & Economic Factors",
     "data_years": "2017",
@@ -12827,7 +12827,7 @@
   },
   {
     "chr_vintage": "2020",
-    "chr_field_id": "v143",
+    "field_id": "v143",
     "measure": "Insufficient Sleep",
     "category": "Health Behaviors",
     "data_years": "2016",
@@ -12948,7 +12948,7 @@
   },
   {
     "chr_vintage": "2020",
-    "chr_field_id": "v153",
+    "field_id": "v153",
     "measure": "Homeownership",
     "category": "Physical Environment",
     "data_years": "2014-2018",
@@ -13069,7 +13069,7 @@
   },
   {
     "chr_vintage": "2020",
-    "chr_field_id": "v154",
+    "field_id": "v154",
     "measure": "Severe Housing Cost Burden",
     "category": "Physical Environment",
     "data_years": "2014-2018",
@@ -13190,7 +13190,7 @@
   },
   {
     "chr_vintage": "2020",
-    "chr_field_id": "v156",
+    "field_id": "v156",
     "measure": "Traffic Volume",
     "category": "Physical Environment",
     "data_years": "2018",
@@ -13311,7 +13311,7 @@
   },
   {
     "chr_vintage": "2021",
-    "chr_field_id": "v002",
+    "field_id": "v002",
     "measure": "Poor or Fair Health",
     "category": "Health Outcomes",
     "data_years": "2018",
@@ -13432,7 +13432,7 @@
   },
   {
     "chr_vintage": "2021",
-    "chr_field_id": "v003",
+    "field_id": "v003",
     "measure": "Uninsured Adults",
     "category": "Clinical Care",
     "data_years": "2018",
@@ -13553,7 +13553,7 @@
   },
   {
     "chr_vintage": "2021",
-    "chr_field_id": "v004",
+    "field_id": "v004",
     "measure": "Primary Care Physicians",
     "category": "Clinical Care",
     "data_years": "2018",
@@ -13674,7 +13674,7 @@
   },
   {
     "chr_vintage": "2021",
-    "chr_field_id": "v009",
+    "field_id": "v009",
     "measure": "Adult Smoking",
     "category": "Health Behaviors",
     "data_years": "2018",
@@ -13795,7 +13795,7 @@
   },
   {
     "chr_vintage": "2021",
-    "chr_field_id": "v011",
+    "field_id": "v011",
     "measure": "Adult Obesity",
     "category": "Health Behaviors",
     "data_years": "2017",
@@ -13916,7 +13916,7 @@
   },
   {
     "chr_vintage": "2021",
-    "chr_field_id": "v021",
+    "field_id": "v021",
     "measure": "High School Graduation",
     "category": "Social & Economic Factors",
     "data_years": "2017-2018",
@@ -14037,7 +14037,7 @@
   },
   {
     "chr_vintage": "2021",
-    "chr_field_id": "v023",
+    "field_id": "v023",
     "measure": "Unemployment",
     "category": "Social & Economic Factors",
     "data_years": "2019",
@@ -14158,7 +14158,7 @@
   },
   {
     "chr_vintage": "2021",
-    "chr_field_id": "v024",
+    "field_id": "v024",
     "measure": "Children in Poverty",
     "category": "Social & Economic Factors",
     "data_years": "2019",
@@ -14279,7 +14279,7 @@
   },
   {
     "chr_vintage": "2021",
-    "chr_field_id": "v036",
+    "field_id": "v036",
     "measure": "Poor Physical Health Days",
     "category": "Health Outcomes",
     "data_years": "2018",
@@ -14400,7 +14400,7 @@
   },
   {
     "chr_vintage": "2021",
-    "chr_field_id": "v042",
+    "field_id": "v042",
     "measure": "Poor Mental Health Days",
     "category": "Health Outcomes",
     "data_years": "2018",
@@ -14521,7 +14521,7 @@
   },
   {
     "chr_vintage": "2021",
-    "chr_field_id": "v044",
+    "field_id": "v044",
     "measure": "Income Inequality",
     "category": "Social & Economic Factors",
     "data_years": "2015-2019",
@@ -14642,7 +14642,7 @@
   },
   {
     "chr_vintage": "2021",
-    "chr_field_id": "v045",
+    "field_id": "v045",
     "measure": "Sexually Transmitted Infections",
     "category": "Health Behaviors",
     "data_years": "2018",
@@ -14763,7 +14763,7 @@
   },
   {
     "chr_vintage": "2021",
-    "chr_field_id": "v049",
+    "field_id": "v049",
     "measure": "Excessive Drinking",
     "category": "Health Behaviors",
     "data_years": "2018",
@@ -14884,7 +14884,7 @@
   },
   {
     "chr_vintage": "2021",
-    "chr_field_id": "v050",
+    "field_id": "v050",
     "measure": "Mammography Screening",
     "category": "Clinical Care",
     "data_years": "2018",
@@ -15005,7 +15005,7 @@
   },
   {
     "chr_vintage": "2021",
-    "chr_field_id": "v054",
+    "field_id": "v054",
     "measure": "% Non-Hispanic Black",
     "category": "Demographics",
     "data_years": "2019",
@@ -15126,7 +15126,7 @@
   },
   {
     "chr_vintage": "2021",
-    "chr_field_id": "v055",
+    "field_id": "v055",
     "measure": "% American Indian & Alaska Native",
     "category": "Demographics",
     "data_years": "2019",
@@ -15247,7 +15247,7 @@
   },
   {
     "chr_vintage": "2021",
-    "chr_field_id": "v056",
+    "field_id": "v056",
     "measure": "% Hispanic",
     "category": "Demographics",
     "data_years": "2019",
@@ -15368,7 +15368,7 @@
   },
   {
     "chr_vintage": "2021",
-    "chr_field_id": "v058",
+    "field_id": "v058",
     "measure": "% Rural",
     "category": "Demographics",
     "data_years": "2010",
@@ -15489,7 +15489,7 @@
   },
   {
     "chr_vintage": "2021",
-    "chr_field_id": "v060",
+    "field_id": "v060",
     "measure": "Diabetes Prevalence",
     "category": "Health Outcomes",
     "data_years": "2017",
@@ -15610,7 +15610,7 @@
   },
   {
     "chr_vintage": "2021",
-    "chr_field_id": "v063",
+    "field_id": "v063",
     "measure": "Median Household Income",
     "category": "Social & Economic Factors",
     "data_years": "2019",
@@ -15731,7 +15731,7 @@
   },
   {
     "chr_vintage": "2021",
-    "chr_field_id": "v069",
+    "field_id": "v069",
     "measure": "Some College",
     "category": "Social & Economic Factors",
     "data_years": "2015-2019",
@@ -15852,7 +15852,7 @@
   },
   {
     "chr_vintage": "2021",
-    "chr_field_id": "v070",
+    "field_id": "v070",
     "measure": "Physical Inactivity",
     "category": "Health Behaviors",
     "data_years": "2017",
@@ -15973,7 +15973,7 @@
   },
   {
     "chr_vintage": "2021",
-    "chr_field_id": "v080",
+    "field_id": "v080",
     "measure": "% Native Hawaiian/Other Pacific Islander",
     "category": "Demographics",
     "data_years": "2019",
@@ -16094,7 +16094,7 @@
   },
   {
     "chr_vintage": "2021",
-    "chr_field_id": "v081",
+    "field_id": "v081",
     "measure": "% Asian",
     "category": "Demographics",
     "data_years": "2019",
@@ -16215,7 +16215,7 @@
   },
   {
     "chr_vintage": "2021",
-    "chr_field_id": "v083",
+    "field_id": "v083",
     "measure": "Limited Access to Healthy Foods",
     "category": "Health Behaviors",
     "data_years": "2015",
@@ -16336,7 +16336,7 @@
   },
   {
     "chr_vintage": "2021",
-    "chr_field_id": "v085",
+    "field_id": "v085",
     "measure": "Uninsured",
     "category": "Clinical Care",
     "data_years": "2018",
@@ -16457,7 +16457,7 @@
   },
   {
     "chr_vintage": "2021",
-    "chr_field_id": "v122",
+    "field_id": "v122",
     "measure": "Uninsured Children",
     "category": "Clinical Care",
     "data_years": "2018",
@@ -16578,7 +16578,7 @@
   },
   {
     "chr_vintage": "2021",
-    "chr_field_id": "v125",
+    "field_id": "v125",
     "measure": "Air Pollution - Particulate Matter",
     "category": "Physical Environment",
     "data_years": "2016",
@@ -16699,7 +16699,7 @@
   },
   {
     "chr_vintage": "2021",
-    "chr_field_id": "v126",
+    "field_id": "v126",
     "measure": "% Non-Hispanic White",
     "category": "Demographics",
     "data_years": "2019",
@@ -16820,7 +16820,7 @@
   },
   {
     "chr_vintage": "2021",
-    "chr_field_id": "v132",
+    "field_id": "v132",
     "measure": "Access to Exercise Opportunities",
     "category": "Health Behaviors",
     "data_years": "2010, 2019",
@@ -16941,7 +16941,7 @@
   },
   {
     "chr_vintage": "2021",
-    "chr_field_id": "v133",
+    "field_id": "v133",
     "measure": "Food Environment Index",
     "category": "Health Behaviors",
     "data_years": "2015, 2018",
@@ -17062,7 +17062,7 @@
   },
   {
     "chr_vintage": "2021",
-    "chr_field_id": "v136",
+    "field_id": "v136",
     "measure": "Severe Housing Problems",
     "category": "Physical Environment",
     "data_years": "2013-2017",
@@ -17183,7 +17183,7 @@
   },
   {
     "chr_vintage": "2021",
-    "chr_field_id": "v139",
+    "field_id": "v139",
     "measure": "Food Insecurity",
     "category": "Health Behaviors",
     "data_years": "2018",
@@ -17304,7 +17304,7 @@
   },
   {
     "chr_vintage": "2021",
-    "chr_field_id": "v140",
+    "field_id": "v140",
     "measure": "Social Associations",
     "category": "Social & Economic Factors",
     "data_years": "2018",
@@ -17425,7 +17425,7 @@
   },
   {
     "chr_vintage": "2021",
-    "chr_field_id": "v143",
+    "field_id": "v143",
     "measure": "Insufficient Sleep",
     "category": "Health Behaviors",
     "data_years": "2018",
@@ -17546,7 +17546,7 @@
   },
   {
     "chr_vintage": "2021",
-    "chr_field_id": "v153",
+    "field_id": "v153",
     "measure": "Homeownership",
     "category": "Physical Environment",
     "data_years": "2015-2019",
@@ -17667,7 +17667,7 @@
   },
   {
     "chr_vintage": "2021",
-    "chr_field_id": "v154",
+    "field_id": "v154",
     "measure": "Severe Housing Cost Burden",
     "category": "Physical Environment",
     "data_years": "2015-2019",
@@ -17788,7 +17788,7 @@
   },
   {
     "chr_vintage": "2021",
-    "chr_field_id": "v156",
+    "field_id": "v156",
     "measure": "Traffic Volume",
     "category": "Physical Environment",
     "data_years": "2019",
@@ -17909,7 +17909,7 @@
   },
   {
     "chr_vintage": "2022",
-    "chr_field_id": "v002",
+    "field_id": "v002",
     "measure": "Poor or Fair Health",
     "category": "Health Outcomes",
     "data_years": "2019",
@@ -18030,7 +18030,7 @@
   },
   {
     "chr_vintage": "2022",
-    "chr_field_id": "v003",
+    "field_id": "v003",
     "measure": "Uninsured Adults",
     "category": "Clinical Care",
     "data_years": "2019",
@@ -18151,7 +18151,7 @@
   },
   {
     "chr_vintage": "2022",
-    "chr_field_id": "v004",
+    "field_id": "v004",
     "measure": "Primary Care Physicians",
     "category": "Clinical Care",
     "data_years": "2019",
@@ -18272,7 +18272,7 @@
   },
   {
     "chr_vintage": "2022",
-    "chr_field_id": "v009",
+    "field_id": "v009",
     "measure": "Adult Smoking",
     "category": "Health Behaviors",
     "data_years": "2019",
@@ -18393,7 +18393,7 @@
   },
   {
     "chr_vintage": "2022",
-    "chr_field_id": "v011",
+    "field_id": "v011",
     "measure": "Adult Obesity",
     "category": "Health Behaviors",
     "data_years": "2019",
@@ -18514,7 +18514,7 @@
   },
   {
     "chr_vintage": "2022",
-    "chr_field_id": "v021",
+    "field_id": "v021",
     "measure": "High School Graduation",
     "category": "Social & Economic Factors",
     "data_years": "2018-2019",
@@ -18635,7 +18635,7 @@
   },
   {
     "chr_vintage": "2022",
-    "chr_field_id": "v023",
+    "field_id": "v023",
     "measure": "Unemployment",
     "category": "Social & Economic Factors",
     "data_years": "2020",
@@ -18756,7 +18756,7 @@
   },
   {
     "chr_vintage": "2022",
-    "chr_field_id": "v024",
+    "field_id": "v024",
     "measure": "Children in Poverty",
     "category": "Social & Economic Factors",
     "data_years": "2020",
@@ -18877,7 +18877,7 @@
   },
   {
     "chr_vintage": "2022",
-    "chr_field_id": "v036",
+    "field_id": "v036",
     "measure": "Poor Physical Health Days",
     "category": "Health Outcomes",
     "data_years": "2019",
@@ -18998,7 +18998,7 @@
   },
   {
     "chr_vintage": "2022",
-    "chr_field_id": "v042",
+    "field_id": "v042",
     "measure": "Poor Mental Health Days",
     "category": "Health Outcomes",
     "data_years": "2019",
@@ -19119,7 +19119,7 @@
   },
   {
     "chr_vintage": "2022",
-    "chr_field_id": "v044",
+    "field_id": "v044",
     "measure": "Income Inequality",
     "category": "Social & Economic Factors",
     "data_years": "2016-2020",
@@ -19240,7 +19240,7 @@
   },
   {
     "chr_vintage": "2022",
-    "chr_field_id": "v045",
+    "field_id": "v045",
     "measure": "Sexually Transmitted Infections",
     "category": "Health Behaviors",
     "data_years": "2019",
@@ -19361,7 +19361,7 @@
   },
   {
     "chr_vintage": "2022",
-    "chr_field_id": "v049",
+    "field_id": "v049",
     "measure": "Excessive Drinking",
     "category": "Health Behaviors",
     "data_years": "2019",
@@ -19482,7 +19482,7 @@
   },
   {
     "chr_vintage": "2022",
-    "chr_field_id": "v050",
+    "field_id": "v050",
     "measure": "Mammography Screening",
     "category": "Clinical Care",
     "data_years": "2019",
@@ -19603,7 +19603,7 @@
   },
   {
     "chr_vintage": "2022",
-    "chr_field_id": "v054",
+    "field_id": "v054",
     "measure": "% Non-Hispanic Black",
     "category": "Demographics",
     "data_years": "2020",
@@ -19724,7 +19724,7 @@
   },
   {
     "chr_vintage": "2022",
-    "chr_field_id": "v055",
+    "field_id": "v055",
     "measure": "% American Indian & Alaska Native",
     "category": "Demographics",
     "data_years": "2020",
@@ -19845,7 +19845,7 @@
   },
   {
     "chr_vintage": "2022",
-    "chr_field_id": "v056",
+    "field_id": "v056",
     "measure": "% Hispanic",
     "category": "Demographics",
     "data_years": "2020",
@@ -19966,7 +19966,7 @@
   },
   {
     "chr_vintage": "2022",
-    "chr_field_id": "v058",
+    "field_id": "v058",
     "measure": "% Rural",
     "category": "Demographics",
     "data_years": "2010",
@@ -20087,7 +20087,7 @@
   },
   {
     "chr_vintage": "2022",
-    "chr_field_id": "v060",
+    "field_id": "v060",
     "measure": "Diabetes Prevalence",
     "category": "Health Outcomes",
     "data_years": "2019",
@@ -20208,7 +20208,7 @@
   },
   {
     "chr_vintage": "2022",
-    "chr_field_id": "v063",
+    "field_id": "v063",
     "measure": "Median Household Income",
     "category": "Social & Economic Factors",
     "data_years": "2020",
@@ -20329,7 +20329,7 @@
   },
   {
     "chr_vintage": "2022",
-    "chr_field_id": "v069",
+    "field_id": "v069",
     "measure": "Some College",
     "category": "Social & Economic Factors",
     "data_years": "2016-2020",
@@ -20450,7 +20450,7 @@
   },
   {
     "chr_vintage": "2022",
-    "chr_field_id": "v070",
+    "field_id": "v070",
     "measure": "Physical Inactivity",
     "category": "Health Behaviors",
     "data_years": "2019",
@@ -20571,7 +20571,7 @@
   },
   {
     "chr_vintage": "2022",
-    "chr_field_id": "v080",
+    "field_id": "v080",
     "measure": "% Native Hawaiian/Other Pacific Islander",
     "category": "Demographics",
     "data_years": "2020",
@@ -20692,7 +20692,7 @@
   },
   {
     "chr_vintage": "2022",
-    "chr_field_id": "v081",
+    "field_id": "v081",
     "measure": "% Asian",
     "category": "Demographics",
     "data_years": "2020",
@@ -20813,7 +20813,7 @@
   },
   {
     "chr_vintage": "2022",
-    "chr_field_id": "v083",
+    "field_id": "v083",
     "measure": "Limited Access to Healthy Foods",
     "category": "Health Behaviors",
     "data_years": "2019",
@@ -20934,7 +20934,7 @@
   },
   {
     "chr_vintage": "2022",
-    "chr_field_id": "v085",
+    "field_id": "v085",
     "measure": "Uninsured",
     "category": "Clinical Care",
     "data_years": "2019",
@@ -21055,7 +21055,7 @@
   },
   {
     "chr_vintage": "2022",
-    "chr_field_id": "v122",
+    "field_id": "v122",
     "measure": "Uninsured Children",
     "category": "Clinical Care",
     "data_years": "2019",
@@ -21176,7 +21176,7 @@
   },
   {
     "chr_vintage": "2022",
-    "chr_field_id": "v125",
+    "field_id": "v125",
     "measure": "Air Pollution - Particulate Matter",
     "category": "Physical Environment",
     "data_years": "2018",
@@ -21297,7 +21297,7 @@
   },
   {
     "chr_vintage": "2022",
-    "chr_field_id": "v126",
+    "field_id": "v126",
     "measure": "% Non-Hispanic White",
     "category": "Demographics",
     "data_years": "2020",
@@ -21418,7 +21418,7 @@
   },
   {
     "chr_vintage": "2022",
-    "chr_field_id": "v132",
+    "field_id": "v132",
     "measure": "Access to Exercise Opportunities",
     "category": "Health Behaviors",
     "data_years": "2010, 2021",
@@ -21539,7 +21539,7 @@
   },
   {
     "chr_vintage": "2022",
-    "chr_field_id": "v133",
+    "field_id": "v133",
     "measure": "Food Environment Index",
     "category": "Health Behaviors",
     "data_years": "2019",
@@ -21660,7 +21660,7 @@
   },
   {
     "chr_vintage": "2022",
-    "chr_field_id": "v136",
+    "field_id": "v136",
     "measure": "Severe Housing Problems",
     "category": "Physical Environment",
     "data_years": "2014-2018",
@@ -21781,7 +21781,7 @@
   },
   {
     "chr_vintage": "2022",
-    "chr_field_id": "v139",
+    "field_id": "v139",
     "measure": "Food Insecurity",
     "category": "Health Behaviors",
     "data_years": "2019",
@@ -21902,7 +21902,7 @@
   },
   {
     "chr_vintage": "2022",
-    "chr_field_id": "v140",
+    "field_id": "v140",
     "measure": "Social Associations",
     "category": "Social & Economic Factors",
     "data_years": "2019",
@@ -22023,7 +22023,7 @@
   },
   {
     "chr_vintage": "2022",
-    "chr_field_id": "v143",
+    "field_id": "v143",
     "measure": "Insufficient Sleep",
     "category": "Health Behaviors",
     "data_years": "2018",
@@ -22144,7 +22144,7 @@
   },
   {
     "chr_vintage": "2022",
-    "chr_field_id": "v153",
+    "field_id": "v153",
     "measure": "Homeownership",
     "category": "Physical Environment",
     "data_years": "2019",
@@ -22265,7 +22265,7 @@
   },
   {
     "chr_vintage": "2022",
-    "chr_field_id": "v154",
+    "field_id": "v154",
     "measure": "Severe Housing Cost Burden",
     "category": "Physical Environment",
     "data_years": "2016-2020",
@@ -22386,7 +22386,7 @@
   },
   {
     "chr_vintage": "2022",
-    "chr_field_id": "v156",
+    "field_id": "v156",
     "measure": "Traffic Volume",
     "category": "Physical Environment",
     "data_years": "2016-2020",
@@ -22507,7 +22507,7 @@
   },
   {
     "chr_vintage": "2023",
-    "chr_field_id": "v002",
+    "field_id": "v002",
     "measure": "Poor or Fair Health",
     "category": "Health Outcomes",
     "data_years": "2020",
@@ -22628,7 +22628,7 @@
   },
   {
     "chr_vintage": "2023",
-    "chr_field_id": "v003",
+    "field_id": "v003",
     "measure": "Uninsured Adults",
     "category": "Clinical Care",
     "data_years": "2020",
@@ -22749,7 +22749,7 @@
   },
   {
     "chr_vintage": "2023",
-    "chr_field_id": "v004",
+    "field_id": "v004",
     "measure": "Primary Care Physicians",
     "category": "Clinical Care",
     "data_years": "2020",
@@ -22870,7 +22870,7 @@
   },
   {
     "chr_vintage": "2023",
-    "chr_field_id": "v009",
+    "field_id": "v009",
     "measure": "Adult Smoking",
     "category": "Health Behaviors",
     "data_years": "2020",
@@ -22991,7 +22991,7 @@
   },
   {
     "chr_vintage": "2023",
-    "chr_field_id": "v011",
+    "field_id": "v011",
     "measure": "Adult Obesity",
     "category": "Health Behaviors",
     "data_years": "2020",
@@ -23112,7 +23112,7 @@
   },
   {
     "chr_vintage": "2023",
-    "chr_field_id": "v021",
+    "field_id": "v021",
     "measure": "High School Graduation",
     "category": "Social & Economic Factors",
     "data_years": "2019-2020",
@@ -23233,7 +23233,7 @@
   },
   {
     "chr_vintage": "2023",
-    "chr_field_id": "v023",
+    "field_id": "v023",
     "measure": "Unemployment",
     "category": "Social & Economic Factors",
     "data_years": "2021",
@@ -23354,7 +23354,7 @@
   },
   {
     "chr_vintage": "2023",
-    "chr_field_id": "v024",
+    "field_id": "v024",
     "measure": "Children in Poverty",
     "category": "Social & Economic Factors",
     "data_years": "2021",
@@ -23475,7 +23475,7 @@
   },
   {
     "chr_vintage": "2023",
-    "chr_field_id": "v036",
+    "field_id": "v036",
     "measure": "Poor Physical Health Days",
     "category": "Health Outcomes",
     "data_years": "2020",
@@ -23596,7 +23596,7 @@
   },
   {
     "chr_vintage": "2023",
-    "chr_field_id": "v042",
+    "field_id": "v042",
     "measure": "Poor Mental Health Days",
     "category": "Health Outcomes",
     "data_years": "2020",
@@ -23717,7 +23717,7 @@
   },
   {
     "chr_vintage": "2023",
-    "chr_field_id": "v044",
+    "field_id": "v044",
     "measure": "Income Inequality",
     "category": "Social & Economic Factors",
     "data_years": "2017-2021",
@@ -23838,7 +23838,7 @@
   },
   {
     "chr_vintage": "2023",
-    "chr_field_id": "v045",
+    "field_id": "v045",
     "measure": "Sexually Transmitted Infections",
     "category": "Health Behaviors",
     "data_years": "2020",
@@ -23959,7 +23959,7 @@
   },
   {
     "chr_vintage": "2023",
-    "chr_field_id": "v049",
+    "field_id": "v049",
     "measure": "Excessive Drinking",
     "category": "Health Behaviors",
     "data_years": "2020",
@@ -24080,7 +24080,7 @@
   },
   {
     "chr_vintage": "2023",
-    "chr_field_id": "v050",
+    "field_id": "v050",
     "measure": "Mammography Screening",
     "category": "Clinical Care",
     "data_years": "2020",
@@ -24201,7 +24201,7 @@
   },
   {
     "chr_vintage": "2023",
-    "chr_field_id": "v054",
+    "field_id": "v054",
     "measure": "% Non-Hispanic Black",
     "category": "Demographics",
     "data_years": "2021",
@@ -24322,7 +24322,7 @@
   },
   {
     "chr_vintage": "2023",
-    "chr_field_id": "v055",
+    "field_id": "v055",
     "measure": "% American Indian & Alaska Native",
     "category": "Demographics",
     "data_years": "2021",
@@ -24443,7 +24443,7 @@
   },
   {
     "chr_vintage": "2023",
-    "chr_field_id": "v056",
+    "field_id": "v056",
     "measure": "% Hispanic",
     "category": "Demographics",
     "data_years": "2021",
@@ -24564,7 +24564,7 @@
   },
   {
     "chr_vintage": "2023",
-    "chr_field_id": "v058",
+    "field_id": "v058",
     "measure": "% Rural",
     "category": "Demographics",
     "data_years": "2010",
@@ -24685,7 +24685,7 @@
   },
   {
     "chr_vintage": "2023",
-    "chr_field_id": "v060",
+    "field_id": "v060",
     "measure": "Diabetes Prevalence",
     "category": "Health Outcomes",
     "data_years": "2020",
@@ -24806,7 +24806,7 @@
   },
   {
     "chr_vintage": "2023",
-    "chr_field_id": "v063",
+    "field_id": "v063",
     "measure": "Median Household Income",
     "category": "Social & Economic Factors",
     "data_years": "2021",
@@ -24927,7 +24927,7 @@
   },
   {
     "chr_vintage": "2023",
-    "chr_field_id": "v069",
+    "field_id": "v069",
     "measure": "Some College",
     "category": "Social & Economic Factors",
     "data_years": "2017-2021",
@@ -25048,7 +25048,7 @@
   },
   {
     "chr_vintage": "2023",
-    "chr_field_id": "v070",
+    "field_id": "v070",
     "measure": "Physical Inactivity",
     "category": "Health Behaviors",
     "data_years": "2020",
@@ -25169,7 +25169,7 @@
   },
   {
     "chr_vintage": "2023",
-    "chr_field_id": "v080",
+    "field_id": "v080",
     "measure": "% Native Hawaiian/Other Pacific Islander",
     "category": "Demographics",
     "data_years": "2021",
@@ -25290,7 +25290,7 @@
   },
   {
     "chr_vintage": "2023",
-    "chr_field_id": "v081",
+    "field_id": "v081",
     "measure": "% Asian",
     "category": "Demographics",
     "data_years": "2021",
@@ -25411,7 +25411,7 @@
   },
   {
     "chr_vintage": "2023",
-    "chr_field_id": "v083",
+    "field_id": "v083",
     "measure": "Limited Access to Healthy Foods",
     "category": "Health Behaviors",
     "data_years": "2019",
@@ -25532,7 +25532,7 @@
   },
   {
     "chr_vintage": "2023",
-    "chr_field_id": "v085",
+    "field_id": "v085",
     "measure": "Uninsured",
     "category": "Clinical Care",
     "data_years": "2020",
@@ -25653,7 +25653,7 @@
   },
   {
     "chr_vintage": "2023",
-    "chr_field_id": "v122",
+    "field_id": "v122",
     "measure": "Uninsured Children",
     "category": "Clinical Care",
     "data_years": "2020",
@@ -25774,7 +25774,7 @@
   },
   {
     "chr_vintage": "2023",
-    "chr_field_id": "v125",
+    "field_id": "v125",
     "measure": "Air Pollution - Particulate Matter",
     "category": "Physical Environment",
     "data_years": "2019",
@@ -25895,7 +25895,7 @@
   },
   {
     "chr_vintage": "2023",
-    "chr_field_id": "v126",
+    "field_id": "v126",
     "measure": "% Non-Hispanic White",
     "category": "Demographics",
     "data_years": "2021",
@@ -26016,7 +26016,7 @@
   },
   {
     "chr_vintage": "2023",
-    "chr_field_id": "v132",
+    "field_id": "v132",
     "measure": "Access to Exercise Opportunities",
     "category": "Health Behaviors",
     "data_years": "2020, 2022",
@@ -26137,7 +26137,7 @@
   },
   {
     "chr_vintage": "2023",
-    "chr_field_id": "v133",
+    "field_id": "v133",
     "measure": "Food Environment Index",
     "category": "Health Behaviors",
     "data_years": "2019, 2020",
@@ -26258,7 +26258,7 @@
   },
   {
     "chr_vintage": "2023",
-    "chr_field_id": "v136",
+    "field_id": "v136",
     "measure": "Severe Housing Problems",
     "category": "Physical Environment",
     "data_years": "2015-2019",
@@ -26379,7 +26379,7 @@
   },
   {
     "chr_vintage": "2023",
-    "chr_field_id": "v139",
+    "field_id": "v139",
     "measure": "Food Insecurity",
     "category": "Health Behaviors",
     "data_years": "2020",
@@ -26500,7 +26500,7 @@
   },
   {
     "chr_vintage": "2023",
-    "chr_field_id": "v140",
+    "field_id": "v140",
     "measure": "Social Associations",
     "category": "Social & Economic Factors",
     "data_years": "2020",
@@ -26621,7 +26621,7 @@
   },
   {
     "chr_vintage": "2023",
-    "chr_field_id": "v143",
+    "field_id": "v143",
     "measure": "Insufficient Sleep",
     "category": "Health Behaviors",
     "data_years": "2020",
@@ -26742,7 +26742,7 @@
   },
   {
     "chr_vintage": "2023",
-    "chr_field_id": "v153",
+    "field_id": "v153",
     "measure": "Homeownership",
     "category": "Physical Environment",
     "data_years": "2017-2021",
@@ -26863,7 +26863,7 @@
   },
   {
     "chr_vintage": "2023",
-    "chr_field_id": "v154",
+    "field_id": "v154",
     "measure": "Severe Housing Cost Burden",
     "category": "Physical Environment",
     "data_years": "2017-2021",
@@ -26984,7 +26984,7 @@
   },
   {
     "chr_vintage": "2023",
-    "chr_field_id": "v156",
+    "field_id": "v156",
     "measure": "Traffic Volume",
     "category": "Physical Environment",
     "data_years": "2019",
@@ -27105,7 +27105,7 @@
   },
   {
     "chr_vintage": "2024",
-    "chr_field_id": "v002",
+    "field_id": "v002",
     "measure": "Poor or Fair Health",
     "category": "Health Outcomes",
     "data_years": "2021",
@@ -27226,7 +27226,7 @@
   },
   {
     "chr_vintage": "2024",
-    "chr_field_id": "v003",
+    "field_id": "v003",
     "measure": "Uninsured Adults",
     "category": "Clinical Care",
     "data_years": "2021",
@@ -27347,7 +27347,7 @@
   },
   {
     "chr_vintage": "2024",
-    "chr_field_id": "v004",
+    "field_id": "v004",
     "measure": "Primary Care Physicians",
     "category": "Clinical Care",
     "data_years": "2021",
@@ -27468,7 +27468,7 @@
   },
   {
     "chr_vintage": "2024",
-    "chr_field_id": "v009",
+    "field_id": "v009",
     "measure": "Adult Smoking",
     "category": "Health Behaviors",
     "data_years": "2021",
@@ -27589,7 +27589,7 @@
   },
   {
     "chr_vintage": "2024",
-    "chr_field_id": "v011",
+    "field_id": "v011",
     "measure": "Adult Obesity",
     "category": "Health Behaviors",
     "data_years": "2021",
@@ -27710,7 +27710,7 @@
   },
   {
     "chr_vintage": "2024",
-    "chr_field_id": "v021",
+    "field_id": "v021",
     "measure": "High School Graduation",
     "category": "Social & Economic Factors",
     "data_years": "2020-2021",
@@ -27831,7 +27831,7 @@
   },
   {
     "chr_vintage": "2024",
-    "chr_field_id": "v023",
+    "field_id": "v023",
     "measure": "Unemployment",
     "category": "Social & Economic Factors",
     "data_years": "2022",
@@ -27952,7 +27952,7 @@
   },
   {
     "chr_vintage": "2024",
-    "chr_field_id": "v024",
+    "field_id": "v024",
     "measure": "Children in Poverty",
     "category": "Social & Economic Factors",
     "data_years": "2022, 2018-2022",
@@ -28073,7 +28073,7 @@
   },
   {
     "chr_vintage": "2024",
-    "chr_field_id": "v036",
+    "field_id": "v036",
     "measure": "Poor Physical Health Days",
     "category": "Health Outcomes",
     "data_years": "2021",
@@ -28194,7 +28194,7 @@
   },
   {
     "chr_vintage": "2024",
-    "chr_field_id": "v042",
+    "field_id": "v042",
     "measure": "Poor Mental Health Days",
     "category": "Health Outcomes",
     "data_years": "2021",
@@ -28315,7 +28315,7 @@
   },
   {
     "chr_vintage": "2024",
-    "chr_field_id": "v044",
+    "field_id": "v044",
     "measure": "Income Inequality",
     "category": "Social & Economic Factors",
     "data_years": "2018-2022",
@@ -28436,7 +28436,7 @@
   },
   {
     "chr_vintage": "2024",
-    "chr_field_id": "v045",
+    "field_id": "v045",
     "measure": "Sexually Transmitted Infections",
     "category": "Health Behaviors",
     "data_years": "2021",
@@ -28557,7 +28557,7 @@
   },
   {
     "chr_vintage": "2024",
-    "chr_field_id": "v049",
+    "field_id": "v049",
     "measure": "Excessive Drinking",
     "category": "Health Behaviors",
     "data_years": "2021",
@@ -28678,7 +28678,7 @@
   },
   {
     "chr_vintage": "2024",
-    "chr_field_id": "v050",
+    "field_id": "v050",
     "measure": "Mammography Screening",
     "category": "Clinical Care",
     "data_years": "2021",
@@ -28799,7 +28799,7 @@
   },
   {
     "chr_vintage": "2024",
-    "chr_field_id": "v054",
+    "field_id": "v054",
     "measure": "% Non-Hispanic Black",
     "category": "Demographics",
     "data_years": "2022",
@@ -28920,7 +28920,7 @@
   },
   {
     "chr_vintage": "2024",
-    "chr_field_id": "v055",
+    "field_id": "v055",
     "measure": "% American Indian & Alaska Native",
     "category": "Demographics",
     "data_years": "2022",
@@ -29041,7 +29041,7 @@
   },
   {
     "chr_vintage": "2024",
-    "chr_field_id": "v056",
+    "field_id": "v056",
     "measure": "% Hispanic",
     "category": "Demographics",
     "data_years": "2022",
@@ -29162,7 +29162,7 @@
   },
   {
     "chr_vintage": "2024",
-    "chr_field_id": "v058",
+    "field_id": "v058",
     "measure": "% Rural",
     "category": "Demographics",
     "data_years": "2020",
@@ -29283,7 +29283,7 @@
   },
   {
     "chr_vintage": "2024",
-    "chr_field_id": "v060",
+    "field_id": "v060",
     "measure": "Diabetes Prevalence",
     "category": "Health Outcomes",
     "data_years": "2021",
@@ -29404,7 +29404,7 @@
   },
   {
     "chr_vintage": "2024",
-    "chr_field_id": "v063",
+    "field_id": "v063",
     "measure": "Median Household Income",
     "category": "Social & Economic Factors",
     "data_years": "2022, 2018-2022",
@@ -29525,7 +29525,7 @@
   },
   {
     "chr_vintage": "2024",
-    "chr_field_id": "v069",
+    "field_id": "v069",
     "measure": "Some College",
     "category": "Social & Economic Factors",
     "data_years": "2018-2022",
@@ -29646,7 +29646,7 @@
   },
   {
     "chr_vintage": "2024",
-    "chr_field_id": "v070",
+    "field_id": "v070",
     "measure": "Physical Inactivity",
     "category": "Health Behaviors",
     "data_years": "2021",
@@ -29767,7 +29767,7 @@
   },
   {
     "chr_vintage": "2024",
-    "chr_field_id": "v080",
+    "field_id": "v080",
     "measure": "% Native Hawaiian/Other Pacific Islander",
     "category": "Demographics",
     "data_years": "2022",
@@ -29888,7 +29888,7 @@
   },
   {
     "chr_vintage": "2024",
-    "chr_field_id": "v081",
+    "field_id": "v081",
     "measure": "% Asian",
     "category": "Demographics",
     "data_years": "2022",
@@ -30009,7 +30009,7 @@
   },
   {
     "chr_vintage": "2024",
-    "chr_field_id": "v083",
+    "field_id": "v083",
     "measure": "Limited Access to Healthy Foods",
     "category": "Health Behaviors",
     "data_years": "2019",
@@ -30130,7 +30130,7 @@
   },
   {
     "chr_vintage": "2024",
-    "chr_field_id": "v085",
+    "field_id": "v085",
     "measure": "Uninsured",
     "category": "Clinical Care",
     "data_years": "2021",
@@ -30251,7 +30251,7 @@
   },
   {
     "chr_vintage": "2024",
-    "chr_field_id": "v122",
+    "field_id": "v122",
     "measure": "Uninsured Children",
     "category": "Clinical Care",
     "data_years": "2021",
@@ -30372,7 +30372,7 @@
   },
   {
     "chr_vintage": "2024",
-    "chr_field_id": "v125",
+    "field_id": "v125",
     "measure": "Air Pollution - Particulate Matter",
     "category": "Physical Environment",
     "data_years": "2019",
@@ -30493,7 +30493,7 @@
   },
   {
     "chr_vintage": "2024",
-    "chr_field_id": "v126",
+    "field_id": "v126",
     "measure": "% Non-Hispanic White",
     "category": "Demographics",
     "data_years": "2022",
@@ -30614,7 +30614,7 @@
   },
   {
     "chr_vintage": "2024",
-    "chr_field_id": "v132",
+    "field_id": "v132",
     "measure": "Access to Exercise Opportunities",
     "category": "Health Behaviors",
     "data_years": "2020, 2022, 2023",
@@ -30735,7 +30735,7 @@
   },
   {
     "chr_vintage": "2024",
-    "chr_field_id": "v133",
+    "field_id": "v133",
     "measure": "Food Environment Index",
     "category": "Health Behaviors",
     "data_years": "2019, 2021",
@@ -30856,7 +30856,7 @@
   },
   {
     "chr_vintage": "2024",
-    "chr_field_id": "v136",
+    "field_id": "v136",
     "measure": "Severe Housing Problems",
     "category": "Physical Environment",
     "data_years": "2016-2020",
@@ -30977,7 +30977,7 @@
   },
   {
     "chr_vintage": "2024",
-    "chr_field_id": "v139",
+    "field_id": "v139",
     "measure": "Food Insecurity",
     "category": "Health Behaviors",
     "data_years": "2021",
@@ -31098,7 +31098,7 @@
   },
   {
     "chr_vintage": "2024",
-    "chr_field_id": "v140",
+    "field_id": "v140",
     "measure": "Social Associations",
     "category": "Social & Economic Factors",
     "data_years": "2021",
@@ -31219,7 +31219,7 @@
   },
   {
     "chr_vintage": "2024",
-    "chr_field_id": "v143",
+    "field_id": "v143",
     "measure": "Insufficient Sleep",
     "category": "Health Behaviors",
     "data_years": "2020",
@@ -31340,7 +31340,7 @@
   },
   {
     "chr_vintage": "2024",
-    "chr_field_id": "v153",
+    "field_id": "v153",
     "measure": "Homeownership",
     "category": "Physical Environment",
     "data_years": "2018-2022",
@@ -31461,7 +31461,7 @@
   },
   {
     "chr_vintage": "2024",
-    "chr_field_id": "v154",
+    "field_id": "v154",
     "measure": "Severe Housing Cost Burden",
     "category": "Physical Environment",
     "data_years": "2018-2022",
@@ -31582,7 +31582,7 @@
   },
   {
     "chr_vintage": "2024",
-    "chr_field_id": "v156",
+    "field_id": "v156",
     "measure": "Traffic Volume",
     "category": "Physical Environment",
     "data_years": "2023",
@@ -31703,7 +31703,7 @@
   },
   {
     "chr_vintage": "2025",
-    "chr_field_id": "v002",
+    "field_id": "v002",
     "measure": "Poor or Fair Health",
     "category": "Health Outcomes",
     "data_years": "2022",
@@ -31824,7 +31824,7 @@
   },
   {
     "chr_vintage": "2025",
-    "chr_field_id": "v003",
+    "field_id": "v003",
     "measure": "Uninsured Adults",
     "category": "Clinical Care",
     "data_years": "2022",
@@ -31945,7 +31945,7 @@
   },
   {
     "chr_vintage": "2025",
-    "chr_field_id": "v004",
+    "field_id": "v004",
     "measure": "Primary Care Physicians",
     "category": "Clinical Care",
     "data_years": "2021",
@@ -32066,7 +32066,7 @@
   },
   {
     "chr_vintage": "2025",
-    "chr_field_id": "v009",
+    "field_id": "v009",
     "measure": "Adult Smoking",
     "category": "Health Behaviors",
     "data_years": "2022",
@@ -32187,7 +32187,7 @@
   },
   {
     "chr_vintage": "2025",
-    "chr_field_id": "v011",
+    "field_id": "v011",
     "measure": "Adult Obesity",
     "category": "Health Behaviors",
     "data_years": "2022",
@@ -32308,7 +32308,7 @@
   },
   {
     "chr_vintage": "2025",
-    "chr_field_id": "v021",
+    "field_id": "v021",
     "measure": "High School Graduation",
     "category": "Social & Economic Factors",
     "data_years": "Varies",
@@ -32429,7 +32429,7 @@
   },
   {
     "chr_vintage": "2025",
-    "chr_field_id": "v023",
+    "field_id": "v023",
     "measure": "Unemployment",
     "category": "Social & Economic Factors",
     "data_years": "2023",
@@ -32550,7 +32550,7 @@
   },
   {
     "chr_vintage": "2025",
-    "chr_field_id": "v024",
+    "field_id": "v024",
     "measure": "Children in Poverty",
     "category": "Social & Economic Factors",
     "data_years": "2023, 2019-2023",
@@ -32671,7 +32671,7 @@
   },
   {
     "chr_vintage": "2025",
-    "chr_field_id": "v036",
+    "field_id": "v036",
     "measure": "Poor Physical Health Days",
     "category": "Health Outcomes",
     "data_years": "2022",
@@ -32792,7 +32792,7 @@
   },
   {
     "chr_vintage": "2025",
-    "chr_field_id": "v042",
+    "field_id": "v042",
     "measure": "Poor Mental Health Days",
     "category": "Health Outcomes",
     "data_years": "2022",
@@ -32913,7 +32913,7 @@
   },
   {
     "chr_vintage": "2025",
-    "chr_field_id": "v044",
+    "field_id": "v044",
     "measure": "Income Inequality",
     "category": "Social & Economic Factors",
     "data_years": "2019-2023",
@@ -33034,7 +33034,7 @@
   },
   {
     "chr_vintage": "2025",
-    "chr_field_id": "v045",
+    "field_id": "v045",
     "measure": "Sexually Transmitted Infections",
     "category": "Health Behaviors",
     "data_years": "2022",
@@ -33155,7 +33155,7 @@
   },
   {
     "chr_vintage": "2025",
-    "chr_field_id": "v049",
+    "field_id": "v049",
     "measure": "Excessive Drinking",
     "category": "Health Behaviors",
     "data_years": "2022",
@@ -33276,7 +33276,7 @@
   },
   {
     "chr_vintage": "2025",
-    "chr_field_id": "v050",
+    "field_id": "v050",
     "measure": "Mammography Screening",
     "category": "Clinical Care",
     "data_years": "2022",
@@ -33397,7 +33397,7 @@
   },
   {
     "chr_vintage": "2025",
-    "chr_field_id": "v054",
+    "field_id": "v054",
     "measure": "% Non-Hispanic Black",
     "category": "Demographics",
     "data_years": "2023",
@@ -33518,7 +33518,7 @@
   },
   {
     "chr_vintage": "2025",
-    "chr_field_id": "v055",
+    "field_id": "v055",
     "measure": "% American Indian & Alaska Native",
     "category": "Demographics",
     "data_years": "2023",
@@ -33639,7 +33639,7 @@
   },
   {
     "chr_vintage": "2025",
-    "chr_field_id": "v056",
+    "field_id": "v056",
     "measure": "% Hispanic",
     "category": "Demographics",
     "data_years": "2023",
@@ -33760,7 +33760,7 @@
   },
   {
     "chr_vintage": "2025",
-    "chr_field_id": "v058",
+    "field_id": "v058",
     "measure": "% Rural",
     "category": "Demographics",
     "data_years": "2020",
@@ -33881,7 +33881,7 @@
   },
   {
     "chr_vintage": "2025",
-    "chr_field_id": "v060",
+    "field_id": "v060",
     "measure": "Diabetes Prevalence",
     "category": "Health Outcomes",
     "data_years": "2022",
@@ -34002,7 +34002,7 @@
   },
   {
     "chr_vintage": "2025",
-    "chr_field_id": "v063",
+    "field_id": "v063",
     "measure": "Median Household Income",
     "category": "Social & Economic Factors",
     "data_years": "2023, 2019-2023",
@@ -34123,7 +34123,7 @@
   },
   {
     "chr_vintage": "2025",
-    "chr_field_id": "v069",
+    "field_id": "v069",
     "measure": "Some College",
     "category": "Social & Economic Factors",
     "data_years": "2019-2023",
@@ -34244,7 +34244,7 @@
   },
   {
     "chr_vintage": "2025",
-    "chr_field_id": "v070",
+    "field_id": "v070",
     "measure": "Physical Inactivity",
     "category": "Health Behaviors",
     "data_years": "2022",
@@ -34365,7 +34365,7 @@
   },
   {
     "chr_vintage": "2025",
-    "chr_field_id": "v080",
+    "field_id": "v080",
     "measure": "% Native Hawaiian/Other Pacific Islander",
     "category": "Demographics",
     "data_years": "2023",
@@ -34486,7 +34486,7 @@
   },
   {
     "chr_vintage": "2025",
-    "chr_field_id": "v081",
+    "field_id": "v081",
     "measure": "% Asian",
     "category": "Demographics",
     "data_years": "2023",
@@ -34607,7 +34607,7 @@
   },
   {
     "chr_vintage": "2025",
-    "chr_field_id": "v083",
+    "field_id": "v083",
     "measure": "Limited Access to Healthy Foods",
     "category": "Health Behaviors",
     "data_years": "2019",
@@ -34728,7 +34728,7 @@
   },
   {
     "chr_vintage": "2025",
-    "chr_field_id": "v085",
+    "field_id": "v085",
     "measure": "Uninsured",
     "category": "Clinical Care",
     "data_years": "2022",
@@ -34849,7 +34849,7 @@
   },
   {
     "chr_vintage": "2025",
-    "chr_field_id": "v122",
+    "field_id": "v122",
     "measure": "Uninsured Children",
     "category": "Clinical Care",
     "data_years": "2022",
@@ -34970,7 +34970,7 @@
   },
   {
     "chr_vintage": "2025",
-    "chr_field_id": "v125",
+    "field_id": "v125",
     "measure": "Air Pollution - Particulate Matter",
     "category": "Physical Environment",
     "data_years": "2020",
@@ -35091,7 +35091,7 @@
   },
   {
     "chr_vintage": "2025",
-    "chr_field_id": "v126",
+    "field_id": "v126",
     "measure": "% Non-Hispanic White",
     "category": "Demographics",
     "data_years": "2023",
@@ -35212,7 +35212,7 @@
   },
   {
     "chr_vintage": "2025",
-    "chr_field_id": "v132",
+    "field_id": "v132",
     "measure": "Access to Exercise Opportunities",
     "category": "Health Behaviors",
     "data_years": "2020, 2022, 2024",
@@ -35333,7 +35333,7 @@
   },
   {
     "chr_vintage": "2025",
-    "chr_field_id": "v133",
+    "field_id": "v133",
     "measure": "Food Environment Index",
     "category": "Health Behaviors",
     "data_years": "2019, 2022",
@@ -35454,7 +35454,7 @@
   },
   {
     "chr_vintage": "2025",
-    "chr_field_id": "v136",
+    "field_id": "v136",
     "measure": "Severe Housing Problems",
     "category": "Physical Environment",
     "data_years": "2017-2021",
@@ -35575,7 +35575,7 @@
   },
   {
     "chr_vintage": "2025",
-    "chr_field_id": "v139",
+    "field_id": "v139",
     "measure": "Food Insecurity",
     "category": "Health Behaviors",
     "data_years": "2022",
@@ -35696,7 +35696,7 @@
   },
   {
     "chr_vintage": "2025",
-    "chr_field_id": "v140",
+    "field_id": "v140",
     "measure": "Social Associations",
     "category": "Social & Economic Factors",
     "data_years": "2022",
@@ -35817,7 +35817,7 @@
   },
   {
     "chr_vintage": "2025",
-    "chr_field_id": "v143",
+    "field_id": "v143",
     "measure": "Insufficient Sleep",
     "category": "Health Behaviors",
     "data_years": "2022",
@@ -35938,7 +35938,7 @@
   },
   {
     "chr_vintage": "2025",
-    "chr_field_id": "v153",
+    "field_id": "v153",
     "measure": "Homeownership",
     "category": "Physical Environment",
     "data_years": "2019-2023",
@@ -36059,7 +36059,7 @@
   },
   {
     "chr_vintage": "2025",
-    "chr_field_id": "v154",
+    "field_id": "v154",
     "measure": "Severe Housing Cost Burden",
     "category": "Physical Environment",
     "data_years": "2019-2023",
@@ -36180,7 +36180,7 @@
   },
   {
     "chr_vintage": "2025",
-    "chr_field_id": "v156",
+    "field_id": "v156",
     "measure": "Traffic Volume",
     "category": "Physical Environment",
     "data_years": "2020",

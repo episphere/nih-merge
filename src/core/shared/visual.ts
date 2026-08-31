@@ -58,12 +58,6 @@ export const RACE_STYLE: Record<Race, RaceStyle> = {
     color: PALETTE.red,
     symbol: 'star',
   },
-  'More than one race': {
-    label: 'More than\none race',
-    labelShort: 'Multiracial',
-    color: PALETTE.grey,
-    symbol: 'diamond2',
-  },
 };
 
 // --- Sex ---

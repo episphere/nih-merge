@@ -3,7 +3,6 @@
 export const ALL_RACES = [
   'White', 'Black or African American', 'Asian', 'Hispanic',
   'American Indian or Alaska Native', 'Native Hawaiian or Other Pacific Islander',
-  'More than one race',
 ] as const
 export type Race = (typeof ALL_RACES)[number]
 
