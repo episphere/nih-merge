@@ -190,9 +190,10 @@ export function renderPlot(state: DemographicsState, data: EnrichedAgeRow[]): vo
   const marks: Plot.Markish[] = [];
 
   // If no x comparison, add a constant "All" column to data for plotting
+  const unsuppressedData = data.filter(d => d.deaths != null);
   const plotData = xField
-    ? data
-    : data.map(d => ({ ...d, _x: 'All' }));
+    ? unsuppressedData
+    : unsuppressedData.map(d => ({ ...d, _x: 'All' }));
   const xChannel = xField ?? '_x';
 
   // Bar mark
@@ -229,25 +230,18 @@ export function renderPlot(state: DemographicsState, data: EnrichedAgeRow[]): vo
     }));
   }
 
-  // Suppressed category labels
-  if (showSuppressed && xField) {
-    const dataXByFx = new Map<string, Set<string>>();
+  // A null death count means the count is suppressed (between 1 and 9).
+  // Plot one label for each suppressed x/facet position, including the "All"
+  // position when no bar comparison is selected.
+  if (showSuppressed) {
+    const suppressedByPosition = new Map<string, { x: string; fx?: string }>();
     for (const d of data) {
-      const fxVal = fxField ? (d[fxField] as string) : '__all__';
-      if (!dataXByFx.has(fxVal)) dataXByFx.set(fxVal, new Set());
-      dataXByFx.get(fxVal)!.add(d[xField] as string);
+      if (d.deaths != null) continue;
+      const x = xField ? (d[xField] as string) : 'All';
+      const fx = fxField ? (d[fxField] as string) : undefined;
+      suppressedByPosition.set(`${x}\u0000${fx ?? ''}`, { x, fx });
     }
-
-    const suppressedData: { x: string; fx?: string }[] = [];
-    const fxValues = fxDomain ?? ['__all__'];
-    for (const fxVal of fxValues) {
-      const presentX = dataXByFx.get(fxVal) ?? new Set();
-      for (const xVal of xDomain) {
-        if (!presentX.has(xVal)) {
-          suppressedData.push(fxField ? { x: xVal, fx: fxVal } : { x: xVal });
-        }
-      }
-    }
+    const suppressedData = [...suppressedByPosition.values()];
 
     if (suppressedData.length > 0) {
       marks.push(Plot.text(suppressedData, {
@@ -267,8 +261,8 @@ export function renderPlot(state: DemographicsState, data: EnrichedAgeRow[]): vo
   // "Zero" labels for data points with y=0 (visible only when all bars are zero)
   if (allZero) {
     const zeroData = xField
-      ? data.map(d => ({ x: d[xField] as string, fx: fxField ? d[fxField] as string : undefined }))
-      : data.map(() => ({ x: 'All' as string, fx: undefined as string | undefined }));
+      ? unsuppressedData.map(d => ({ x: d[xField] as string, fx: fxField ? d[fxField] as string : undefined }))
+      : unsuppressedData.map(() => ({ x: 'All' as string, fx: undefined as string | undefined }));
 
     if (zeroData.length > 0) {
       marks.push(Plot.text(zeroData, {

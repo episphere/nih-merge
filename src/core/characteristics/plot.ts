@@ -251,18 +251,22 @@ export function renderPlot(
 
   // Y domain
   const ci = ciFields(measure);
+  const unsuppressedData = data.filter(d => d.deaths != null);
   let yMin: number;
   let yMax: number;
 
   if (showCI && ci) {
-    yMin = d3.min(data, d => d[ci.lower] as number) ?? 0;
-    yMax = d3.max(data, d => d[ci.upper] as number) ?? 0;
+    yMin = d3.min(unsuppressedData, d => d[ci.lower] as number) ?? 0;
+    yMax = d3.max(unsuppressedData, d => d[ci.upper] as number) ?? 0;
   } else {
-    yMin = d3.min(data, d => d[yField as keyof EnrichedQuantileRow] as number) ?? 0;
-    yMax = d3.max(data, d => d[yField as keyof EnrichedQuantileRow] as number) ?? 0;
+    yMin = d3.min(unsuppressedData, d => d[yField as keyof EnrichedQuantileRow] as number) ?? 0;
+    yMax = d3.max(unsuppressedData, d => d[yField as keyof EnrichedQuantileRow] as number) ?? 0;
   }
 
-  const yDomain: [number, number] = [startZero ? 0 : yMin * 0.9, yMax];
+  const hasNumericY = unsuppressedData.some(d => typeof d[yField as keyof EnrichedQuantileRow] === 'number');
+  const yDomain: [number, number] = hasNumericY
+    ? [startZero ? 0 : yMin * 0.9, yMax]
+    : [0, 1];
 
   // Facet tick format
   const fxTickFmt = fxField === 'race'
@@ -283,7 +287,7 @@ export function renderPlot(
   if (showLines && seriesFn) {
     marks.push(Plot.line(data, {
        x: 'quantile_bin',
-      y: yField as string,
+      y: (d) => d.deaths == null ? null : d[yField as keyof EnrichedQuantileRow] as number,
       stroke: colorFn as never,
       fx: fxField ?? undefined,
       z: seriesFn as never,
@@ -293,7 +297,7 @@ export function renderPlot(
   } else if (showLines && !seriesFn) {
     marks.push(Plot.line(data, {
       x: 'quantile_bin',
-      y: yField as string,
+      y: (d) => d.deaths == null ? null : d[yField as keyof EnrichedQuantileRow] as number,
       stroke: DEFAULT_DOT_COLOR,
       fx: fxField ?? undefined,
       strokeDasharray: '3 4',
@@ -304,7 +308,7 @@ export function renderPlot(
   // Confidence interval marks (vertical links with horizontal caps)
   if (showCI && ci) {
     const capHalf = 4; // half-width of cap in pixels
-    marks.push(Plot.link(data, {
+    marks.push(Plot.link(unsuppressedData, {
       x1: 'quantile_bin',
       x2: 'quantile_bin',
       y1: ci.lower as string,
@@ -344,8 +348,34 @@ export function renderPlot(
     }));
   }
 
+  // A null death count represents a suppressed count between 1 and 9. Since
+  // the associated measure cannot be plotted, label its quantile position at
+  // the bottom of the chart. Multiple comparison series may share a position,
+  // so de-duplicate labels by quantile and facet.
+  const suppressedByPosition = new Map<string, { x: string | number; fx?: string }>();
+  for (const d of data) {
+    if (d.deaths != null) continue;
+    const x = d.quantile_bin;
+    const fx = fxField ? (d[fxField] as string) : undefined;
+    suppressedByPosition.set(`${x}\u0000${fx ?? ''}`, { x, fx });
+  }
+  const suppressedData = [...suppressedByPosition.values()];
+  if (suppressedData.length > 0) {
+    marks.push(Plot.text(suppressedData, {
+      x: 'x',
+      y: () => yDomain[0],
+      fx: fxField ? 'fx' : undefined,
+      text: () => 'Suppressed',
+      rotate: -90,
+      textAnchor: 'start',
+      dy: -10,
+      fill: '#888',
+      fontSize: 16,
+    }));
+  }
+
   // Dot marks
-  marks.push(Plot.dot(data, {
+  marks.push(Plot.dot(unsuppressedData, {
     x: 'quantile_bin',
     y: yField as string,
     fill: colorFn as never,

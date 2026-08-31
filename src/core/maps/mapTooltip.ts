@@ -264,7 +264,10 @@ export function initMapTooltip(
         }
 
         nameEl.textContent = name;
-        valueEl.textContent = info.unavailableMessage ?? (val != null ? formatValue(val) : 'Not Applicable');
+        const missingValueLabel = info.measure !== 'population' && info.row != null && info.row.deaths == null
+          ? 'Suppressed'
+          : 'Not applicable';
+        valueEl.textContent = info.unavailableMessage ?? (val != null ? formatValue(val) : missingValueLabel);
         densityContainer.style.display = val != null && !info.unavailableMessage ? '' : 'none';
 
         if (val != null && !info.unavailableMessage) {
