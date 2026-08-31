@@ -10,7 +10,10 @@ interface QuantileBoundaries {
 
 interface ChrQuantileEntry {
   chr_vintage: string;
-  chr_field_id: string;
+  // Metadata generated before the mortality-data rename uses `field_id`.
+  // Accept both names so refreshing that file cannot silently break labels.
+  chr_field_id?: string;
+  field_id?: string;
   measure: string;
   category: string;
   data_years: string;
@@ -53,6 +56,14 @@ function indexKey(fieldId: string, nQuantiles: string, chrVintage: string): stri
   return `${fieldId}|${nQuantiles}|${chrVintage}`;
 }
 
+function getEntryFieldId(entry: ChrQuantileEntry): string {
+  const fieldId = entry.chr_field_id ?? entry.field_id;
+  if (!fieldId) {
+    throw new Error(`CHR quantile metadata for vintage ${entry.chr_vintage} has no field ID`);
+  }
+  return fieldId;
+}
+
 function detectUnit(entry: ChrQuantileEntry): string {
   // Heuristic: if all boundaries across all quantile types are 0-1 range, it's a proportion
   for (const qb of Object.values(entry.quantiles)) {
@@ -66,13 +77,14 @@ function detectUnit(entry: ChrQuantileEntry): string {
 function buildIndex(entries: ChrQuantileEntry[]): QuantileDetailsIndex {
   const index: QuantileDetailsIndex = new Map();
   for (const entry of entries) {
+    const fieldId = getEntryFieldId(entry);
     const rawUnit = detectUnit(entry);
     const isProportion = rawUnit === 'Proportion';
 
     for (const [nQ, qb] of Object.entries(entry.quantiles)) {
       const detail: QuantileDetail = {
         chrVintage: entry.chr_vintage,
-        fieldId: entry.chr_field_id,
+        fieldId,
         name: entry.measure,
         category: entry.category,
         dataYears: entry.data_years,
@@ -88,7 +100,7 @@ function buildIndex(entries: ChrQuantileEntry[]): QuantileDetailsIndex {
             : [lo, hi],
         ),
       };
-      index.set(indexKey(entry.chr_field_id, nQ, entry.chr_vintage), detail);
+      index.set(indexKey(fieldId, nQ, entry.chr_vintage), detail);
     }
   }
   return index;
