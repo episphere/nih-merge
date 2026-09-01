@@ -1,6 +1,12 @@
 import * as d3 from 'd3';
+import { feature, mesh } from 'topojson-client';
+import type { GeometryCollection, Topology } from 'topojson-specification';
 import { dataManager } from '../../data-access';
-import { geographyUrl } from '../../data-access/geography';
+import {
+  geographyNamesUrl,
+  geographyTopologyUrl,
+  type GeographyTier,
+} from '../../data-access/geography';
 import type { CountyFilters, CountyRow, PopulationFilters, PopulationRow } from '../../domain/mortality';
 import type { Card, CardState, MapsMeasure, MapsState } from './state';
 import { buildTrimmedColorScheme, sampleInterpolator } from './trimmedScheme';
@@ -11,8 +17,8 @@ import { getSchemeReverse } from './topControls';
 export interface GeoFeature {
   type: 'Feature';
   id: string;
-  properties: { name: string };
-  geometry: unknown;
+  properties: { name?: string; state?: string };
+  geometry: GeoJSON.Geometry;
 }
 
 export interface GeoFeatureCollection {
@@ -21,9 +27,15 @@ export interface GeoFeatureCollection {
 }
 
 export interface GeoData {
+  tier: GeographyTier;
   stateGeoJSON: GeoFeatureCollection;
   countyGeoJSON: GeoFeatureCollection;
   nationGeoJSON: GeoFeatureCollection;
+}
+
+interface GeographyNames {
+  states: Record<string, string>;
+  counties: Record<string, string>;
 }
 
 // --- Color config ---
@@ -39,23 +51,85 @@ export interface ColorConfig {
   highOutlierColor: string | null;
 }
 
-// --- GeoJSON loading (cached) ---
+// --- Adaptive TopoJSON loading (cached) ---
 
-let geoDataPromise: Promise<GeoData> | null = null;
+type GeographyObject = GeometryCollection<{ id?: string; name?: string; state?: string }>;
 
-export function loadGeoJSON(): Promise<GeoData> {
-  if (!geoDataPromise) {
-    geoDataPromise = Promise.all([
-      d3.json(geographyUrl('states.geojson')) as Promise<GeoFeatureCollection>,
-      d3.json(geographyUrl('counties.geojson')) as Promise<GeoFeatureCollection>,
-      d3.json(geographyUrl('nation.geojson')) as Promise<GeoFeatureCollection>,
-    ]).then(([stateGeoJSON, countyGeoJSON, nationGeoJSON]) => ({
-      stateGeoJSON,
-      countyGeoJSON,
-      nationGeoJSON,
-    }));
+const geoDataPromises = new Map<string, Promise<GeoData>>();
+const resolvedGeoData = new Map<string, GeoData>();
+let geographyNamesPromise: Promise<GeographyNames> | null = null;
+
+function geographyKey(tier: GeographyTier, stateFips?: string): string {
+  return tier === 'high' ? `${tier}:${stateFips ?? ''}` : tier;
+}
+
+function normalizeFeatureCollection(value: unknown): GeoFeatureCollection {
+  const collection = value as GeoJSON.FeatureCollection;
+  return {
+    type: 'FeatureCollection',
+    features: collection.features.map((item) => ({
+      type: 'Feature',
+      id: String(item.id ?? item.properties?.id ?? ''),
+      properties: (item.properties ?? {}) as GeoFeature['properties'],
+      geometry: item.geometry,
+    })),
+  };
+}
+
+function decodeTopology(topology: Topology, tier: GeographyTier): GeoData {
+  const countiesObject = topology.objects.counties as GeographyObject | undefined;
+  const statesObject = topology.objects.states as GeographyObject | undefined;
+  if (!countiesObject || !statesObject) {
+    throw new Error('Geography topology is missing counties or states');
   }
-  return geoDataPromise;
+
+  const countyGeoJSON = normalizeFeatureCollection(feature(topology, countiesObject));
+  const stateGeoJSON = normalizeFeatureCollection(feature(topology, statesObject));
+  const nationGeometry = mesh(topology, statesObject, (a, b) => a === b);
+  const nationGeoJSON: GeoFeatureCollection = {
+    type: 'FeatureCollection',
+    features: [{
+      type: 'Feature',
+      id: 'nation',
+      properties: {},
+      geometry: nationGeometry,
+    }],
+  };
+
+  return { tier, countyGeoJSON, stateGeoJSON, nationGeoJSON };
+}
+
+export function getCachedGeoData(tier: GeographyTier, stateFips?: string): GeoData | null {
+  return resolvedGeoData.get(geographyKey(tier, stateFips)) ?? null;
+}
+
+export function loadGeoData(tier: GeographyTier, stateFips?: string): Promise<GeoData> {
+  const key = geographyKey(tier, stateFips);
+  const cached = resolvedGeoData.get(key);
+  if (cached) return Promise.resolve(cached);
+
+  let pending = geoDataPromises.get(key);
+  if (pending) return pending;
+
+  pending = d3.json(geographyTopologyUrl(tier, stateFips))
+    .then((topology) => decodeTopology(topology as Topology, tier))
+    .then((geoData) => {
+      resolvedGeoData.set(key, geoData);
+      return geoData;
+    });
+  geoDataPromises.set(key, pending);
+  pending.catch(() => geoDataPromises.delete(key));
+  return pending;
+}
+
+function loadGeographyNames(): Promise<GeographyNames> {
+  if (!geographyNamesPromise) {
+    geographyNamesPromise = d3.json(geographyNamesUrl()) as Promise<GeographyNames>;
+    geographyNamesPromise.catch(() => {
+      geographyNamesPromise = null;
+    });
+  }
+  return geographyNamesPromise;
 }
 
 // --- Per-card data fetching ---
@@ -121,25 +195,15 @@ async function enrichRows(
   rows: (CountyRow | PopulationRow)[],
   spatialLevel: 'county' | 'state',
 ): Promise<Record<string, unknown>[]> {
-  const geo = await loadGeoJSON();
-  const nameMap = new Map<string, string>();
-
-  if (spatialLevel === 'county') {
-    for (const f of geo.countyGeoJSON.features) {
-      nameMap.set(f.id, f.properties.name);
-    }
-  } else {
-    for (const f of geo.stateGeoJSON.features) {
-      nameMap.set(f.id, f.properties.name);
-    }
-  }
+  const names = await loadGeographyNames();
+  const nameMap = spatialLevel === 'county' ? names.counties : names.states;
 
   const fipsField = spatialLevel === 'county' ? 'countyFips' : 'stateFips';
   return rows.map((row) => {
     const r = row as unknown as Record<string, unknown>;
     return {
       ...r,
-      regionName: nameMap.get(r[fipsField] as string) ?? 'Unknown',
+      regionName: nameMap[r[fipsField] as string] ?? 'Unknown',
     };
   });
 }

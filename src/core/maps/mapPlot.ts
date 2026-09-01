@@ -226,6 +226,24 @@ function fitSvgToContent(svgNode: SVGSVGElement, padding = 0): void {
 
 // --- Public: render a card's map into a container ---
 
+export function getMapDomain(
+  cardState: CardState,
+  geoData: GeoData,
+): GeoFeatureCollection {
+  const source = cardState.spatialLevel === 'county'
+    ? geoData.countyGeoJSON
+    : geoData.stateGeoJSON;
+  if (cardState.stateFips === 'All') return source;
+  return {
+    type: 'FeatureCollection',
+    features: source.features.filter((feature) =>
+      cardState.spatialLevel === 'county'
+        ? feature.id.startsWith(cardState.stateFips)
+        : feature.id === cardState.stateFips,
+    ),
+  };
+}
+
 export function renderMapCard(
   container: HTMLElement,
   cardState: CardState,
@@ -238,35 +256,22 @@ export function renderMapCard(
   if (bbox.width === 0 || bbox.height === 0) return null;
 
   const indexField = cardState.spatialLevel === 'county' ? 'countyFips' : 'stateFips';
-  const { countyGeoJSON, stateGeoJSON, nationGeoJSON } = geoData;
+  const { stateGeoJSON, nationGeoJSON } = geoData;
 
   // Determine primary feature collection based on spatial level and state filter
-  let featureCollection: GeoFeatureCollection;
+  const featureCollection = getMapDomain(cardState, geoData);
   let mapOutline: GeoFeatureCollection | unknown[];
 
   if (cardState.spatialLevel === 'county') {
     if (cardState.stateFips !== 'All') {
-      // Filter counties to selected state
-      featureCollection = {
-        type: 'FeatureCollection',
-        features: countyGeoJSON.features.filter((d) =>
-          d.id.startsWith(cardState.stateFips),
-        ),
-      };
       mapOutline = stateGeoJSON.features.filter((d) => d.id === cardState.stateFips);
     } else {
-      featureCollection = countyGeoJSON;
       mapOutline = nationGeoJSON;
     }
   } else {
     if (cardState.stateFips !== 'All') {
-      featureCollection = {
-        type: 'FeatureCollection',
-        features: stateGeoJSON.features.filter((d) => d.id === cardState.stateFips),
-      };
       mapOutline = stateGeoJSON.features.filter((d) => d.id === cardState.stateFips);
     } else {
-      featureCollection = stateGeoJSON;
       mapOutline = nationGeoJSON;
     }
   }

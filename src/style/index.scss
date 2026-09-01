@@ -575,6 +575,17 @@ html {
   height: 100%;
   overflow: hidden;
 
+  &__error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    padding: units(2);
+    color: color("error-dark");
+    text-align: center;
+  }
+
   &--blank {
     border-style: dashed;
     border-color: color("base-light");

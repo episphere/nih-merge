@@ -6,8 +6,16 @@ import { initControls, openCardEditor } from './controls';
 import { fipsName } from '../shared/fips';
 import type { CardState, MapsMeasure } from './state';
 import { initTopControls } from './topControls';
-import { fetchAllCardData, computeColorConfig, loadGeoJSON, type ColorConfig } from './query';
-import { renderMapCard } from './mapPlot';
+import {
+  fetchAllCardData,
+  computeColorConfig,
+  getCachedGeoData,
+  loadGeoData,
+  type ColorConfig,
+  type GeoData,
+} from './query';
+import { getMapDomain, renderMapCard } from './mapPlot';
+import { selectDetailTier } from './detailTier';
 import { renderColorLegend } from './colorLegend';
 import { Gridette } from './grid';
 import { initMapTooltip, type MapTooltipHandle, type CardDensityData } from './mapTooltip';
@@ -171,6 +179,7 @@ const mapTooltipHandle: MapTooltipHandle = initMapTooltip((cardIndex, featureId)
 let cardDataMap = new Map<number, Record<string, unknown>[]>();
 let colorConfig: ColorConfig | null = null;
 let renderVersion = 0;
+let renderGeneration = 0;
 let prevQuerySnapshot = '';
 let gridette: Gridette | null = null;
 let prevGridKey = '';
@@ -192,6 +201,7 @@ function gridKey(state: MapsState): string {
 }
 
 $state.subscribe(async (state) => {
+  const generation = ++renderGeneration;
   const snap = querySnapshot(state);
   const needsFetch = snap !== prevQuerySnapshot;
 
@@ -232,13 +242,13 @@ $state.subscribe(async (state) => {
     mapTooltipHandle.updateDensity(cardData, colorConfig);
   }
 
-  render();
+  void render(generation).catch((error: unknown) => {
+    showGeographyError(error, generation);
+  });
 });
 
-async function render(): Promise<void> {
+async function render(generation: number): Promise<void> {
   const state = $state.get();
-
-  const geoData = await loadGeoJSON();
   const gk = gridKey(state);
 
   // Only recreate Gridette when grid dimensions change
@@ -306,6 +316,9 @@ async function render(): Promise<void> {
     }
   }
 
+  const lowGeoData = await loadGeoData('low');
+  if (generation !== renderGeneration) return;
+
   // Render maps into card bodies
   for (const card of state.cards) {
     if (card.blank || !card.state || !colorConfig?.valid) continue;
@@ -317,11 +330,76 @@ async function render(): Promise<void> {
     if (!cell) continue;
     const mapContainer = cell.element.querySelector('.map-card__body') as HTMLElement;
     if (mapContainer) {
-      const fc = renderMapCard(mapContainer, card.state, data, colorConfig, geoData, state);
-      if (fc) {
-        mapTooltipHandle.bindCard(mapContainer, cardIdx, fc.features);
+      const width = Math.max(0, mapContainer.getBoundingClientRect().width - 30);
+      const height = Math.max(0, mapContainer.getBoundingClientRect().height - 30);
+      const lowDomain = getMapDomain(card.state, lowGeoData);
+      const desiredTier = selectDetailTier(
+        lowDomain,
+        width,
+        height,
+        card.state.stateFips === 'All',
+      );
+      const tierStateFips = desiredTier === 'high' ? card.state.stateFips : undefined;
+      const desiredGeoData = getCachedGeoData(desiredTier, tierStateFips);
+      const cachedLowerTier = desiredTier === 'high' ? getCachedGeoData('medium') : null;
+      const initialGeoData = desiredGeoData ?? cachedLowerTier ?? lowGeoData;
+
+      renderCardGeometry(mapContainer, cardIdx, card.state, data, colorConfig, initialGeoData, state);
+
+      if (!desiredGeoData && desiredTier !== 'low') {
+        void loadGeoData(desiredTier, tierStateFips).then((detailGeoData) => {
+          if (generation !== renderGeneration || !gridette) return;
+          const currentCell = gridette.getCell(card.x, card.y);
+          const currentContainer = currentCell?.element.querySelector('.map-card__body');
+          if (currentContainer !== mapContainer) return;
+          renderCardGeometry(
+            mapContainer,
+            cardIdx,
+            card.state!,
+            data,
+            colorConfig!,
+            detailGeoData,
+            state,
+          );
+        }).catch((error: unknown) => {
+          console.warn(`Unable to load ${desiredTier}-detail map geography; retaining lower detail.`, error);
+        });
       }
     }
+  }
+}
+
+function renderCardGeometry(
+  container: HTMLElement,
+  cardIndex: number,
+  cardState: CardState,
+  data: Record<string, unknown>[],
+  cardColorConfig: ColorConfig,
+  geoData: GeoData,
+  state: MapsState,
+): void {
+  const featureCollection = renderMapCard(
+    container,
+    cardState,
+    data,
+    cardColorConfig,
+    geoData,
+    state,
+  );
+  if (featureCollection) {
+    mapTooltipHandle.bindCard(container, cardIndex, featureCollection.features);
+  }
+}
+
+function showGeographyError(error: unknown, generation: number): void {
+  if (generation !== renderGeneration) return;
+  console.error('Unable to load map geography.', error);
+  for (const body of mapGridEl.querySelectorAll<HTMLElement>('.map-card__body')) {
+    body.replaceChildren();
+    const message = document.createElement('div');
+    message.className = 'map-card__error';
+    message.textContent = 'Map geography could not be loaded.';
+    body.appendChild(message);
   }
 }
 
@@ -485,9 +563,16 @@ if (mapGridEl) {
   onResize(
     mapGridEl,
     () => {
+      // ResizeObserver fires once during startup. If that happens while the
+      // initial data query is still pending, rendering here would invalidate
+      // the data-backed render and leave the card empty until another resize.
+      if (!colorConfig?.valid || cardDataMap.size === 0) return;
       gridette = null;
       prevGridKey = '';
-      render();
+      const generation = ++renderGeneration;
+      void render(generation).catch((error: unknown) => {
+        showGeographyError(error, generation);
+      });
     },
     300,
     () => {},

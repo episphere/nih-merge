@@ -26,6 +26,7 @@ dist-ssr
 .claude
 planning/
 tools/data/input/legacy
+tools/data/input/geography
 epitracker/
 nih-merge/
 /src/data/less_old_data
