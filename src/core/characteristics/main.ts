@@ -12,7 +12,9 @@ import {
   buildFieldGroupMap, buildFieldNameMap, formatQuantileRange, getFieldName,
   type QuantileDetailsIndex, type QuantileDetail,
 } from '../../data-access';
-import { createPlotTooltip, type PlotTooltipField } from '../shared/plotTooltip';
+import {
+  createPlotTooltip, MORTALITY_TOOLTIP_FIELDS, type PlotTooltipField,
+} from '../shared/plotTooltip';
 import { COMPARISON_FIELD_LABEL, CHARACTERISTICS_MEASURE_STYLE } from '../shared/visual';
 import { dataAssetUrl, quantileFile } from '../../data-access';
 import type { TableInfo, TableFilterSpec } from '../shared/tableFilters';
@@ -216,6 +218,8 @@ function render(): void {
       return `${q} (${formatQuantileRange(range, detail.unit)})`;
     },
   });
+
+  fields.push(...MORTALITY_TOOLTIP_FIELDS);
 
   // Measure value last
   const measureLabel = CHARACTERISTICS_MEASURE_STYLE[state.measure].labelShort;

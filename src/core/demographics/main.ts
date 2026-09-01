@@ -7,7 +7,9 @@ import { initControls } from './controls';
 import { initTopControls } from './topControls';
 import { fetchData, applyPlotFilters, deriveFilterOptions, type EnrichedAgeRow } from './query';
 import { renderPlot } from './plot';
-import { createPlotTooltip, type PlotTooltipField } from '../shared/plotTooltip';
+import {
+  createPlotTooltip, MORTALITY_TOOLTIP_FIELDS, type PlotTooltipField,
+} from '../shared/plotTooltip';
 import { COMPARISON_FIELD_LABEL, MEASURE_STYLE } from '../shared/visual';
 import { dataAssetUrl, ageFile } from '../../data-access';
 import type { TableInfo, TableFilterSpec } from '../shared/tableFilters';
@@ -116,6 +118,8 @@ function render(): void {
       });
     }
   }
+
+  fields.push(...MORTALITY_TOOLTIP_FIELDS);
 
   // Measure value last
   const measureLabel = MEASURE_STYLE[state.measure].labelShort;

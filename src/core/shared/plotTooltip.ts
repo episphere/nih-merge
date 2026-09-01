@@ -13,6 +13,32 @@ export interface PlotTooltipField {
   value: (row: Record<string, unknown>) => string;
 }
 
+const COUNT_FORMATTER = new Intl.NumberFormat('en-US', {
+  maximumFractionDigits: 0,
+});
+
+/** Standard mortality context shown alongside a dashboard's selected measure. */
+export const MORTALITY_TOOLTIP_FIELDS: PlotTooltipField[] = [
+  {
+    label: 'Deaths',
+    value: (row) => {
+      const value = row.deaths;
+      return typeof value === 'number' && Number.isFinite(value)
+        ? COUNT_FORMATTER.format(value)
+        : 'Suppressed';
+    },
+  },
+  {
+    label: 'Population',
+    value: (row) => {
+      const value = row.population;
+      return typeof value === 'number' && Number.isFinite(value)
+        ? COUNT_FORMATTER.format(value)
+        : 'N/A';
+    },
+  },
+];
+
 export interface PlotTooltipOptions {
   /** When set, tooltip activates within this radius (px) of the nearest mark center. */
   proximity?: number;
