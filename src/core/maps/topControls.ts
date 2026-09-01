@@ -200,7 +200,7 @@ function initSettingsButton(
   btn.addEventListener('click', () => popup.toggle());
 
   // Initialize combo box after it's in the DOM
-  const colorSchemeComboBox = USAComboBox.create(colorSchemeWrapper);
+  const colorSchemeComboBox = USAComboBox.create(colorSchemeWrapper, { portal: true });
 
   // Add gradient previews to combo box list items
   addGradientPreviews(colorSchemeWrapper);

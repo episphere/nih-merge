@@ -10,6 +10,13 @@
 // implicitly via CustomEvent dispatch — detail objects match the shapes
 // defined by the NCIDS library.
 
+import { autoUpdate, computePosition, flip, offset, shift } from '@floating-ui/dom';
+
+export interface USAComboBoxOptions {
+	/** Render the open listbox under document.body so it can escape clipping and stacking contexts. */
+	portal?: boolean;
+}
+
 /**
  * NOTE: This is a modification of the USAComboBox provided by the NCI design system. The changes are as follows:
  * - The behavior of filtering has been changed so that filters are applied only when the user modifies the textbox text. 
@@ -134,6 +141,15 @@ export class USAComboBox {
 	/** Dropdown element containing filtered options. */
 	private listbox: HTMLUListElement | undefined;
 
+	/** Whether the listbox should be moved to document.body while open. */
+	private readonly portalListbox: boolean;
+
+	/** Stops Floating UI observers after a portaled listbox is closed. */
+	private stopPortalAutoUpdate: (() => void) | undefined;
+
+	/** Original insertion point used to restore a portaled listbox. */
+	private listboxNextSibling: ChildNode | null = null;
+
 	/** Active event status of the list select element. */
 	private isOutside: boolean;
 
@@ -197,8 +213,9 @@ export class USAComboBox {
 	 * @param comboBox The combo box HTMLElement.
 	 * @protected
 	 */
-	protected constructor(comboBox: HTMLElement) {
+	protected constructor(comboBox: HTMLElement, options: USAComboBoxOptions = {}) {
 		this.comboBox = comboBox;
+		this.portalListbox = options.portal ?? false;
 		const existingComponent = USAComboBox._components.get(this.comboBox);
 
 		if (existingComponent) {
@@ -240,12 +257,12 @@ export class USAComboBox {
 	 *
 	 * @param comboBox Element to initialize.
 	 */
-	public static create(comboBox: HTMLElement): USAComboBox {
+	public static create(comboBox: HTMLElement, options: USAComboBoxOptions = {}): USAComboBox {
 		if (!(comboBox instanceof HTMLElement)) {
 			throw 'Element is not an HTMLElement';
 		}
 
-		return this._components.get(comboBox) || new this(comboBox);
+		return this._components.get(comboBox) || new this(comboBox, options);
 	}
 
 	/**
@@ -279,6 +296,7 @@ export class USAComboBox {
 	 */
 	public unregister(): void {
 		this.removeEventListeners();
+		this.restorePortaledListbox();
 		this.resetSelectState();
 		this.input?.remove();
 		this.clearButtonWrapper?.remove();
@@ -906,7 +924,8 @@ export class USAComboBox {
 		if (
 			this.listbox &&
 			!this.listbox.hidden &&
-			!this.comboBox.contains(target)
+			!this.comboBox.contains(target) &&
+			!this.listbox.contains(target)
 		) {
 			this.isOutside = true;
 			this.hideListbox(true);
@@ -947,6 +966,9 @@ export class USAComboBox {
 
 		this.listbox.hidden = false;
 		this.isOutside = false;
+		if (this.portalListbox) {
+			this.showPortaledListbox();
+		}
 		this.comboBox.dispatchEvent(
 			new CustomEvent('usa-combo-box:listbox:expanded', {
 				bubbles: true,
@@ -982,6 +1004,7 @@ export class USAComboBox {
 
 		this.listbox.hidden = true;
 		this.listbox.scrollTop = 0;
+		this.restorePortaledListbox();
 
 		// Reset listbox with unfiltered results (including group headers).
 		this.removeHighlightedOption();
@@ -1004,6 +1027,47 @@ export class USAComboBox {
 				},
 			})
 		);
+	}
+
+	/** Moves and positions the open listbox outside ancestor clipping/stacking contexts. */
+	private showPortaledListbox(): void {
+		if (!this.listbox || !this.input) return;
+
+		this.listboxNextSibling = this.listbox.nextSibling;
+		this.listbox.classList.add('usa-combo-box__list--portal');
+		document.body.appendChild(this.listbox);
+
+		const positionListbox = async () => {
+			if (!this.listbox || !this.input || this.listbox.parentElement !== document.body) return;
+
+			const { x, y } = await computePosition(this.input, this.listbox, {
+				placement: 'bottom-start',
+				strategy: 'fixed',
+				middleware: [offset(0), flip(), shift({ padding: 8 })],
+			});
+
+			if (this.listbox.parentElement !== document.body) return;
+			this.listbox.style.left = `${x}px`;
+			this.listbox.style.top = `${y}px`;
+			this.listbox.style.width = `${this.input.getBoundingClientRect().width}px`;
+		};
+
+		this.stopPortalAutoUpdate = autoUpdate(this.input, this.listbox, positionListbox);
+	}
+
+	/** Restores a portaled listbox to the combo box for normal teardown and reopening. */
+	private restorePortaledListbox(): void {
+		this.stopPortalAutoUpdate?.();
+		this.stopPortalAutoUpdate = undefined;
+
+		if (!this.listbox || !this.listbox.classList.contains('usa-combo-box__list--portal')) return;
+
+		this.listbox.classList.remove('usa-combo-box__list--portal');
+		this.listbox.style.removeProperty('left');
+		this.listbox.style.removeProperty('top');
+		this.listbox.style.removeProperty('width');
+		this.comboBox.insertBefore(this.listbox, this.listboxNextSibling);
+		this.listboxNextSibling = null;
 	}
 
   /**

@@ -195,7 +195,7 @@ export function openCardEditor(
         const wrapperEl = form.querySelector(`#${wrapperId}`) as HTMLElement | null;
         if (wrapperEl) {
           if (optionsChanged || !comboBoxes.has(config.id)) {
-            comboBoxes.set(config.id, USAComboBox.create(wrapperEl));
+            comboBoxes.set(config.id, USAComboBox.create(wrapperEl, { portal: true }));
           }
           syncing = true;
           comboBoxes.get(config.id)!.setSelectedByValue(currentValue);

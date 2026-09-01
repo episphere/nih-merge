@@ -460,6 +460,12 @@ html {
   margin-right: 0.5rem;
 }
 
+// Portaled lists sit above popups and are positioned against the viewport by Floating UI.
+.usa-combo-box__list--portal {
+  position: fixed;
+  z-index: 3000;
+}
+
 // --- Plot hover effects ---
 
 // Demographics bar charts: slightly muted by default, brighten on hover

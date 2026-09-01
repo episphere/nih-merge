@@ -84,7 +84,14 @@ export function createPopup(
   }
 
   function onClickOutside(e: MouseEvent) {
-    if (!el.contains(e.target as Node) && !anchorEl.contains(e.target as Node)) {
+    const target = e.target as HTMLElement;
+    const portalListbox = target.closest<HTMLElement>('.usa-combo-box__list--portal');
+    const portalLabel = portalListbox?.getAttribute('aria-labelledby');
+    const belongsToPopup = portalLabel
+      ? el.contains(document.getElementById(portalLabel))
+      : false;
+
+    if (!el.contains(target) && !anchorEl.contains(target) && !belongsToPopup) {
       close();
     }
   }
