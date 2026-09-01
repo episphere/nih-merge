@@ -254,8 +254,11 @@ html {
   }
 
   &__name {
+    border-bottom: 1px solid color("base-lighter");
     font-weight: bold;
     font-size: 0.85rem;
+    margin-bottom: units(0.5);
+    padding-bottom: units(0.5);
   }
 
   &__value {
@@ -267,6 +270,7 @@ html {
 
     svg {
       display: block;
+      margin-inline: auto;
     }
   }
 
@@ -274,6 +278,7 @@ html {
     border-collapse: collapse;
     font-size: 0.8rem;
 
+    th,
     td {
       padding: 1px units(0.5);
     }
@@ -281,7 +286,9 @@ html {
 
   &__table-label {
     color: color("base-dark");
+    font-weight: normal;
     padding-right: units(1);
+    text-align: left;
     white-space: nowrap;
   }
 

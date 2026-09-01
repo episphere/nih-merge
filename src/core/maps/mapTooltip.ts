@@ -1,5 +1,5 @@
 /**
- * Map hover tooltip — shows region name, value, and multi-card density plot.
+ * Map hover tooltip — shows region name, mortality details, and multi-card density plot.
  * Attaches mouseover/mousemove/mouseleave directly to geo paths after each render.
  */
 
@@ -9,12 +9,13 @@ import { density1d } from 'fast-kde';
 import { createTooltip, type TooltipHandle } from '../shared/tooltip';
 import { fipsName } from '../shared/fips';
 import type { ColorConfig } from './query';
+import { MAPS_MEASURE_LABELS, type MapsMeasure } from './state';
 import { PALETTE } from '../shared/visual';
 
 export interface CardInfo {
   row: Record<string, unknown> | undefined;
   spatialLevel: 'county' | 'state';
-  measure: string;
+  measure: MapsMeasure;
   unavailableMessage?: string;
 }
 
@@ -42,13 +43,17 @@ export function initMapTooltip(
   const nameEl = document.createElement('div');
   nameEl.className = 'epi-tooltip__name';
 
-  const valueEl = document.createElement('div');
-  valueEl.className = 'epi-tooltip__value';
+  const detailsTable = document.createElement('table');
+  detailsTable.className = 'epi-tooltip__table';
+
+  const statusEl = document.createElement('div');
+  statusEl.className = 'epi-tooltip__value';
+  statusEl.style.display = 'none';
 
   const densityContainer = document.createElement('div');
   densityContainer.className = 'epi-tooltip__density';
 
-  tooltip.contentEl.append(nameEl, valueEl, densityContainer);
+  tooltip.contentEl.append(nameEl, detailsTable, statusEl, densityContainer);
 
   // Density plot state
   let densityPaths = new Map<number, SVGPathElement>();
@@ -217,9 +222,49 @@ export function initMapTooltip(
     }
   }
 
-  function formatValue(val: number): string {
-    if (val % 1 !== 0) return val.toFixed(1);
-    return String(val);
+  function formatValue(val: number, measure: MapsMeasure): string {
+    return val.toLocaleString('en-US', {
+      minimumFractionDigits: measure === 'ageAdjustedRate' || measure === 'crudeRate' ? 1 : 0,
+      maximumFractionDigits: measure === 'ageAdjustedRate' || measure === 'crudeRate' ? 1 : 0,
+    });
+  }
+
+  function missingValueLabel(
+    row: Record<string, unknown> | undefined,
+    measure: MapsMeasure,
+  ): string {
+    return measure !== 'population' && row != null && row.deaths == null
+      ? 'Suppressed'
+      : 'Not applicable';
+  }
+
+  function renderDetails(info: CardInfo): void {
+    detailsTable.replaceChildren();
+
+    // Deaths and population are always useful context. Avoid repeating either
+    // when it is also the selected map measure.
+    const measures: MapsMeasure[] = ['deaths', 'population'];
+    if (!measures.includes(info.measure)) {
+      measures.push(info.measure);
+    }
+
+    for (const measure of measures) {
+      const tr = document.createElement('tr');
+      const label = document.createElement('th');
+      label.className = 'epi-tooltip__table-label';
+      label.scope = 'row';
+      label.textContent = MAPS_MEASURE_LABELS[measure];
+
+      const value = document.createElement('td');
+      value.className = 'epi-tooltip__table-value';
+      const rawValue = info.row?.[measure];
+      value.textContent = typeof rawValue === 'number' && Number.isFinite(rawValue)
+        ? formatValue(rawValue, measure)
+        : missingValueLabel(info.row, measure);
+
+      tr.append(label, value);
+      detailsTable.appendChild(tr);
+    }
   }
 
   function bindCard(
@@ -264,10 +309,10 @@ export function initMapTooltip(
         }
 
         nameEl.textContent = name;
-        const missingValueLabel = info.measure !== 'population' && info.row != null && info.row.deaths == null
-          ? 'Suppressed'
-          : 'Not applicable';
-        valueEl.textContent = info.unavailableMessage ?? (val != null ? formatValue(val) : missingValueLabel);
+        renderDetails(info);
+        detailsTable.style.display = info.unavailableMessage ? 'none' : '';
+        statusEl.textContent = info.unavailableMessage ?? '';
+        statusEl.style.display = info.unavailableMessage ? '' : 'none';
         densityContainer.style.display = val != null && !info.unavailableMessage ? '' : 'none';
 
         if (val != null && !info.unavailableMessage) {

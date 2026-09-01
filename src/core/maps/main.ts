@@ -1,7 +1,7 @@
 import { initLayout } from '../shared/initLayout';
 import { createDashboardStore } from '../shared/state/createStore';
 import { onResize } from '../shared/resizeObserver';
-import { MAPS_DEFAULTS, resolveMaps, type MapsState } from './state';
+import { MAPS_DEFAULTS, MAPS_MEASURE_LABELS, resolveMaps, type MapsState } from './state';
 import { initControls, openCardEditor } from './controls';
 import { fipsName } from '../shared/fips';
 import type { CardState, MapsMeasure } from './state';
@@ -400,13 +400,6 @@ function createCardElement(blank: boolean, cardIndex: number): HTMLElement {
 
 // --- Title logic: shared fields go in topbar, differing fields go on cards ---
 
-const MEASURE_LABEL_SHORT: Record<MapsMeasure, string> = {
-  ageAdjustedRate: 'Age-Adjusted Rate',
-  crudeRate: 'Crude Rate',
-  deaths: 'Deaths',
-  population: 'Population',
-};
-
 const CARD_FIELDS = ['year', 'cause', 'sex', 'race', 'stateFips', 'spatialLevel'] as const;
 type CardField = (typeof CARD_FIELDS)[number];
 
@@ -457,7 +450,7 @@ function updateTitles(state: MapsState): void {
   const diffFields = CARD_FIELDS.filter((f) => !(f in shared));
 
   // Build shared title: "US age-adjusted rate, 2018-2022, All races, All sexes, All cancers"
-  const measureLabel = MEASURE_LABEL_SHORT[state.measure];
+  const measureLabel = MAPS_MEASURE_LABELS[state.measure];
   const filterParts: string[] = [];
   if (shared.year) filterParts.push(shared.year);
   if (shared.race !== undefined) filterParts.push(formatFieldValue('race', shared.race));

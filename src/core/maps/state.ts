@@ -9,6 +9,13 @@ import { causeSexRule } from '../shared/state/rules';
 
 export type MapsMeasure = 'ageAdjustedRate' | 'crudeRate' | 'deaths' | 'population';
 
+export const MAPS_MEASURE_LABELS: Record<MapsMeasure, string> = {
+  ageAdjustedRate: 'Age-Adjusted Rate',
+  crudeRate: 'Crude Rate',
+  deaths: 'Deaths',
+  population: 'Population',
+};
+
 export interface CardState {
   year: Year;
   cause: CancerSite | 'All';

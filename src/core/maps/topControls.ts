@@ -1,6 +1,6 @@
 import * as d3 from 'd3';
 import type { MapStore } from 'nanostores';
-import type { MapsState, MapsMeasure } from './state';
+import { MAPS_MEASURE_LABELS, type MapsMeasure, type MapsState } from './state';
 import { createPopup, createDropdown } from '../shared/popup';
 import { createOverlay } from '../shared/overlay';
 import { downloadCSV, downloadTSV, downloadJSON } from '../shared/download';
@@ -9,15 +9,6 @@ import { buildTableFilters, type TableInfo } from '../shared/tableFilters';
 import { createCheckbox, createSelect } from '../shared/formElements';
 import { USAComboBox } from '../../lib/USAComboBox';
 import { downloadMapsFigurePNG, downloadMapsFigureSVG, type MapsFigureOptions } from '../shared/downloadImage';
-
-// --- Measure labels ---
-
-const MEASURE_LABELS: Record<MapsMeasure, string> = {
-  ageAdjustedRate: 'Age-Adjusted Rate',
-  crudeRate: 'Crude Rate',
-  deaths: 'Deaths',
-  population: 'Population',
-};
 
 // --- Color scheme options ---
 
@@ -119,7 +110,7 @@ function initSettingsButton(
 
   // Measure select
   const measure = createSelect('settings-measure', 'Measure');
-  for (const [value, label] of Object.entries(MEASURE_LABELS)) {
+  for (const [value, label] of Object.entries(MAPS_MEASURE_LABELS)) {
     const opt = document.createElement('option');
     opt.value = value;
     opt.textContent = label;
