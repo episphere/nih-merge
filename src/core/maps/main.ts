@@ -37,7 +37,7 @@ function getTableInfo(): TableInfo {
   const state = $state.get();
   const activeCards = state.cards.filter((c) => !c.blank && c.state);
   const firstCard = activeCards[0];
-  const year = firstCard?.state?.year ?? '2022';
+  const year = firstCard?.state?.year ?? '2024';
   const url = dataAssetUrl(countyFile(year));
 
   // Build union filters across all active cards

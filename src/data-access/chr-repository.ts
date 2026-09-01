@@ -176,7 +176,7 @@ export async function getQuantileDetail(
   index: QuantileDetailsIndex,
   fieldId: FieldId,
   nQuantiles: string,
-  mortalityYear = '2022',
+  mortalityYear = '2024',
 ): Promise<QuantileDetail | undefined> {
   const assignments = await loadVintageAssignments(mortalityYear);
   const chrVintage = assignments[fieldId];

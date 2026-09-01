@@ -85,7 +85,7 @@ export const CHARACTERISTICS_DEFAULTS: CharacteristicsState = {
   quantileField: 'v009',
   quantileNumber: '4',
 
-  year: '2022',
+  year: '2024',
 
   compareColor: 'none',
   compareFacet: 'none',

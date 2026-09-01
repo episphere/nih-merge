@@ -65,7 +65,7 @@ export interface MapsState {
 // --- Defaults ---
 
 export const DEFAULT_CARD: CardState = {
-  year: '2022',
+  year: '2024',
   cause: 'All',
   sex: 'All',
   race: 'All',
@@ -97,7 +97,7 @@ export const MAPS_DEFAULTS: MapsState = {
   showOutlineNation: true,
 
   editingCardIndex: null,
-  editYear: '2022',
+  editYear: '2024',
   editCause: 'All',
   editSex: 'All',
   editRace: 'All',

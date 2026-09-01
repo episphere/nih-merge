@@ -56,7 +56,7 @@ const ALL_COMPARISON_FIELDS: (ComparisonField | 'none')[] = ['none', 'race', 'se
 // --- Defaults ---
 
 export const DEMOGRAPHICS_DEFAULTS: DemographicsState = {
-  year: '2022',
+  year: '2024',
   cause: 'All',
   race: 'All',
   sex: 'All',
