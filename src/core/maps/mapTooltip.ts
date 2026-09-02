@@ -35,6 +35,8 @@ const CARD_COLORS = [
   PALETTE.skyBlue, PALETTE.red, PALETTE.grey,
 ];
 
+let nextDensityClipId = 0;
+
 export function initMapTooltip(
   getCardInfo: (cardIndex: number, featureId: string) => CardInfo | null,
 ): MapTooltipHandle {
@@ -108,6 +110,10 @@ export function initMapTooltip(
     if (allMin === allMax) return; // zero-width extent
 
     const extent: [number, number] = [allMin, allMax];
+    const cardExtents = new Map<number, [number, number]>();
+    for (const fc of filteredCards) {
+      cardExtents.set(fc.cardIndex, [Math.min(...fc.values), Math.max(...fc.values)]);
+    }
 
     // Compute density per card, tagging each point with its cardIndex
     interface DensityPoint { x: number; y: number; card: number }
@@ -161,6 +167,13 @@ export function initMapTooltip(
     svg.style.display = 'block';
     densityContainer.appendChild(svg);
 
+    // Keep the shared KDE calculation and x-domain, but do not draw a card's
+    // estimated tails beyond the range of values actually observed for it.
+    const xScale = d3.scaleLinear().domain(extent).range([15, 135]);
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const defs = document.createElementNS(svgNS, 'defs');
+    svg.prepend(defs);
+
     // Grab rendered path elements for highlight toggling.
     // Plot renders each areaY mark as a separate <g aria-label="area"> containing one <path>.
     const markPaths: SVGPathElement[] = [];
@@ -174,14 +187,31 @@ export function initMapTooltip(
       // (Observable Plot may set fill-opacity as an inline style, which
       // takes precedence over SVG presentation attributes).
       path.style.fillOpacity = String(defaultOpacity);
+      const cardExtent = cardExtents.get(cardIndices[i]);
+      if (cardExtent) {
+        const clipId = `map-density-clip-${nextDensityClipId++}`;
+        const clipPath = document.createElementNS(svgNS, 'clipPath');
+        clipPath.setAttribute('id', clipId);
+        clipPath.setAttribute('clipPathUnits', 'userSpaceOnUse');
+
+        const rect = document.createElementNS(svgNS, 'rect');
+        const x0 = xScale(cardExtent[0]);
+        const x1 = xScale(cardExtent[1]);
+        rect.setAttribute('x', String(x0));
+        rect.setAttribute('y', '0');
+        rect.setAttribute('width', String(Math.max(0, x1 - x0)));
+        rect.setAttribute('height', '60');
+        clipPath.appendChild(rect);
+        defs.appendChild(clipPath);
+        path.setAttribute('clip-path', `url(#${clipId})`);
+      }
       densityPaths.set(cardIndices[i], path);
     }
 
     // Build x scale matching Plot's margins for red dot positioning
-    densityXScale = d3.scaleLinear().domain(extent).range([15, 135]);
+    densityXScale = xScale;
 
     // Red dot on baseline
-    const svgNS = 'http://www.w3.org/2000/svg';
     redDot = document.createElementNS(svgNS, 'circle');
     redDot.setAttribute('r', '3');
     redDot.setAttribute('fill', 'red');
