@@ -7,6 +7,7 @@ import { fipsName } from '../shared/fips';
 // --- Label formatting ---
 
 function formatLabel(key: string, value: string): string {
+  if (key === 'editStateFips' && value === 'All') return 'United States';
   if (value === 'All') return 'All';
   if (key === 'editStateFips') return fipsName(value);
   return value;
