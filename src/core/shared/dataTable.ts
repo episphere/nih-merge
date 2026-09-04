@@ -1,15 +1,28 @@
 /**
  * Shared data table renderer — wraps @jeyabbalas/data-table.
  */
-import { createDataTable, type DataTable, type Filter } from '@jeyabbalas/data-table';
+import { createDataTable, type DataTable } from '@jeyabbalas/data-table';
 import '@jeyabbalas/data-table/styles';
-import { queryParquet } from '../../data-access/duckdb-parquet';
 
 export type { DataTable };
+
+export interface TablePresentation {
+  /** Dimension/context columns that remain visible and are not user-selectable. */
+  fixedColumns: string[];
+  /** Currently selected dashboard measure; placed last when available. */
+  activeMeasure: string;
+  /** Numeric columns visible when the table is first opened or reset. */
+  defaultNumericColumns: string[];
+  /** Human-readable names used by the column chooser. */
+  columnLabels?: Record<string, string>;
+  /** Filename stem for exports launched from the table overlay. */
+  exportFileStem: string;
+}
 
 export async function renderDataTable(
   container: HTMLElement,
   data: Record<string, unknown>[],
+  portalTarget?: HTMLElement,
 ): Promise<DataTable> {
   container.innerHTML = '';
   const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
@@ -21,41 +34,9 @@ export async function renderDataTable(
     presets: false,
     undoRedo: false,
     expressionFilter: false,
+    exportDialog: false,
+    portalTarget,
     colorScheme: 'light',
   });
   return table;
-}
-
-export async function renderDataTableFromUrl(
-  container: HTMLElement,
-  url: string,
-  filters: Filter[],
-): Promise<DataTable> {
-  const clauses: string[] = [];
-  const parameters: unknown[] = [];
-
-  for (const filter of filters) {
-    const column = `"${filter.column.replaceAll('"', '""')}"`;
-    if (filter.type === 'point') {
-      if (filter.value === null) {
-        clauses.push(`${column} IS NULL`);
-      } else {
-        clauses.push(`${column} = ?`);
-        parameters.push(filter.value);
-      }
-    } else if (filter.type === 'set' || filter.type === 'not-set') {
-      if (filter.values.length === 0) {
-        clauses.push(filter.type === 'set' ? 'FALSE' : 'TRUE');
-      } else {
-        const operator = filter.type === 'set' ? 'IN' : 'NOT IN';
-        clauses.push(`${column} ${operator} (${filter.values.map(() => '?').join(', ')})`);
-        parameters.push(...filter.values);
-      }
-    } else {
-      throw new Error(`Unsupported initial table filter: ${filter.type}`);
-    }
-  }
-
-  const rows = await queryParquet(url, [], clauses.length > 0 ? clauses.join(' AND ') : 'TRUE', parameters);
-  return renderDataTable(container, rows);
 }

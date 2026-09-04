@@ -115,6 +115,7 @@ export type DropdownEntry = DropdownItem | 'separator';
 
 export interface DropdownHandle {
   el: HTMLElement;
+  close(): void;
   destroy(): void;
 }
 
@@ -189,5 +190,5 @@ export function createDropdown(
     el.remove();
   }
 
-  return { el, destroy };
+  return { el, close, destroy };
 }

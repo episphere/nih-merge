@@ -16,8 +16,7 @@ import {
   createPlotTooltip, MORTALITY_TOOLTIP_FIELDS, type PlotTooltipField,
 } from '../shared/plotTooltip';
 import { COMPARISON_FIELD_LABEL, CHARACTERISTICS_MEASURE_STYLE } from '../shared/visual';
-import { dataAssetUrl, quantileFile } from '../../data-access';
-import type { TableInfo, TableFilterSpec } from '../shared/tableFilters';
+import type { TableView } from '../shared/dataTableOverlay';
 
 // 1. Layout
 initLayout();
@@ -26,20 +25,41 @@ initLayout();
 const { $state, update } = createDashboardStore(CHARACTERISTICS_DEFAULTS, resolveCharacteristics);
 
 // 3. Controls
-function getTableInfo(): TableInfo {
+function getTableView(): TableView {
   const state = $state.get();
-  const compAxes: string[] = [state.compareColor, state.compareFacet];
-  const filters: TableFilterSpec[] = [
-    { column: 'cause', value: compAxes.includes('cause') ? '*' : state.cause },
-    { column: 'race', value: compAxes.includes('race') ? '*' : state.race },
-    { column: 'sex', value: compAxes.includes('sex') ? '*' : state.sex },
-    { column: 'chr_field_id', value: state.quantileField },
-  ];
-  return { url: dataAssetUrl(quantileFile(state.quantileNumber, state.year)), filters };
+  return {
+    key: `${querySnapshot(state)}\0${state.measure}\0${tableDataVersion}`,
+    rows: lastData.map((row) => ({ year: state.year, ...row })) as unknown as Record<string, unknown>[],
+    subtitle: document.getElementById('title')?.textContent ?? '',
+    presentation: {
+      fixedColumns: ['year', 'chr_field_id', 'quantile_bin', 'cause', 'race', 'sex'],
+      activeMeasure: state.measure,
+      defaultNumericColumns: ['deaths', 'population', state.measure],
+      exportFileStem: 'nih-merge-characteristics-table',
+      columnLabels: {
+        deaths: 'Deaths', population: 'Population', crudeRate: 'Crude Rate',
+        ageAdjustedRate: 'Age-Adjusted Rate', crudeRateCiLower: 'Crude Rate CI Lower',
+        crudeRateCiUpper: 'Crude Rate CI Upper', ageAdjustedRateCiLower: 'Age-Adjusted Rate CI Lower',
+        ageAdjustedRateCiUpper: 'Age-Adjusted Rate CI Upper',
+        ageAdjustedRateRatioRefLow: 'AA Rate Ratio (Lowest Quantile)',
+        ageAdjustedRateRatioRefHigh: 'AA Rate Ratio (Highest Quantile)',
+        crudeRateRatioRefLow: 'Crude Rate Ratio (Lowest Quantile)',
+        crudeRateRatioRefHigh: 'Crude Rate Ratio (Highest Quantile)',
+        ageAdjustedRateRatioRefLowCiLower: 'AA Rate Ratio (Lowest Quantile) CI Lower',
+        ageAdjustedRateRatioRefLowCiUpper: 'AA Rate Ratio (Lowest Quantile) CI Upper',
+        ageAdjustedRateRatioRefHighCiLower: 'AA Rate Ratio (Highest Quantile) CI Lower',
+        ageAdjustedRateRatioRefHighCiUpper: 'AA Rate Ratio (Highest Quantile) CI Upper',
+        crudeRateRatioRefLowCiLower: 'Crude Rate Ratio (Lowest Quantile) CI Lower',
+        crudeRateRatioRefLowCiUpper: 'Crude Rate Ratio (Lowest Quantile) CI Upper',
+        crudeRateRatioRefHighCiLower: 'Crude Rate Ratio (Highest Quantile) CI Lower',
+        crudeRateRatioRefHighCiUpper: 'Crude Rate Ratio (Highest Quantile) CI Upper',
+      },
+    },
+  };
 }
 
 initControls($state, update);
-initTopControls($state, update, () => lastData as unknown as Record<string, unknown>[], getTableInfo);
+initTopControls($state, update, () => lastData as unknown as Record<string, unknown>[], getTableView);
 
 // 4. URL sync
 const URL_KEYS: (keyof typeof CHARACTERISTICS_DEFAULTS & string)[] = [
@@ -56,6 +76,7 @@ const QUERY_KEYS: (keyof CharacteristicsState)[] = [
 ];
 
 let lastData: EnrichedQuantileRow[] = [];
+let tableDataVersion = 0;
 let renderVersion = 0;
 let prevQuerySnapshot = '';
 let quantileDetails: QuantileDetailsIndex | null = null;
@@ -86,6 +107,7 @@ $state.subscribe(async (state) => {
   const needsFetch = snap !== prevQuerySnapshot;
 
   if (needsFetch) {
+    document.getElementById('btn-table')?.setAttribute('disabled', '');
     prevQuerySnapshot = snap;
     const version = ++renderVersion;
 
@@ -97,7 +119,9 @@ $state.subscribe(async (state) => {
     const data = await fetchData(state);
     if (version !== renderVersion) return; // stale
     lastData = data;
+    tableDataVersion++;
     hasCompletedInitialFetch = true;
+    document.getElementById('btn-table')?.removeAttribute('disabled');
 
     // Update filter options from the actual query results
     const filterOptions = deriveFilterOptions(state, data);

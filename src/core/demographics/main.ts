@@ -11,8 +11,7 @@ import {
   createPlotTooltip, MORTALITY_TOOLTIP_FIELDS, type PlotTooltipField,
 } from '../shared/plotTooltip';
 import { COMPARISON_FIELD_LABEL, MEASURE_STYLE } from '../shared/visual';
-import { dataAssetUrl, ageFile } from '../../data-access';
-import type { TableInfo, TableFilterSpec } from '../shared/tableFilters';
+import type { TableView } from '../shared/dataTableOverlay';
 
 // 1. Layout
 initLayout();
@@ -21,21 +20,29 @@ initLayout();
 const { $state, update } = createDashboardStore(DEMOGRAPHICS_DEFAULTS, resolveDemographics);
 
 // 3. Controls
-function getTableInfo(): TableInfo {
+function getTableView(): TableView {
   const state = $state.get();
-  const compAxes = [state.compareBar, state.compareFacet];
-  const filters: TableFilterSpec[] = [
-    { column: 'cause', value: compAxes.includes('cause') ? '*' : state.cause },
-    { column: 'race', value: compAxes.includes('race') ? '*' : state.race },
-    { column: 'sex', value: compAxes.includes('sex') ? '*' : state.sex },
-    { column: 'ageGroup', value: compAxes.includes('ageGroup') ? '*' : state.ageGroup },
-    { column: 'stateFips', value: state.stateFips },
-  ];
-  return { url: dataAssetUrl(ageFile(state.year)), filters };
+  return {
+    key: `${querySnapshot(state)}\0${state.measure}\0${tableDataVersion}`,
+    rows: lastData.map((row) => ({ year: state.year, ...row })) as unknown as Record<string, unknown>[],
+    subtitle: document.getElementById('title')?.textContent ?? '',
+    presentation: {
+      fixedColumns: ['year', 'stateFips', 'cause', 'race', 'sex', 'ageGroup'],
+      activeMeasure: state.measure,
+      defaultNumericColumns: ['deaths', 'population', state.measure],
+      exportFileStem: 'nih-merge-demographics-table',
+      columnLabels: {
+        deaths: 'Deaths', population: 'Population', crudeRate: 'Crude Rate',
+        ageAdjustedRate: 'Age-Adjusted Rate', crudeRateCiLower: 'Crude Rate CI Lower',
+        crudeRateCiUpper: 'Crude Rate CI Upper', ageAdjustedRateCiLower: 'Age-Adjusted Rate CI Lower',
+        ageAdjustedRateCiUpper: 'Age-Adjusted Rate CI Upper',
+      },
+    },
+  };
 }
 
 initControls($state, update);
-initTopControls($state, update, () => lastData as unknown as Record<string, unknown>[], getTableInfo);
+initTopControls($state, update, () => lastData as unknown as Record<string, unknown>[], getTableView);
 
 // 4. URL sync
 const URL_KEYS: (keyof typeof DEMOGRAPHICS_DEFAULTS & string)[] = [
@@ -52,6 +59,7 @@ const QUERY_KEYS: (keyof DemographicsState)[] = [
 ];
 
 let lastData: EnrichedAgeRow[] = [];
+let tableDataVersion = 0;
 let renderVersion = 0;
 let prevQuerySnapshot: string = '';
 let hasCompletedInitialFetch = false;
@@ -69,12 +77,15 @@ $state.subscribe(async (state) => {
   const needsFetch = snap !== prevQuerySnapshot;
 
   if (needsFetch) {
+    document.getElementById('btn-table')?.setAttribute('disabled', '');
     prevQuerySnapshot = snap;
     const version = ++renderVersion;
     const data = await fetchData(state);
     if (version !== renderVersion) return; // stale
     lastData = data;
+    tableDataVersion++;
     hasCompletedInitialFetch = true;
+    document.getElementById('btn-table')?.removeAttribute('disabled');
 
     // Update filter options from the actual query results (only if changed to avoid loop)
     const filterOptions = deriveFilterOptions(state, data);

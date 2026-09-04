@@ -2,10 +2,8 @@ import * as d3 from 'd3';
 import type { MapStore } from 'nanostores';
 import { MAPS_MEASURE_LABELS, type MapsMeasure, type MapsState } from './state';
 import { createPopup, createDropdown } from '../shared/popup';
-import { createOverlay } from '../shared/overlay';
 import { downloadCSV, downloadTSV, downloadJSON } from '../shared/download';
-import { renderDataTableFromUrl, type DataTable } from '../shared/dataTable';
-import { buildTableFilters, type TableInfo } from '../shared/tableFilters';
+import { initDataTableButton, type TableView } from '../shared/dataTableOverlay';
 import { createCheckbox, createSelect } from '../shared/formElements';
 import { USAComboBox } from '../../lib/USAComboBox';
 import { downloadMapsFigurePNG, downloadMapsFigureSVG, type MapsFigureOptions } from '../shared/downloadImage';
@@ -47,11 +45,11 @@ export function initTopControls(
   $state: MapStore<MapsState>,
   update: (change: Partial<MapsState>) => void,
   getData: () => Record<string, unknown>[],
-  getTableInfo?: () => TableInfo,
+  getTableView?: () => TableView,
 ): void {
   initGridEditButton($state, update);
   initSettingsButton($state, update);
-  initTableButton(getTableInfo);
+  if (getTableView) initDataTableButton('btn-table', getTableView);
   initDownloadButton($state, getData);
 }
 
@@ -261,42 +259,6 @@ function initSettingsButton(
   });
   nationOutline.input.addEventListener('change', () => {
     update({ showOutlineNation: nationOutline.input.checked });
-  });
-}
-
-// --- Table button ---
-
-function initTableButton(getTableInfo?: () => TableInfo): void {
-  const btn = document.getElementById('btn-table');
-  if (!btn) return;
-
-  const overlay = createOverlay({ title: 'Data Table' });
-  let activeTable: DataTable | null = null;
-  let lastTableKey = '';
-
-  btn.addEventListener('click', async () => {
-    const currentKey = getTableInfo ? JSON.stringify(getTableInfo()) : '';
-
-    // If table is already loaded with the same filters, just re-open
-    if (activeTable && currentKey === lastTableKey) {
-      overlay.open();
-      return;
-    }
-
-    // Open overlay first so the container has layout dimensions
-    overlay.open();
-    overlay.showLoading();
-
-    if (getTableInfo) {
-      const { url, filters } = getTableInfo();
-      activeTable = await renderDataTableFromUrl(overlay.contentEl, url, buildTableFilters(filters));
-      lastTableKey = currentKey;
-      overlay.hideLoading();
-      overlay.sizeToFit();
-    } else {
-      overlay.contentEl.innerHTML = '<p class="padding-3">No data available.</p>';
-      overlay.hideLoading();
-    }
   });
 }
 

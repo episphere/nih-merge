@@ -2,7 +2,7 @@
  * Reusable data-download utilities (CSV, TSV, JSON).
  */
 
-function triggerDownload(content: string, filename: string, mimeType: string): void {
+export function triggerDownload(content: BlobPart, filename: string, mimeType: string): void {
   const blob = new Blob([content], { type: mimeType });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');

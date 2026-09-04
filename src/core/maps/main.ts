@@ -19,8 +19,7 @@ import { selectDetailTier } from './detailTier';
 import { renderColorLegend } from './colorLegend';
 import { Gridette } from './grid';
 import { initMapTooltip, type MapTooltipHandle, type CardDensityData } from './mapTooltip';
-import { dataAssetUrl, countyFile } from '../../data-access';
-import type { TableInfo, TableFilterSpec } from '../shared/tableFilters';
+import type { TableView } from '../shared/dataTableOverlay';
 import { syncMapsToURL } from './urlSync';
 
 // 1. Layout
@@ -37,45 +36,34 @@ syncMapsToURL($state, update);
 
 // Collect all card data for table/download export
 let allCardData: Record<string, unknown>[] = [];
+let tableDataVersion = 0;
 function getData(): Record<string, unknown>[] {
   return allCardData;
 }
 
-function getTableInfo(): TableInfo {
+function getTableView(): TableView {
   const state = $state.get();
-  const activeCards = state.cards.filter((c) => !c.blank && c.state);
-  const firstCard = activeCards[0];
-  const year = firstCard?.state?.year ?? '2024';
-  const url = dataAssetUrl(countyFile(year));
-
-  // Build union filters across all active cards
-  const fieldKeys = ['cause', 'sex', 'race', 'stateFips'] as const;
-  const filters: TableFilterSpec[] = [];
-
-  for (const key of fieldKeys) {
-    const values = [...new Set(activeCards.map((c) => c.state![key]))];
-    if (values.length === 1) {
-      filters.push({ column: key, value: values[0] });
-    } else if (values.length > 1) {
-      filters.push({ column: key, value: values });
-    }
-  }
-
-  // stateFips="All" means "all states" — convert to '*' so the table
-  // doesn't filter on the literal string "All" (which no county row has).
-  for (const f of filters) {
-    if (f.column === 'stateFips' && f.value === 'All') {
-      f.value = '*';
-    }
-  }
-
-  // Exclude aggregate county rows
-  filters.push({ column: 'countyFips', value: '*' });
-
-  return { url, filters };
+  return {
+    key: `${querySnapshot(state)}\0${tableDataVersion}`,
+    rows: allCardData,
+    subtitle: document.getElementById('title')?.textContent ?? '',
+    presentation: {
+      fixedColumns: [
+        'mapCard', 'year', 'spatialLevel', 'regionName', 'stateFips', 'countyFips',
+        'cause', 'race', 'sex', 'ageGroup',
+      ],
+      activeMeasure: state.measure,
+      defaultNumericColumns: ['deaths', 'population', state.measure],
+      exportFileStem: 'nih-merge-maps-table',
+      columnLabels: {
+        deaths: 'Deaths', population: 'Population', crudeRate: 'Crude Rate',
+        ageAdjustedRate: 'Age-Adjusted Rate',
+      },
+    },
+  };
 }
 
-initTopControls($state, update, getData, getTableInfo);
+initTopControls($state, update, getData, getTableView);
 
 // 4. Color legend + in-grid add/remove buttons
 const dashboardEl = document.getElementById('dashboard')!;
@@ -206,6 +194,7 @@ $state.subscribe(async (state) => {
   const needsFetch = snap !== prevQuerySnapshot;
 
   if (needsFetch) {
+    document.getElementById('btn-table')?.setAttribute('disabled', '');
     prevQuerySnapshot = snap;
     const version = ++renderVersion;
     const data = await fetchAllCardData(state.cards, state.measure);
@@ -214,9 +203,18 @@ $state.subscribe(async (state) => {
 
     // Flatten all card data for table/download
     allCardData = [];
-    for (const rows of cardDataMap.values()) {
-      allCardData.push(...rows);
+    for (const [cardIndex, rows] of cardDataMap) {
+      const cardState = state.cards[cardIndex]?.state;
+      if (!cardState) continue;
+      allCardData.push(...rows.map((row) => ({
+        mapCard: cardIndex + 1,
+        year: cardState.year,
+        spatialLevel: cardState.spatialLevel,
+        ...row,
+      })));
     }
+    tableDataVersion++;
+    document.getElementById('btn-table')?.removeAttribute('disabled');
   }
 
   colorConfig = computeColorConfig(cardDataMap, state);

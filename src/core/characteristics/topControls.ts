@@ -2,11 +2,9 @@ import type { MapStore } from 'nanostores';
 import type { CharacteristicsState } from './state';
 import { createPopup } from '../shared/popup';
 import { createDropdown } from '../shared/popup';
-import { createOverlay } from '../shared/overlay';
 import { downloadCSV, downloadTSV, downloadJSON } from '../shared/download';
 import { downloadFigurePNG, downloadFigureSVG, getFigureOptions } from '../shared/downloadImage';
-import { renderDataTableFromUrl, type DataTable } from '../shared/dataTable';
-import { buildTableFilters, type TableInfo } from '../shared/tableFilters';
+import { initDataTableButton, type TableView } from '../shared/dataTableOverlay';
 
 /**
  * Wire the 4 top-control icon buttons to their respective popups/dropdowns/overlays.
@@ -15,11 +13,11 @@ export function initTopControls(
   $state: MapStore<CharacteristicsState>,
   update: (change: Partial<CharacteristicsState>) => void,
   getData?: () => Record<string, unknown>[],
-  getTableInfo?: () => TableInfo,
+  getTableView?: () => TableView,
 ): void {
   initFilterButton($state);
   initSettingsButton($state, update);
-  initTableButton(getTableInfo);
+  if (getTableView) initDataTableButton('btn-table', getTableView);
   initDownloadButton(getData);
 }
 
@@ -117,47 +115,6 @@ function initSettingsButton(
   $state.subscribe((state) => {
     for (const { key, input } of inputs) {
       input.checked = state[key] as boolean;
-    }
-  });
-}
-
-// --- Table button ---
-
-function initTableButton(getTableInfo?: () => TableInfo): void {
-  const btn = document.getElementById('btn-table');
-  if (!btn) return;
-
-  const overlay = createOverlay({ title: 'Data Table' });
-  let activeTable: DataTable | null = null;
-  let lastTableKey = '';
-
-  btn.addEventListener('click', async () => {
-    const currentKey = getTableInfo ? JSON.stringify(getTableInfo()) : '';
-
-    // If table is already loaded with the same filters, just re-open
-    if (activeTable && currentKey === lastTableKey) {
-      overlay.open();
-      return;
-    }
-
-    // Set subtitle from current plot title
-    const titleEl = document.getElementById('title');
-    overlay.subtitleEl.textContent = titleEl?.textContent ?? '';
-
-    // Open overlay first so the container has layout dimensions
-    overlay.open();
-    overlay.showLoading();
-
-    // Render table from parquet URL with filters
-    if (getTableInfo) {
-      const { url, filters } = getTableInfo();
-      activeTable = await renderDataTableFromUrl(overlay.contentEl, url, buildTableFilters(filters));
-      lastTableKey = currentKey;
-      overlay.hideLoading();
-      overlay.sizeToFit();
-    } else {
-      overlay.contentEl.innerHTML = '<p class="padding-3">No data available.</p>';
-      overlay.hideLoading();
     }
   });
 }
