@@ -16,6 +16,8 @@ export const MAPS_MEASURE_LABELS: Record<MapsMeasure, string> = {
   population: 'Population',
 };
 
+const AI_AN_RACE: Race = 'American Indian or Alaska Native';
+
 export interface CardState {
   year: Year;
   cause: CancerSite | 'All';
@@ -128,6 +130,36 @@ function populationHidesCauseRule(state: MapsState): void {
   }
 }
 
+/** AI/AN data may be displayed on state maps, but not on county maps. */
+function countyHidesAiAnRule(state: MapsState, change: Partial<MapsState>): void {
+  // If AI/AN is explicitly selected while editing a county map, move the map
+  // to the supported state level. This also guards against a stale popup whose
+  // options were rendered before the county-level list was filtered.
+  if (
+    state.editSpatialLevel === 'county'
+    && change.editRace === AI_AN_RACE
+    && change.editSpatialLevel !== 'county'
+  ) {
+    state.editSpatialLevel = 'state';
+  }
+
+  state.editRaceOptions = state.editSpatialLevel === 'county'
+    ? ['All', ...ALL_RACES.filter((race) => race !== AI_AN_RACE)]
+    : ['All', ...ALL_RACES];
+
+  if (state.editSpatialLevel === 'county' && state.editRace === AI_AN_RACE) {
+    state.editRace = 'All';
+  }
+
+  // Also normalize cards loaded from shared URLs or other persisted state.
+  state.cards = state.cards.map((card) => {
+    if (card.state?.spatialLevel !== 'county' || card.state.race !== AI_AN_RACE) {
+      return card;
+    }
+    return { ...card, state: { ...card.state, race: 'All' } };
+  });
+}
+
 /** Ensure cards array matches nRows * nCols, filling new positions with blank cards. */
 function syncCardsToGrid(state: MapsState, prev: MapsState): void {
   if (state.nRows === prev.nRows && state.nCols === prev.nCols) return;
@@ -185,6 +217,7 @@ export function resolveMaps(state: MapsState, change: Partial<MapsState>): MapsS
   next.editSexOptions = editProxy.sexOptions;
 
   populationHidesCauseRule(next);
+  countyHidesAiAnRule(next, change);
   syncCardsToGrid(next, state);
 
   return next;
