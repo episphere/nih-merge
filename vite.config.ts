@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite'
 import { resolve } from 'node:path'
-import { cpSync, mkdirSync } from 'node:fs'
+import { cpSync, mkdirSync, readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import type { Plugin } from 'vite'
 
@@ -23,6 +23,26 @@ function copyDataAssets() {
 }
 
 const pages = ['demographics', 'maps', 'characteristics', 'help'] as const
+
+const footerPartialPath = resolve(__dirname, 'src/partials/footer.html')
+
+function htmlPartials(): Plugin {
+  return {
+    name: 'html-partials',
+    transformIndexHtml(html) {
+      return html.replace('<!-- include:footer -->', readFileSync(footerPartialPath, 'utf8'))
+    },
+    configureServer(server) {
+      server.watcher.add(footerPartialPath)
+    },
+    handleHotUpdate({ file, server }) {
+      if (file === footerPartialPath) {
+        server.ws.send({ type: 'full-reload' })
+        return []
+      }
+    },
+  }
+}
 
 function devCleanUrls(): Plugin {
   return {
@@ -103,5 +123,5 @@ export default defineConfig({
       },
     },
   },
-  plugins: [devCleanUrls(), buildOutputRestructure(), copyDataAssets()],
+  plugins: [htmlPartials(), devCleanUrls(), buildOutputRestructure(), copyDataAssets()],
 })
