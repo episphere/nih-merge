@@ -22,7 +22,7 @@ function copyDataAssets() {
   }
 }
 
-const pages = ['demographics', 'maps', 'characteristics', 'help'] as const
+const pages = ['demographics', 'maps', 'characteristics', 'help', 'report-issue'] as const
 
 const headerPartialPath = resolve(__dirname, 'src/partials/header.html')
 const footerPartialPath = resolve(__dirname, 'src/partials/footer.html')
@@ -34,6 +34,7 @@ function renderHeader(page: string): string {
   return readFileSync(headerPartialPath, 'utf8')
     .replaceAll('{{root}}', root)
     .replace('{{homeCurrent}}', page === 'home' ? ' usa-current' : '')
+    .replace('{{reportIssueCurrent}}', page === 'reportissue' ? ' usa-current' : '')
     .replace('{{helpCurrent}}', page === 'help' ? ' usa-current' : '')
 }
 
@@ -133,6 +134,7 @@ export default defineConfig({
         maps: resolve(__dirname, 'src/pages/maps.html'),
         characteristics: resolve(__dirname, 'src/pages/characteristics.html'),
         help: resolve(__dirname, 'src/pages/help.html'),
+        reportIssue: resolve(__dirname, 'src/pages/report-issue.html'),
       },
     },
   },
