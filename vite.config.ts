@@ -24,19 +24,32 @@ function copyDataAssets() {
 
 const pages = ['demographics', 'maps', 'characteristics', 'help'] as const
 
+const headerPartialPath = resolve(__dirname, 'src/partials/header.html')
 const footerPartialPath = resolve(__dirname, 'src/partials/footer.html')
+const partialPaths = [headerPartialPath, footerPartialPath]
+
+function renderHeader(page: string): string {
+  const root = page === 'home' ? './' : '../'
+
+  return readFileSync(headerPartialPath, 'utf8')
+    .replaceAll('{{root}}', root)
+    .replace('{{homeCurrent}}', page === 'home' ? ' usa-current' : '')
+    .replace('{{helpCurrent}}', page === 'help' ? ' usa-current' : '')
+}
 
 function htmlPartials(): Plugin {
   return {
     name: 'html-partials',
     transformIndexHtml(html) {
-      return html.replace('<!-- include:footer -->', readFileSync(footerPartialPath, 'utf8'))
+      return html
+        .replace(/    <!-- include:header (\w+) -->/, (_marker, page: string) => renderHeader(page))
+        .replace('    <!-- include:footer -->', readFileSync(footerPartialPath, 'utf8'))
     },
     configureServer(server) {
-      server.watcher.add(footerPartialPath)
+      server.watcher.add(partialPaths)
     },
     handleHotUpdate({ file, server }) {
-      if (file === footerPartialPath) {
+      if (partialPaths.includes(file)) {
         server.ws.send({ type: 'full-reload' })
         return []
       }

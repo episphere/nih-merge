@@ -8,54 +8,7 @@
   </head>
   <body>
 
-    <!-- Gov banner -->
-    <section class="usa-banner" aria-label="Official government website">
-      <header class="usa-banner__header">
-        <div class="usa-banner__inner">
-          <div class="usa-banner__header-text">
-            An official website of the United States government
-          </div>
-        </div>
-      </header>
-    </section>
-
-    <!-- NCI Header -->
-    <header id="nci-header" class="nci-header nci-header--megamenu" aria-label="NIH National Cancer Institute">
-      <div class="nci-header__navbar">
-        <div class="nci-logo" id="megamenu-logo">
-          <a href="https://www.cancer.gov">
-            <picture>
-              <source media="(min-width: 1024px)"
-                srcset="https://www.cancer.gov/profiles/custom/cgov_site/themes/custom/cgov/static/images/design-elements/logos/nci-logo-full.svg" />
-              <img
-                src="https://www.cancer.gov/profiles/custom/cgov_site/themes/custom/cgov/static/images/design-elements/logos/nci-logo-full.svg"
-                alt="National Cancer Institute Homepage" />
-            </picture>
-          </a>
-        </div>
-        <div class="nci-header-nav__secondary">
-          <button class="usa-button nci-header-mobilenav__open-btn">Menu</button>
-        </div>
-      </div>
-      <nav aria-label="Primary Navigation" class="nci-header-nav">
-        <div class="nci-header-nav__inner">
-          <ul class="nci-header-nav__primary">
-            <li class="nci-header-nav__primary-item">
-              <a href="../" class="nci-header-nav__primary-link"><span>Home</span></a>
-            </li>
-            <li class="nci-header-nav__primary-item">
-              <a href="#" class="nci-header-nav__primary-link" data-menu-id="2"><span>Visualizations</span></a>
-            </li>
-            <li class="nci-header-nav__primary-item">
-              <a href="https://github.com/LKMason/nih-merge/issues/new" class="nci-header-nav__primary-link"><span>Report Issue</span></a>
-            </li>
-            <li class="nci-header-nav__primary-item">
-              <a href="../help/" class="nci-header-nav__primary-link"><span>Help</span></a>
-            </li>
-          </ul>
-        </div>
-      </nav>
-    </header>
+    <!-- include:header demographics -->
 
     <!-- Main content -->
     <main id="main-content" class="main-content padding-y-3">
@@ -139,35 +92,6 @@
     </main>
 
     <!-- include:footer -->
-
-    <!-- Megamenu content (hidden, used by NCIDS JS) -->
-    <div id="hidden-stuff">
-      <div id="megamenu-layer" class="nci-megamenu" aria-live="polite" aria-busy="false" aria-atomic="true" aria-hidden="false">
-        <div class="grid-container">
-          <div class="grid-row grid-gap-1">
-            <div class="nci-megamenu__items-pane grid-col-9">
-              <div class="grid-row grid-gap">
-                <div class="grid-col-4">
-                  <ul class="nci-megamenu__list">
-                    <li class="nci-megamenu__list-item"><a class="nci-megamenu__list-item-link" href="../maps/">Mapping Tool</a></li>
-                  </ul>
-                </div>
-                <div class="grid-col-4">
-                  <ul class="nci-megamenu__list">
-                    <li class="nci-megamenu__list-item"><a class="nci-megamenu__list-item-link" href="../characteristics/">County Characteristics Tool</a></li>
-                  </ul>
-                </div>
-                <div class="grid-col-4">
-                  <ul class="nci-megamenu__list">
-                    <li class="nci-megamenu__list-item"><a class="nci-megamenu__list-item-link" href="../demographics/">Demographics Tool</a></li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <!-- Hidden containers for plot filter checkboxes (shown in tooltips later) -->
     <div style="display: none;">
