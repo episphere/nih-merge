@@ -23,6 +23,7 @@ interface ChoroplethOptions {
   highOutlierColor: string;
   trimmedScheme: string[] | null;
   stripedExtremes: boolean;
+  crosshatchConnecticut: boolean;
 }
 
 // --- Choropleth plot ---
@@ -142,6 +143,21 @@ function createChoroplethPlot(
     );
   }
 
+  // Connecticut county values are unavailable after 2019. Distinguish the
+  // retained county shapes from ordinary missing values whenever the selected
+  // year or aggregate range includes 2020 or later.
+  if (options.crosshatchConnecticut) {
+    marks.push(
+      Plot.geo(featureCollection as unknown as GeoJSON.FeatureCollection, {
+        filter: ((d: { id: string }) => d.id.startsWith('09')) as unknown as Plot.ChannelValue,
+        fill: 'url(#map-ct-crosshatch)',
+        stroke: 'none',
+        strokeWidth: 0,
+        pointerEvents: 'none',
+      }),
+    );
+  }
+
   for (const overlay of options.overlays) {
     const fc = Array.isArray(overlay.featureCollection)
       ? { type: 'FeatureCollection' as const, features: overlay.featureCollection }
@@ -166,13 +182,16 @@ function createChoroplethPlot(
     marks,
   });
 
-  // Inject patterns for optional outlier stripes and suppressed-value stripes.
+  // Inject patterns for outliers, suppressed values, and historical CT data.
   const stripePatterns = [
     options.stripedExtremes
       ? '<pattern id="map-stripes" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="1" height="8" fill="rgba(255, 255, 255, 1)" /></pattern>'
       : '',
     measureField !== 'population'
       ? '<pattern id="map-suppressed-stripes" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="1" height="8" fill="#a9aeb1" /></pattern>'
+      : '',
+    options.crosshatchConnecticut
+      ? '<pattern id="map-ct-crosshatch" width="6" height="6" patternUnits="userSpaceOnUse"><path d="M-1 1L1-1M0 6L6 0M5 7L7 5M-1 5L1 7M0 0L6 6M5-1L7 1" fill="none" stroke="#565c65" stroke-width="1" /></pattern>'
       : '',
   ].join('');
   if (stripePatterns) {
@@ -244,6 +263,12 @@ export function getMapDomain(
   };
 }
 
+export function shouldCrosshatchConnecticut(cardState: CardState): boolean {
+  if (cardState.spatialLevel !== 'county') return false;
+  const selectedYears = cardState.year.match(/\d{4}/g) ?? [];
+  return selectedYears.some((year) => Number(year) >= 2020);
+}
+
 export function renderMapCard(
   container: HTMLElement,
   cardState: CardState,
@@ -308,6 +333,7 @@ export function renderMapCard(
     highOutlierColor: colorConfig.highOutlierColor ?? '#3d3d3d',
     trimmedScheme: colorConfig.trimmedScheme,
     stripedExtremes: globalState.stripedExtremes,
+    crosshatchConnecticut: shouldCrosshatchConnecticut(cardState),
   });
 
   container.replaceChildren(plot);
