@@ -13,7 +13,9 @@ import { fipsName } from '../shared/fips';
 // --- Title generation ---
 
 export function generateTitle(state: DemographicsState): string {
-  const measure = MEASURE_STYLE[state.measure].label;
+  const measure = state.measure === 'ageAdjustedRate'
+    ? 'age-adjusted mortality rate'
+    : 'crude mortality rate';
 
   const comparisons = [state.compareBar, state.compareFacet]
     .filter(c => c !== 'none')
@@ -32,7 +34,7 @@ export function generateTitle(state: DemographicsState): string {
   if (state.stateFips !== 'All') filters.push(fipsName(state.stateFips));
 
   if (filters.length > 0) {
-    title += ' | ' + filters.join(', ');
+    title += ', ' + filters.join(', ');
   }
 
   return title;

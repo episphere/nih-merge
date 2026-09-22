@@ -17,7 +17,7 @@ export function generateTitle(
   detail: QuantileDetail | undefined,
   fieldName: string = state.quantileField,
 ): string {
-  const measure = CHARACTERISTICS_MEASURE_STYLE[state.measure].label;
+  const measure = titleMeasureLabel(state.measure);
   const fieldLabel = detail?.name ?? fieldName;
 
   const comparisons = [state.compareColor, state.compareFacet]
@@ -37,9 +37,26 @@ export function generateTitle(
   if (state.race !== 'All') filters.push(state.race);
   if (state.sex !== 'All') filters.push(state.sex);
 
-  title += ' | ' + filters.join(', ');
+  title += ', ' + filters.join(', ');
 
   return title;
+}
+
+function titleMeasureLabel(measure: CharacteristicsMeasure): string {
+  switch (measure) {
+    case 'ageAdjustedRate':
+      return 'age-adjusted mortality rate';
+    case 'crudeRate':
+      return 'crude mortality rate';
+    case 'ageAdjustedRateRatioRefLow':
+      return 'age-adjusted rate ratio (to lowest quantile)';
+    case 'ageAdjustedRateRatioRefHigh':
+      return 'age-adjusted rate ratio (to highest quantile)';
+    case 'crudeRateRatioRefLow':
+      return 'crude rate ratio (to lowest quantile)';
+    case 'crudeRateRatioRefHigh':
+      return 'crude rate ratio (to highest quantile)';
+  }
 }
 
 // --- Color and symbol helpers ---
