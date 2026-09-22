@@ -1,10 +1,10 @@
 import { initLayout } from '../shared/initLayout';
 import { createDashboardStore } from '../shared/state/createStore';
 import { onResize } from '../shared/resizeObserver';
-import { MAPS_DEFAULTS, MAPS_MEASURE_LABELS, resolveMaps, type MapsState } from './state';
+import { MAPS_DEFAULTS, resolveMaps, type MapsState } from './state';
 import { initControls, openCardEditor } from './controls';
-import { fipsName } from '../shared/fips';
 import type { CardState, MapsMeasure } from './state';
+import { buildCardTitle, buildSharedTitle, type CardField } from './titles';
 import { initTopControls } from './topControls';
 import {
   fetchAllCardData,
@@ -476,43 +476,6 @@ function createCardElement(blank: boolean, cardIndex: number): HTMLElement {
 
 // --- Title logic: shared fields go in topbar, differing fields go on cards ---
 
-const CARD_FIELDS = ['year', 'cause', 'sex', 'race', 'stateFips', 'spatialLevel'] as const;
-type CardField = (typeof CARD_FIELDS)[number];
-
-/** Find fields where all non-blank cards have the same value. */
-function computeSharedFields(state: MapsState): Partial<Record<CardField, string>> {
-  const cardStates = state.cards.filter((c) => !c.blank && c.state).map((c) => c.state!);
-  if (cardStates.length === 0) return {};
-
-  const shared: Partial<Record<CardField, string>> = {};
-  for (const field of CARD_FIELDS) {
-    const first = cardStates[0][field];
-    if (cardStates.every((cs) => cs[field] === first)) {
-      shared[field] = first;
-    }
-  }
-  return shared;
-}
-
-function formatFieldValue(field: CardField, value: string): string {
-  switch (field) {
-    case 'sex':
-      return value === 'All' ? 'All sexes' : value;
-    case 'race':
-      return value === 'All' ? 'All races' : value;
-    case 'cause':
-      return value === 'All' ? 'All cancers' : value;
-    case 'stateFips':
-      return value === 'All' ? 'US' : fipsName(value);
-    case 'spatialLevel':
-      return value === 'county' ? 'County' : 'State';
-    case 'year':
-      return value;
-    default:
-      return value;
-  }
-}
-
 const titleEl = document.getElementById('title')!;
 
 function updateTitles(state: MapsState): void {
@@ -522,38 +485,15 @@ function updateTitles(state: MapsState): void {
     return;
   }
 
-  const shared = computeSharedFields(state);
-  const diffFields = CARD_FIELDS.filter((f) => !(f in shared));
-
-  // Build shared title: "US age-adjusted rate, 2018-2022, All races, All sexes, All cancers"
-  const measureLabel = MAPS_MEASURE_LABELS[state.measure];
-  const filterParts: string[] = [];
-  if (shared.year) filterParts.push(shared.year);
-  if (shared.race !== undefined) filterParts.push(formatFieldValue('race', shared.race));
-  if (shared.sex !== undefined) filterParts.push(formatFieldValue('sex', shared.sex));
-  if (state.measure !== 'population' && shared.cause !== undefined) {
-    filterParts.push(formatFieldValue('cause', shared.cause));
-  }
-
-  let title = `US ${measureLabel.toLowerCase()}`;
-  if (filterParts.length > 0) {
-    title += `, ${filterParts.join(', ')}`;
-  }
+  const { title, diffFields } = buildSharedTitle(state);
   titleEl.textContent = title;
-
-  // Store diffFields for card title generation
   currentDiffFields = diffFields;
 }
 
 let currentDiffFields: CardField[] = [];
 
 function getCardTitle(cardState: CardState, measure: MapsMeasure): string {
-  const parts: string[] = [];
-  for (const field of currentDiffFields) {
-    if (field === 'cause' && measure === 'population') continue;
-    parts.push(formatFieldValue(field, cardState[field]));
-  }
-  return parts.length > 0 ? parts.join(', ') : '';
+  return buildCardTitle(cardState, measure, currentDiffFields);
 }
 
 // 7. Re-render on resize
