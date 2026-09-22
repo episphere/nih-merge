@@ -81,18 +81,74 @@ function fullDomain(field: ComparisonField, state: DemographicsState): string[] 
 
 const MIN_HEIGHT = 450;
 const FONT_SIZE = '14px';
+const APPROX_CHAR_WIDTH = 7;
+const LABEL_LINE_HEIGHT = 14;
+const FACET_LABEL_PADDING = 12;
+
+export interface FacetLabelLayout {
+  facetWidth: number;
+  labels: string[];
+  labelOffset: number;
+  marginTop: number;
+}
+
+/** Wrap a label at word boundaries to fit an approximate pixel width. */
+export function wrapFacetLabel(label: string, maxWidth: number): string {
+  const words = label.trim().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return '';
+
+  const lines: string[] = [];
+  let line = words[0];
+
+  for (const word of words.slice(1)) {
+    const candidate = `${line} ${word}`;
+    if (candidate.length * APPROX_CHAR_WIDTH <= maxWidth) {
+      line = candidate;
+    } else {
+      lines.push(line);
+      line = word;
+    }
+  }
+
+  lines.push(line);
+  return lines.join('\n');
+}
+
+/** Size and wrap facet labels without modifying the underlying domain values. */
+export function calculateFacetLabelLayout(
+  labels: string[],
+  naturalFacetWidth: number,
+): FacetLabelLayout {
+  const longestWordLength = labels.reduce((max, label) => {
+    const words = label.split(/\s+/);
+    return Math.max(max, ...words.map(word => word.length));
+  }, 0);
+  const facetWidth = Math.max(
+    naturalFacetWidth,
+    longestWordLength * APPROX_CHAR_WIDTH + FACET_LABEL_PADDING,
+  );
+  const availableLabelWidth = Math.max(1, facetWidth - FACET_LABEL_PADDING);
+  const wrappedLabels = labels.map(label => wrapFacetLabel(label, availableLabelWidth));
+  const maxLines = Math.max(1, ...wrappedLabels.map(label => label.split('\n').length));
+  const labelHeight = maxLines * LABEL_LINE_HEIGHT;
+
+  return {
+    facetWidth,
+    labels: wrappedLabels,
+    labelOffset: 30 + labelHeight,
+    marginTop: 65 + labelHeight,
+  };
+}
 
 /** Approximate the rendered height of a rotated tick label (used for margin calculation). */
 function estimateLabelHeight(labels: string[], angleDeg = 45): number {
-  const charWidth = 7;   // approximate width per character at ~14px
-  const charHeight = 14;  // approximate line height
   const angleRad = (angleDeg * Math.PI) / 180;
   let maxHeight = 0;
   for (const label of labels) {
     const lines = label.split('\n');
     const longestLine = d3.max(lines, l => l.length) ?? 0;
-    const textWidth = longestLine * charWidth;
-    const textHeight = lines.length * charHeight;
+    const textWidth = longestLine * APPROX_CHAR_WIDTH;
+    const textHeight = lines.length * LABEL_LINE_HEIGHT;
     const rotatedH = Math.abs(textWidth * Math.sin(angleRad)) + Math.abs(textHeight * Math.cos(angleRad));
     maxHeight = Math.max(maxHeight, rotatedH);
   }
@@ -150,12 +206,11 @@ export function renderPlot(state: DemographicsState, data: EnrichedAgeRow[]): vo
   const xLabels = xDomain.map(v => xTickFmt ? xTickFmt(v) : v);
   const labelHeight = estimateLabelHeight(xLabels);
 
-  const fxTickFmt = tickFormat(compareFacet);
+  const baseFxTickFmt = tickFormat(compareFacet);
 
   const height = Math.max(MIN_HEIGHT, plotEl.clientHeight-1);
 
   // Margins (computed first since they affect available bar area).
-  const marginTop = fxField ? 80 : 50;
   const marginBottom = 50 + labelHeight;
   const baseMarginLeft = Math.max(90, labelHeight);
   const baseMarginRight = 20;
@@ -172,7 +227,25 @@ export function renderPlot(state: DemographicsState, data: EnrichedAgeRow[]): vo
   const availableForBars = (containerWidth - fixedMargins) / nFacets;
   const naturalBarWidth = availableForBars / nBars;
   const barWidth = Math.min(Math.max(MIN_BAR_WIDTH, naturalBarWidth), MAX_BAR_WIDTH);
-  const plotWidth = barWidth * nBars * nFacets + fixedMargins;
+  const naturalFacetWidth = barWidth * nBars;
+
+  // Facet labels are presentation-only: format them first, then wrap them to
+  // the available slot. The slot grows just enough for its longest word so a
+  // wrapped line cannot collide with the neighboring facet.
+  const facetLabels = fxDomain?.map(v => baseFxTickFmt ? baseFxTickFmt(v) : v) ?? [];
+  const facetLayout = fxField && fxDomain
+    ? calculateFacetLabelLayout(facetLabels, naturalFacetWidth)
+    : null;
+  const facetWidth = facetLayout?.facetWidth ?? naturalFacetWidth;
+  const plotWidth = facetWidth * nFacets + fixedMargins;
+  const marginTop = facetLayout?.marginTop ?? 50;
+  const fxLabelOffset = facetLayout?.labelOffset ?? 45;
+  const wrappedFacetLabels = new Map(
+    fxDomain?.map((value, index) => [value, facetLayout?.labels[index] ?? value]) ?? [],
+  );
+  const fxTickFmt = fxField
+    ? (value: string) => wrappedFacetLabels.get(value) ?? (baseFxTickFmt ? baseFxTickFmt(value) : value)
+    : undefined;
 
   // Center the chart when it's narrower than the container.
   const extraSpace = Math.max(0, containerWidth - plotWidth);
@@ -318,7 +391,7 @@ export function renderPlot(state: DemographicsState, data: EnrichedAgeRow[]): vo
   if (fxField && fxDomain) {
     plotOptions.fx = {
       tickFormat: fxTickFmt ?? undefined,
-      labelOffset: 45,
+      labelOffset: fxLabelOffset,
       domain: fxDomain,
       label: COMPARISON_FIELD_LABEL[fxField] ?? null,
     };
