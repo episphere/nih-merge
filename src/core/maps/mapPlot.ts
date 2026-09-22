@@ -126,7 +126,7 @@ function createChoroplethPlot(
 
   // Suppressed mortality values have a data row, but their death count is
   // null. Distinguish them from genuinely missing geography (no row) with a
-  // grey stripe overlay on the white base fill.
+  // grey dot overlay on the white base fill.
   if (measureField !== 'population') {
     const isSuppressed = (d: { id: string }) => {
       const row = spatialDataMap.get(d.id);
@@ -135,7 +135,7 @@ function createChoroplethPlot(
     marks.push(
       Plot.geo(featureCollection as unknown as GeoJSON.FeatureCollection, {
         filter: isSuppressed as unknown as Plot.ChannelValue,
-        fill: 'url(#map-suppressed-stripes)',
+        fill: 'url(#map-suppressed-dots)',
         stroke: 'none',
         strokeWidth: 0,
         pointerEvents: 'none',
@@ -188,7 +188,7 @@ function createChoroplethPlot(
       ? '<pattern id="map-stripes" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="1" height="8" fill="rgba(255, 255, 255, 1)" /></pattern>'
       : '',
     measureField !== 'population'
-      ? '<pattern id="map-suppressed-stripes" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="1" height="8" fill="#a9aeb1" /></pattern>'
+      ? '<pattern id="map-suppressed-dots" width="6" height="6" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.25" fill="#8d9297" /></pattern>'
       : '',
     options.crosshatchConnecticut
       ? '<pattern id="map-ct-crosshatch" width="6" height="6" patternUnits="userSpaceOnUse"><path d="M-1 1L1-1M0 6L6 0M5 7L7 5M-1 5L1 7M0 0L6 6M5-1L7 1" fill="none" stroke="#565c65" stroke-width="1" /></pattern>'
