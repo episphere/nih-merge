@@ -43,13 +43,14 @@ function getData(): Record<string, unknown>[] {
 
 function getTableView(): TableView {
   const state = $state.get();
+  const rows = allCardData.map(({ mapCard: _mapCard, spatialLevel: _spatialLevel, ...row }) => row);
   return {
     key: `${querySnapshot(state)}\0${tableDataVersion}`,
-    rows: allCardData,
+    rows,
     subtitle: document.getElementById('title')?.textContent ?? '',
     presentation: {
       fixedColumns: [
-        'mapCard', 'year', 'spatialLevel', 'regionName', 'stateFips', 'countyFips',
+        'year', 'regionName', 'stateFips', 'countyFips',
         'cause', 'race', 'sex', 'ageGroup',
       ],
       activeMeasure: state.measure,
@@ -57,8 +58,7 @@ function getTableView(): TableView {
       exportFileStem: 'nih-merge-maps-table',
       aliases: {
         columns: {
-          mapCard: 'Map Card', year: 'Year', spatialLevel: 'Spatial Level',
-          regionName: 'Region Name', stateFips: 'State FIPS', countyFips: 'County FIPS',
+          year: 'Year', regionName: 'Region Name', stateFips: 'State FIPS', countyFips: 'County FIPS',
           cause: 'Cancer Site', race: 'Race/Ethnicity', sex: 'Sex', ageGroup: 'Age Group',
           deaths: 'Deaths', population: 'Population', crudeRate: 'Crude Rate',
           ageAdjustedRate: 'Age-Adjusted Rate',
