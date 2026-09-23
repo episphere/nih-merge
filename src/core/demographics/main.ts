@@ -31,11 +31,15 @@ function getTableView(): TableView {
       activeMeasure: state.measure,
       defaultNumericColumns: ['deaths', 'population', state.measure],
       exportFileStem: 'nih-merge-demographics-table',
-      columnLabels: {
-        deaths: 'Deaths', population: 'Population', crudeRate: 'Crude Rate',
-        ageAdjustedRate: 'Age-Adjusted Rate', crudeRateCiLower: 'Crude Rate CI Lower',
-        crudeRateCiUpper: 'Crude Rate CI Upper', ageAdjustedRateCiLower: 'Age-Adjusted Rate CI Lower',
-        ageAdjustedRateCiUpper: 'Age-Adjusted Rate CI Upper',
+      aliases: {
+        columns: {
+          year: 'Year', stateFips: 'State FIPS', cause: 'Cancer Site',
+          race: 'Race/Ethnicity', sex: 'Sex', ageGroup: 'Age Group',
+          deaths: 'Deaths', population: 'Population', crudeRate: 'Crude Rate',
+          ageAdjustedRate: 'Age-Adjusted Rate', crudeRateCiLower: 'Crude Rate CI Lower',
+          crudeRateCiUpper: 'Crude Rate CI Upper', ageAdjustedRateCiLower: 'Age-Adjusted Rate CI Lower',
+          ageAdjustedRateCiUpper: 'Age-Adjusted Rate CI Upper',
+        },
       },
     },
   };

@@ -117,7 +117,9 @@ function attachColumnChooser(
       const label = document.createElement('label');
       label.className = 'usa-checkbox__label';
       label.htmlFor = input.id;
-      label.textContent = presentation.columnLabels?.[column] ?? column;
+      label.textContent = presentation.aliases?.columns?.[column]
+        ?? presentation.columnLabels?.[column]
+        ?? column;
       input.addEventListener('change', () => {
         if (input.checked) table.actions.showColumn(column);
         else table.actions.hideColumn(column);
@@ -256,7 +258,12 @@ export function initDataTableButton(buttonId: string, getView: () => TableView):
     if (activeTable) await activeTable.destroy();
 
     try {
-      activeTable = await renderDataTable(overlay.contentEl, view.rows, overlay.el);
+      activeTable = await renderDataTable(
+        overlay.contentEl,
+        view.rows,
+        overlay.el,
+        view.presentation.aliases,
+      );
       controls = attachTableControls(
         activeTable,
         overlay.toolbarEl,

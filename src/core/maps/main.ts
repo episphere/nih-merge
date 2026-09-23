@@ -55,9 +55,14 @@ function getTableView(): TableView {
       activeMeasure: state.measure,
       defaultNumericColumns: ['deaths', 'population', state.measure],
       exportFileStem: 'nih-merge-maps-table',
-      columnLabels: {
-        deaths: 'Deaths', population: 'Population', crudeRate: 'Crude Rate',
-        ageAdjustedRate: 'Age-Adjusted Rate',
+      aliases: {
+        columns: {
+          mapCard: 'Map Card', year: 'Year', spatialLevel: 'Spatial Level',
+          regionName: 'Region Name', stateFips: 'State FIPS', countyFips: 'County FIPS',
+          cause: 'Cancer Site', race: 'Race/Ethnicity', sex: 'Sex', ageGroup: 'Age Group',
+          deaths: 'Deaths', population: 'Population', crudeRate: 'Crude Rate',
+          ageAdjustedRate: 'Age-Adjusted Rate',
+        },
       },
     },
   };
