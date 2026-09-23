@@ -19,6 +19,11 @@
 @forward "usa-range";
 @forward "usa-checkbox";
 @forward "usa-fieldset";
+@forward "usa-alert";
+@forward "usa-breadcrumb";
+@forward "usa-process-list";
+@forward "usa-sidenav";
+@forward "usa-summary-box";
 @forward "nci-header";
 @forward "nci-card";
 @forward "nci-card-group";
@@ -41,6 +46,121 @@ html {
 .nih-merge-subtitle {
   font-size: 1.5em;
   margin-block: 0px;
+}
+
+// --- Documentation ---
+
+.documentation-content {
+  max-width: units("widescreen");
+}
+
+.documentation-sidebar {
+  margin-bottom: units(3);
+
+  @include at-media("desktop") {
+    margin-bottom: 0;
+
+    > nav {
+      position: sticky;
+      top: units(2);
+    }
+  }
+}
+
+.documentation-sidebar__heading {
+  font-family: family("heading");
+  font-size: size("heading", "md");
+  font-weight: font-weight("bold");
+  line-height: line-height("heading", 2);
+  margin: 0 0 units(2);
+}
+
+.documentation-mobile-nav {
+  border: 1px solid color("base-lighter");
+  border-radius: radius("sm");
+  font-family: family("ui");
+
+  summary {
+    background: color("base-lightest");
+    cursor: pointer;
+    font-weight: font-weight("bold");
+    padding: units(1.5) units(2);
+  }
+
+  ul {
+    margin: 0;
+    padding: units(1) units(2) units(2);
+  }
+
+  li {
+    margin-top: units(1);
+  }
+
+  @include at-media("desktop") {
+    display: none;
+  }
+}
+
+.documentation-mobile-nav__subitem {
+  padding-left: units(2);
+}
+
+.documentation-lede {
+  max-width: units("tablet-lg");
+}
+
+.documentation-section {
+  border-top: 1px solid color("base-lighter");
+  margin-top: units(5);
+  padding-top: units(3);
+  scroll-margin-top: units(3);
+}
+
+.documentation-on-this-page {
+  background: color("base-lightest");
+  border-left: units(0.5) solid color("primary");
+  margin-top: units(4);
+  padding: units(2) units(3);
+
+  h2 {
+    font-size: size("heading", "md");
+    margin-top: 0;
+  }
+
+  .usa-list {
+    margin-bottom: 0;
+  }
+}
+
+.documentation-card-group {
+  margin-top: units(3);
+}
+
+.documentation-topic-list {
+  margin-top: units(1);
+}
+
+.documentation-control-list {
+  margin-bottom: units(2);
+
+  dt {
+    font-weight: bold;
+    margin-top: units(1.5);
+  }
+
+  dd {
+    margin-left: 0;
+    margin-top: units(0.5);
+  }
+}
+
+.documentation-draft-label {
+  color: color("base-dark");
+  font-family: family("ui");
+  font-size: size("ui", "2xs");
+  font-weight: bold;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 // --- Plot container ---

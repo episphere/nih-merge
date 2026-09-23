@@ -22,20 +22,66 @@ function copyDataAssets() {
   }
 }
 
-const pages = ['demographics', 'maps', 'characteristics', 'help', 'report-issue'] as const
+interface PageDefinition {
+  key: string
+  route: string
+  source: string
+  output: string
+}
+
+const pageDefinitions: PageDefinition[] = [
+  { key: 'main', route: '/', source: 'src/pages/index.html', output: 'index.html' },
+  { key: 'demographics', route: '/demographics', source: 'src/pages/demographics.html', output: 'demographics/index.html' },
+  { key: 'maps', route: '/maps', source: 'src/pages/maps.html', output: 'maps/index.html' },
+  { key: 'characteristics', route: '/characteristics', source: 'src/pages/characteristics.html', output: 'characteristics/index.html' },
+  { key: 'help', route: '/help', source: 'src/pages/help.html', output: 'help/index.html' },
+  { key: 'helpTools', route: '/help/tools', source: 'src/pages/help/tools.html', output: 'help/tools/index.html' },
+  { key: 'helpMaps', route: '/help/maps', source: 'src/pages/help/maps.html', output: 'help/maps/index.html' },
+  { key: 'helpCharacteristics', route: '/help/characteristics', source: 'src/pages/help/characteristics.html', output: 'help/characteristics/index.html' },
+  { key: 'helpDemographics', route: '/help/demographics', source: 'src/pages/help/demographics.html', output: 'help/demographics/index.html' },
+  { key: 'helpDataMethods', route: '/help/data-methods', source: 'src/pages/help/data-methods.html', output: 'help/data-methods/index.html' },
+  { key: 'helpFaq', route: '/help/faq', source: 'src/pages/help/faq.html', output: 'help/faq/index.html' },
+  { key: 'reportIssue', route: '/report-issue', source: 'src/pages/report-issue.html', output: 'report-issue/index.html' },
+]
 
 const headerPartialPath = resolve(__dirname, 'src/partials/header.html')
 const footerPartialPath = resolve(__dirname, 'src/partials/footer.html')
-const partialPaths = [headerPartialPath, footerPartialPath]
+const documentationSidenavPartialPath = resolve(__dirname, 'src/partials/documentation-sidenav.html')
+const partialPaths = [headerPartialPath, footerPartialPath, documentationSidenavPartialPath]
 
 function renderHeader(page: string): string {
-  const root = page === 'home' ? './' : '../'
+  const root = page === 'home' ? './' : page === 'help-detail' ? '../../' : '../'
 
   return readFileSync(headerPartialPath, 'utf8')
     .replaceAll('{{root}}', root)
     .replace('{{homeCurrent}}', page === 'home' ? ' usa-current' : '')
     .replace('{{reportIssueCurrent}}', page === 'reportissue' ? ' usa-current' : '')
-    .replace('{{helpCurrent}}', page === 'help' ? ' usa-current' : '')
+    .replace('{{helpCurrent}}', page === 'help' || page === 'help-detail' ? ' usa-current' : '')
+}
+
+function renderDocumentationSidenav(page: string): string {
+  const docsRoot = page === 'overview' ? './' : '../'
+  const current = (key: string) => page === key ? 'usa-current' : ''
+  const aria = (key: string) => page === key ? ' aria-current="page"' : ''
+  const isToolPage = ['tools', 'maps', 'characteristics', 'demographics'].includes(page)
+
+  return readFileSync(documentationSidenavPartialPath, 'utf8')
+    .replaceAll('{{docsRoot}}', docsRoot)
+    .replaceAll('{{overviewCurrent}}', current('overview'))
+    .replaceAll('{{overviewAria}}', aria('overview'))
+    .replaceAll('{{toolsCurrent}}', current('tools'))
+    .replaceAll('{{toolsAncestor}}', isToolPage && page !== 'tools' ? 'usa-current--nci-ancestor' : '')
+    .replaceAll('{{toolsAria}}', aria('tools'))
+    .replaceAll('{{mapsCurrent}}', current('maps'))
+    .replaceAll('{{mapsAria}}', aria('maps'))
+    .replaceAll('{{characteristicsCurrent}}', current('characteristics'))
+    .replaceAll('{{characteristicsAria}}', aria('characteristics'))
+    .replaceAll('{{demographicsCurrent}}', current('demographics'))
+    .replaceAll('{{demographicsAria}}', aria('demographics'))
+    .replaceAll('{{dataMethodsCurrent}}', current('data-methods'))
+    .replaceAll('{{dataMethodsAria}}', aria('data-methods'))
+    .replaceAll('{{faqCurrent}}', current('faq'))
+    .replaceAll('{{faqAria}}', aria('faq'))
 }
 
 function htmlPartials(): Plugin {
@@ -43,7 +89,8 @@ function htmlPartials(): Plugin {
     name: 'html-partials',
     transformIndexHtml(html) {
       return html
-        .replace(/    <!-- include:header (\w+) -->/, (_marker, page: string) => renderHeader(page))
+        .replace(/    <!-- include:header ([\w-]+) -->/, (_marker, page: string) => renderHeader(page))
+        .replace(/          <!-- include:documentation-sidenav ([\w-]+) -->/, (_marker, page: string) => renderDocumentationSidenav(page))
         .replace('    <!-- include:footer -->', readFileSync(footerPartialPath, 'utf8'))
     },
     configureServer(server) {
@@ -64,14 +111,10 @@ function devCleanUrls(): Plugin {
     configureServer(server) {
       server.middlewares.use((req, _res, next) => {
         const url = req.url?.split('?')[0] ?? ''
-        if (url === '/' || url === '/index.html') {
-          req.url = '/src/pages/index.html'
-        } else {
-          for (const page of pages) {
-            if (url === `/${page}` || url === `/${page}/`) {
-              req.url = `/src/pages/${page}.html`
-              break
-            }
+        for (const page of pageDefinitions) {
+          if (url === page.route || url === `${page.route}/` || url === `${page.route}/index.html`) {
+            req.url = `/${page.source}`
+            break
           }
         }
         next()
@@ -88,22 +131,13 @@ function buildOutputRestructure(): Plugin {
       for (const [fileName, chunk] of Object.entries(bundle)) {
         if (chunk.type !== 'asset' || !fileName.endsWith('.html')) continue
 
-        if (fileName === 'src/pages/index.html') {
-          // Moving from src/pages/index.html → index.html (up two levels)
-          // Fix relative paths: ../../X → ./X
-          chunk.source = (chunk.source as string).replace(/(?:\.\.\/)+(?=(assets|images)\/)/g, './')
-          chunk.fileName = 'index.html'
-        } else {
-          for (const page of pages) {
-            if (fileName === `src/pages/${page}.html`) {
-              // Moving from src/pages/X.html → X/index.html (up one level)
-              // Fix relative paths: ../../X → ../X
-              chunk.source = (chunk.source as string).replace(/(?:\.\.\/)+(?=(assets|images)\/)/g, '../')
-              chunk.fileName = `${page}/index.html`
-              break
-            }
-          }
-        }
+        const page = pageDefinitions.find((definition) => fileName === definition.source)
+        if (!page) continue
+
+        const outputDepth = page.output.split('/').length - 1
+        const assetPrefix = outputDepth === 0 ? './' : '../'.repeat(outputDepth)
+        chunk.source = (chunk.source as string).replace(/(?:\.\.\/)+(?=(assets|images)\/)/g, assetPrefix)
+        chunk.fileName = page.output
       }
     },
   }
@@ -128,14 +162,9 @@ export default defineConfig({
   build: {
     outDir: 'nih-merge',
     rollupOptions: {
-      input: {
-        main: resolve(__dirname, 'src/pages/index.html'),
-        demographics: resolve(__dirname, 'src/pages/demographics.html'),
-        maps: resolve(__dirname, 'src/pages/maps.html'),
-        characteristics: resolve(__dirname, 'src/pages/characteristics.html'),
-        help: resolve(__dirname, 'src/pages/help.html'),
-        reportIssue: resolve(__dirname, 'src/pages/report-issue.html'),
-      },
+      input: Object.fromEntries(
+        pageDefinitions.map((page) => [page.key, resolve(__dirname, page.source)]),
+      ),
     },
   },
   plugins: [htmlPartials(), devCleanUrls(), buildOutputRestructure(), copyDataAssets()],

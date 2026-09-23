@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NIH-MERGE – Tool guides</title>
+    <link rel="stylesheet" href="/src/style/index.scss" />
+  </head>
+  <body>
+
+    <!-- include:header help-detail -->
+
+    <main id="main-content" class="main-content">
+      <div class="grid-container">
+        <nav class="usa-breadcrumb" aria-label="Breadcrumb">
+          <ol class="usa-breadcrumb__list">
+            <li class="usa-breadcrumb__list-item"><a href="../../" class="usa-breadcrumb__link"><span>Home</span></a></li>
+            <li class="usa-breadcrumb__list-item"><a href="../" class="usa-breadcrumb__link"><span>Help and documentation</span></a></li>
+            <li class="usa-breadcrumb__list-item usa-current" aria-current="page"><span>Tool guides</span></li>
+          </ol>
+        </nav>
+
+        <div class="grid-row grid-gap">
+          <!-- include:documentation-sidenav tools -->
+
+          <div class="desktop:grid-col-9 documentation-content usa-prose padding-bottom-6">
+            <p class="documentation-draft-label margin-bottom-1">Documentation skeleton</p>
+            <h1 class="margin-top-0">Tool guides</h1>
+            <p class="usa-intro documentation-lede">Choose a guide to learn how to configure a visualization and work with its results.</p>
+
+            <ul class="nci-card-group documentation-card-group">
+              <li class="nci-card tablet:grid-col-4">
+                <a href="../maps/"><div class="nci-card__body"><span class="nci-card__title">Mapping Tool</span><p class="nci-card__description">Geography, map grids, color scales, and downloads.</p></div></a>
+              </li>
+              <li class="nci-card tablet:grid-col-4">
+                <a href="../characteristics/"><div class="nci-card__body"><span class="nci-card__title">County Characteristics Tool</span><p class="nci-card__description">County measures, quantile groups, trends, and downloads.</p></div></a>
+              </li>
+              <li class="nci-card tablet:grid-col-4">
+                <a href="../demographics/"><div class="nci-card__body"><span class="nci-card__title">Demographics Tool</span><p class="nci-card__description">Population comparisons, rates, suppression, and downloads.</p></div></a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- include:footer -->
+
+    <script type="module" src="/src/core/help/main.ts"></script>
+  </body>
+</html>

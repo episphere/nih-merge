@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NIH-MERGE – County Characteristics Tool guide</title>
+    <link rel="stylesheet" href="/src/style/index.scss" />
+  </head>
+  <body>
+    <!-- include:header help-detail -->
+
+    <main id="main-content" class="main-content">
+      <div class="grid-container">
+        <nav class="usa-breadcrumb" aria-label="Breadcrumb">
+          <ol class="usa-breadcrumb__list">
+            <li class="usa-breadcrumb__list-item"><a href="../../" class="usa-breadcrumb__link"><span>Home</span></a></li>
+            <li class="usa-breadcrumb__list-item"><a href="../" class="usa-breadcrumb__link"><span>Help and documentation</span></a></li>
+            <li class="usa-breadcrumb__list-item"><a href="../tools/" class="usa-breadcrumb__link"><span>Tool guides</span></a></li>
+            <li class="usa-breadcrumb__list-item usa-current" aria-current="page"><span>County Characteristics Tool</span></li>
+          </ol>
+        </nav>
+
+        <div class="grid-row grid-gap">
+          <!-- include:documentation-sidenav characteristics -->
+
+          <div class="desktop:grid-col-9 documentation-content usa-prose padding-bottom-6">
+            <p class="documentation-draft-label margin-bottom-1">Documentation skeleton</p>
+            <h1 class="margin-top-0">County Characteristics Tool</h1>
+            <p class="usa-intro documentation-lede">Examine cancer mortality rates in relation to county-level population and community characteristics.</p>
+            <a class="usa-button" href="../../characteristics/">Open the County Characteristics Tool</a>
+
+            <nav class="documentation-on-this-page" aria-labelledby="characteristics-page-contents">
+              <h2 id="characteristics-page-contents">On this page</h2>
+              <ul class="usa-list">
+                <li><a href="#overview">Overview</a></li>
+                <li><a href="#tutorial">Tutorial</a></li>
+                <li><a href="#controls">Control reference</a></li>
+                <li><a href="#county-measures">County measures data</a></li>
+                <li><a href="#downloads">Downloads</a></li>
+              </ul>
+            </nav>
+
+            <section class="documentation-section" id="overview"><h2>Overview</h2><p>Describe when to use the County Characteristics Tool and the questions its quantile plots can help answer.</p></section>
+            <section class="documentation-section" id="tutorial"><h2>Tutorial</h2><p>A worked county-characteristics example will be added here.</p></section>
+            <section class="documentation-section" id="controls"><h2>Control reference</h2><p>Document county measure, quantile, population, comparison, and display controls here.</p></section>
+            <section class="documentation-section" id="county-measures">
+              <h2>County measures data</h2>
+              <p>County characteristics data is sourced from <a href="https://www.countyhealthrankings.org/" class="usa-link">County Health Rankings (CHR)</a>, which aggregates county-level datasets. The tool selects the most recent CHR dataset whose data range ends before the selected mortality year.</p>
+              <p>The available fields, their data-year ranges, and source datasets are listed in the <a class="usa-link" href="../../documentation/chr_field_details.json" download>supplementary county measures document (JSON)</a>.</p>
+            </section>
+            <section class="documentation-section" id="downloads"><h2>Downloads</h2><p>Document the available table, data, and image download formats here.</p></section>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- include:footer -->
+    <script type="module" src="/src/core/help/main.ts"></script>
+  </body>
+</html>

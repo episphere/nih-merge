@@ -3,35 +3,83 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>NIH-MERGE – Help</title>
+    <title>NIH-MERGE – Help and documentation</title>
     <link rel="stylesheet" href="/src/style/index.scss" />
   </head>
   <body>
 
     <!-- include:header help -->
 
-    <!-- Main content -->
-    <main id="main-content" class="main-content usa-section">
+    <main id="main-content" class="main-content">
       <div class="grid-container">
+        <nav class="usa-breadcrumb" aria-label="Breadcrumb">
+          <ol class="usa-breadcrumb__list">
+            <li class="usa-breadcrumb__list-item">
+              <a href="../" class="usa-breadcrumb__link"><span>Home</span></a>
+            </li>
+            <li class="usa-breadcrumb__list-item usa-current" aria-current="page">
+              <span>Help and documentation</span>
+            </li>
+          </ol>
+        </nav>
+
         <div class="grid-row grid-gap">
-          <aside class="usa-in-page-nav-container__nav desktop:grid-col-3">
-            <nav class="usa-in-page-nav" id="help-in-page-nav">
-              <!-- Built by custom init script from h2/h3 headings -->
-            </nav>
-          </aside>
-          <div class="usa-in-page-nav-container__main desktop:grid-col-9">
-            <h1>Help</h1>
-            <h2>Getting Started</h2>
-            <p>Placeholder content for getting started with NIH-MERGE.</p>
-            <h2>Mapping Tool</h2>
-            <p>Placeholder content for the Mapping Tool.</p>
-            <h2>County Characteristics Tool</h2>
-            <h3>County Measures Data</h3>
-            <p>County characteristics data is sourced from <a href="https://www.countyhealthrankings.org/" class="usa-link">County Health Rankings (CHR)</a>, a resource that aggregates various county-level datasets. Detailed information on their methodology can be found in the CHR data documentation. CHR releases a new dataset annually, with typically minor differences between each release. The specific CHR dataset used by the County Characteristics Tool depends on the mortality data year and the county characteristic you select. Specifically, the tool selects the most recent CHR dataset whose data range ends prior to your chosen mortality year. The tool only uses a subset of CHR's total data; the available fields, their data year ranges, and their source datasets can be found in <a class="usa-link" href="../documentation/chr_field_details.json" download>this supplementary JSON document</a>.</p>
-            <h2>Demographics Tool</h2>
-            <p>Placeholder content for the Demographics Tool.</p>
-            <h2>FAQ</h2>
-            <p>Placeholder content for frequently asked questions.</p>
+          <!-- include:documentation-sidenav overview -->
+
+          <div class="desktop:grid-col-9 documentation-content usa-prose padding-bottom-6">
+            <p class="documentation-draft-label margin-bottom-1">Documentation draft</p>
+            <h1 class="margin-top-0">Help and documentation</h1>
+            <p class="usa-intro documentation-lede">Learn how to explore cancer mortality data, configure visualizations, and interpret or download results in NIH-MERGE.</p>
+
+            <div class="usa-summary-box" role="region" aria-labelledby="start-here-heading">
+              <div class="usa-summary-box__body">
+                <h2 class="usa-summary-box__heading" id="start-here-heading">Start here</h2>
+                <div class="usa-summary-box__text">
+                  <ul class="usa-list">
+                    <li>Choose a visualization based on the question you want to answer.</li>
+                    <li>Use the controls beside the chart to select a year, location, cancer site, and population.</li>
+                    <li>Review the chart, open the data table, or download the results for further analysis.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <h2>Choose a visualization</h2>
+            <p>NIH-MERGE provides three complementary tools. Each guide includes space for an overview, tutorial, control reference, interpretation guidance, and download instructions.</p>
+
+            <ul class="nci-card-group documentation-card-group">
+              <li class="nci-card tablet:grid-col-4">
+                <a href="./maps/">
+                  <div class="nci-card__body">
+                    <span class="nci-card__title">Mapping Tool</span>
+                    <p class="nci-card__description">Compare geographic patterns in county-level mortality rates.</p>
+                  </div>
+                </a>
+              </li>
+              <li class="nci-card tablet:grid-col-4">
+                <a href="./characteristics/">
+                  <div class="nci-card__body">
+                    <span class="nci-card__title">County Characteristics Tool</span>
+                    <p class="nci-card__description">Examine mortality rates in relation to county characteristics.</p>
+                  </div>
+                </a>
+              </li>
+              <li class="nci-card tablet:grid-col-4">
+                <a href="./demographics/">
+                  <div class="nci-card__body">
+                    <span class="nci-card__title">Demographics Tool</span>
+                    <p class="nci-card__description">Compare rates by race and ethnicity, sex, age group, or cancer site.</p>
+                  </div>
+                </a>
+              </li>
+            </ul>
+
+            <div class="usa-alert usa-alert--info margin-top-4" role="status">
+              <div class="usa-alert__body">
+                <h2 class="usa-alert__heading">Documentation is in progress</h2>
+                <p class="usa-alert__text">The page structure and demographics tutorial are drafted. Additional tutorials, definitions, methods, and accessibility guidance will be added in future updates.</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
