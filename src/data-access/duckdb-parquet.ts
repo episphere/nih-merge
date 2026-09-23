@@ -33,7 +33,12 @@ function quoteLiteral(value: string): string {
   return `'${value.replaceAll("'", "''")}'`
 }
 
+function mark(name: string): void {
+  if (typeof performance !== 'undefined') performance.mark(name)
+}
+
 async function createEngine(): Promise<Engine> {
+  mark('nih-merge:duckdb-init-start')
   const bundle = await duckdb.selectBundle(BUNDLES)
   if (!bundle.mainWorker) throw new Error('DuckDB-WASM did not select a worker bundle')
 
@@ -43,6 +48,12 @@ async function createEngine(): Promise<Engine> {
   try {
     await db.instantiate(bundle.mainModule, bundle.pthreadWorker)
     const connection = await db.connect()
+    mark('nih-merge:duckdb-init-end')
+    performance.measure(
+      'nih-merge:duckdb-init',
+      'nih-merge:duckdb-init-start',
+      'nih-merge:duckdb-init-end',
+    )
     return { db, connection }
   } catch (error) {
     await db.terminate()
@@ -60,16 +71,21 @@ function getEngine(): Promise<Engine> {
   return enginePromise
 }
 
-async function registerParquetView(url: string): Promise<RegisteredDataset> {
-  const engine = await getEngine()
+async function fetchParquet(url: string): Promise<Uint8Array> {
   const response = await fetch(url)
   if (!response.ok) throw new Error(`fetch failed ${response.status} for ${url}`)
+  return new Uint8Array(await response.arrayBuffer())
+}
 
+async function registerParquetView(url: string): Promise<RegisteredDataset> {
   const id = nextDatasetId++
   const fileName = `dataset_${id}.parquet`
   const viewName = `dataset_${id}`
-  const bytes = new Uint8Array(await response.arrayBuffer())
+  mark(`nih-merge:dataset-register-start:${viewName}`)
 
+  // Engine compilation and the small static data download are independent;
+  // overlap them so a cold load does not pay both costs serially.
+  const [engine, bytes] = await Promise.all([getEngine(), fetchParquet(url)])
   await engine.db.registerFileBuffer(fileName, bytes)
   try {
     await engine.connection.query(
@@ -80,6 +96,12 @@ async function registerParquetView(url: string): Promise<RegisteredDataset> {
     throw error
   }
 
+  mark(`nih-merge:dataset-register-end:${viewName}`)
+  performance.measure(
+    `nih-merge:dataset-register:${viewName}`,
+    `nih-merge:dataset-register-start:${viewName}`,
+    `nih-merge:dataset-register-end:${viewName}`,
+  )
   return { fileName, viewName }
 }
 
@@ -107,7 +129,6 @@ async function evictOldDatasets(currentUrl: string): Promise<void> {
 async function getParquetView(url: string): Promise<string> {
   let pending = viewCache.get(url)
   if (pending) {
-    // Refresh insertion order so the Map also serves as a small LRU cache.
     viewCache.delete(url)
     viewCache.set(url, pending)
   } else {
@@ -137,25 +158,22 @@ async function runQuery(
   whereSql: string,
   parameters: readonly unknown[],
 ): Promise<Record<string, unknown>[]> {
-  const engine = await getEngine()
-  const viewName = await getParquetView(url)
+  const [engine, viewName] = await Promise.all([getEngine(), getParquetView(url)])
   const projection = columns.length > 0 ? columns.map(quoteIdentifier).join(', ') : '*'
   const sql = `SELECT ${projection} FROM ${quoteIdentifier(viewName)} WHERE ${whereSql}`
+  mark('nih-merge:query-start')
   const statement = await engine.connection.prepare(sql)
-
   try {
     const result = await statement.query(...parameters)
+    mark('nih-merge:query-end')
+    performance.measure('nih-merge:query', 'nih-merge:query-start', 'nih-merge:query-end')
     return result.toArray().map((row) => normalizeValue(row.toJSON()) as Record<string, unknown>)
   } finally {
     await statement.close()
   }
 }
 
-/**
- * Query a registered Parquet file without expanding the complete file into
- * JavaScript objects. Queries are serialized because the shared DuckDB-WASM
- * connection executes one statement at a time.
- */
+/** Query a cached Parquet file without expanding it into JavaScript objects. */
 export function queryParquet(
   url: string,
   columns: readonly string[],

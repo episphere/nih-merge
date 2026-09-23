@@ -4,7 +4,8 @@ import { createPopup } from '../shared/popup';
 import { createDropdown } from '../shared/popup';
 import { downloadCSV, downloadTSV, downloadJSON } from '../shared/download';
 import { downloadFigurePNG, downloadFigureSVG, getFigureOptions } from '../shared/downloadImage';
-import { initDataTableButton, type TableView } from '../shared/dataTableOverlay';
+import { initLazyDataTableButton } from '../shared/lazyDataTable';
+import type { TableView } from '../shared/tableView';
 
 /**
  * Wire the 4 top-control icon buttons to their respective popups/dropdowns/overlays.
@@ -17,7 +18,7 @@ export function initTopControls(
 ): void {
   initFilterButton($state);
   initSettingsButton($state, update);
-  if (getTableView) initDataTableButton('btn-table', getTableView);
+  if (getTableView) initLazyDataTableButton('btn-table', getTableView);
   initDownloadButton(getData);
 }
 

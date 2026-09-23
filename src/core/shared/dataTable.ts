@@ -7,23 +7,11 @@ import {
   type DataTableAliases,
 } from '@jeyabbalas/data-table';
 import '@jeyabbalas/data-table/styles';
+import { getTableBridge } from './tableEngine';
 
 export type { DataTable };
 
-export interface TablePresentation {
-  /** Dimension/context columns that remain visible and are not user-selectable. */
-  fixedColumns: string[];
-  /** Currently selected dashboard measure; placed last when available. */
-  activeMeasure: string;
-  /** Numeric columns visible when the table is first opened or reset. */
-  defaultNumericColumns: string[];
-  /** Human-readable names used by the column chooser. */
-  columnLabels?: Record<string, string>;
-  /** Presentation-only aliases passed through to the data-table library. */
-  aliases?: DataTableAliases;
-  /** Filename stem for exports launched from the table overlay. */
-  exportFileStem: string;
-}
+export type { TablePresentation } from './tableView';
 
 export async function renderDataTable(
   container: HTMLElement,
@@ -31,13 +19,16 @@ export async function renderDataTable(
   portalTarget?: HTMLElement,
   aliases?: DataTableAliases,
 ): Promise<DataTable> {
+  performance.mark('nih-merge:table-render-start');
   container.innerHTML = '';
   const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+  const bridge = await getTableBridge();
   const table = await createDataTable({
     container,
     source: blob,
     sourceFormat: 'json',
     aliases,
+    bridge,
     persistence: false,
     presets: false,
     undoRedo: false,
@@ -46,5 +37,11 @@ export async function renderDataTable(
     portalTarget,
     colorScheme: 'light',
   });
+  performance.mark('nih-merge:table-render-end');
+  performance.measure(
+    'nih-merge:table-render',
+    'nih-merge:table-render-start',
+    'nih-merge:table-render-end',
+  );
   return table;
 }

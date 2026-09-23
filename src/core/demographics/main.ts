@@ -11,7 +11,7 @@ import {
   createPlotTooltip, MORTALITY_TOOLTIP_FIELDS, type PlotTooltipField,
 } from '../shared/plotTooltip';
 import { COMPARISON_FIELD_LABEL, MEASURE_STYLE } from '../shared/visual';
-import type { TableView } from '../shared/dataTableOverlay';
+import type { TableView } from '../shared/tableView';
 
 // 1. Layout
 initLayout();

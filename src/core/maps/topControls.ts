@@ -3,7 +3,8 @@ import type { MapStore } from 'nanostores';
 import { MAPS_MEASURE_LABELS, type MapsMeasure, type MapsState } from './state';
 import { createPopup, createDropdown } from '../shared/popup';
 import { downloadCSV, downloadTSV, downloadJSON } from '../shared/download';
-import { initDataTableButton, type TableView } from '../shared/dataTableOverlay';
+import { initLazyDataTableButton } from '../shared/lazyDataTable';
+import type { TableView } from '../shared/tableView';
 import { createCheckbox, createSelect } from '../shared/formElements';
 import { USAComboBox } from '../../lib/USAComboBox';
 import { downloadMapsFigurePNG, downloadMapsFigureSVG, type MapsFigureOptions } from '../shared/downloadImage';
@@ -49,7 +50,7 @@ export function initTopControls(
 ): void {
   initGridEditButton($state, update);
   initSettingsButton($state, update);
-  if (getTableView) initDataTableButton('btn-table', getTableView);
+  if (getTableView) initLazyDataTableButton('btn-table', getTableView);
   initDownloadButton($state, getData);
 }
 

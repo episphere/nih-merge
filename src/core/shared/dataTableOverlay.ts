@@ -4,17 +4,13 @@ import {
   exportParquetFromState,
 } from '@jeyabbalas/data-table/advanced';
 import type { ColumnSchema } from '@jeyabbalas/data-table';
-import { renderDataTable, type DataTable, type TablePresentation } from './dataTable';
+import { renderDataTable, type DataTable } from './dataTable';
+import type { TablePresentation, TableView } from './tableView';
 import { triggerDownload } from './download';
 import { createOverlay } from './overlay';
 import { createDropdown, createPopup, type DropdownEntry } from './popup';
 
-export interface TableView {
-  key: string;
-  rows: Record<string, unknown>[];
-  presentation: TablePresentation;
-  subtitle?: string;
-}
+export type { TableView } from './tableView';
 
 interface TableControls {
   close(): void;

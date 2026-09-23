@@ -19,7 +19,7 @@ import { selectDetailTier } from './detailTier';
 import { renderColorLegend } from './colorLegend';
 import { Gridette } from './grid';
 import { initMapTooltip, type MapTooltipHandle, type CardDensityData } from './mapTooltip';
-import type { TableView } from '../shared/dataTableOverlay';
+import type { TableView } from '../shared/tableView';
 import { syncMapsToURL } from './urlSync';
 
 // 1. Layout
