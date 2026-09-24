@@ -29,16 +29,16 @@ function getTableView(): TableView {
   const state = $state.get();
   return {
     key: `${querySnapshot(state)}\0${state.measure}\0${tableDataVersion}`,
-    rows: lastData.map((row) => ({ year: state.year, ...row })) as unknown as Record<string, unknown>[],
+    rows: lastData.map(({ chr_field_id: _chrFieldId, ...row }) => ({ year: state.year, ...row })) as unknown as Record<string, unknown>[],
     subtitle: document.getElementById('title')?.textContent ?? '',
     presentation: {
-      fixedColumns: ['year', 'chr_field_id', 'quantile_bin', 'cause', 'race', 'sex'],
+      fixedColumns: ['year', 'quantile_bin', 'cause', 'race', 'sex'],
       activeMeasure: state.measure,
       defaultNumericColumns: ['deaths', 'population', state.measure],
       exportFileStem: 'nih-merge-characteristics-table',
       aliases: {
         columns: {
-          year: 'Year', chr_field_id: 'County Characteristic ID', quantile_bin: 'Quantile',
+          year: 'Year', quantile_bin: 'Quantile',
           cause: 'Cancer Site', race: 'Race/Ethnicity', sex: 'Sex',
           deaths: 'Deaths', population: 'Population', crudeRate: 'Crude Rate',
           ageAdjustedRate: 'Age-Adjusted Rate', crudeRateCiLower: 'Crude Rate CI Lower',
