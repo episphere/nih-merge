@@ -23,7 +23,7 @@ import type { TableView } from '../shared/tableView';
 import { syncMapsToURL } from './urlSync';
 
 // 1. Layout
-initLayout();
+initLayout({ showBackToTop: false });
 
 // 2. Store
 const { $state, update } = createDashboardStore(MAPS_DEFAULTS, resolveMaps);

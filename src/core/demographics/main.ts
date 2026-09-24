@@ -14,7 +14,7 @@ import { COMPARISON_FIELD_LABEL, MEASURE_STYLE } from '../shared/visual';
 import type { TableView } from '../shared/tableView';
 
 // 1. Layout
-initLayout();
+initLayout({ showBackToTop: false });
 
 // 2. Store
 const { $state, update } = createDashboardStore(DEMOGRAPHICS_DEFAULTS, resolveDemographics);

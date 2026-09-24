@@ -19,7 +19,7 @@ import { COMPARISON_FIELD_LABEL, CHARACTERISTICS_MEASURE_STYLE } from '../shared
 import type { TableView } from '../shared/tableView';
 
 // 1. Layout
-initLayout();
+initLayout({ showBackToTop: false });
 
 // 2. Store
 const { $state, update } = createDashboardStore(CHARACTERISTICS_DEFAULTS, resolveCharacteristics);

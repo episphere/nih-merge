@@ -7,7 +7,11 @@ class MegaMenuSource {
   }
 }
 
-export function initLayout(): void {
+interface LayoutOptions {
+  showBackToTop?: boolean
+}
+
+export function initLayout({ showBackToTop = true }: LayoutOptions = {}): void {
   const headerEl = document.getElementById('nci-header')
   if (headerEl) {
     NCIExtendedHeaderWithMegaMenu.create(headerEl, {
@@ -18,6 +22,8 @@ export function initLayout(): void {
 
   const footerEl = document.getElementById('nci-footer')
   if (footerEl) {
-    NCIBigFooter.create(footerEl)
+    NCIBigFooter.create(footerEl, {
+      backToTopText: showBackToTop ? 'Back to Top' : null,
+    })
   }
 }
