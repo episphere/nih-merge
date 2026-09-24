@@ -11,6 +11,7 @@ import type { CountyFilters, CountyRow, PopulationFilters, PopulationRow } from 
 import type { Card, CardState, MapsMeasure, MapsState } from './state';
 import { buildTrimmedColorScheme, sampleInterpolator } from './trimmedScheme';
 import { getSchemeReverse } from './topControls';
+import { calculateColorDomain } from './colorDomain';
 
 // --- GeoJSON types ---
 
@@ -253,29 +254,22 @@ export function computeColorConfig(
     return null;
   }
 
-  const mean = d3.mean(allValues)!;
   const extent = d3.extent(allValues) as [number, number];
 
   let domain: [number, number] = extent;
-  let pivot: number | null = null;
 
-  if (state.colorCenterMean) {
-    pivot = mean;
+  const automaticDomain = state.colorExcludeExtremes
+    ? calculateColorDomain(allValues, state)
+    : null;
+  if (automaticDomain) {
+    domain = [automaticDomain.domainMin, automaticDomain.domainMax];
   }
 
-  if (state.colorExcludeExtremes && allValues.length > 1) {
-    // Quantile-based clipping: cutoff is the percentage to clip from each
-    // tail.  This is robust to skewed / zero-inflated distributions where
-    // mean ± k·σ collapses.
-    const tailFraction = state.colorExtremeCutoff / 100;
-    const sorted = Float64Array.from(allValues).sort();
-    const lo = d3.quantile(sorted, tailFraction)!;
-    const hi = d3.quantile(sorted, 1 - tailFraction)!;
-    domain = [
-      Math.max(extent[0], lo),
-      Math.min(extent[1], hi),
-    ];
-  }
+  // Center the continuous scale on the retained distribution. An accepted
+  // extreme must not pull the pivot back toward the range we just excluded.
+  const retainedValues = allValues.filter((value) => value >= domain[0] && value <= domain[1]);
+  const mean = d3.mean(retainedValues)!;
+  const pivot = state.colorCenterMean ? mean : null;
 
   const valid = Number.isFinite(mean) && domain.every((d) => Number.isFinite(d));
 
@@ -288,18 +282,21 @@ export function computeColorConfig(
   let lowOutlierColor: string | null = null;
   let highOutlierColor: string | null = null;
 
-  if (state.colorExcludeExtremes && valid) {
+  const hasLowerExtremes = (automaticDomain?.lowerExtremes.length ?? 0) > 0;
+  const hasUpperExtremes = (automaticDomain?.upperExtremes.length ?? 0) > 0;
+  if (state.colorExcludeExtremes && valid && (hasLowerExtremes || hasUpperExtremes)) {
     try {
       const sampled = sampleInterpolator(state.colorScheme, 16);
-      const trimResult = buildTrimmedColorScheme(sampled, 0.1, 0.1);
+      const trimResult = buildTrimmedColorScheme(
+        sampled,
+        hasLowerExtremes ? 0.1 : 0,
+        hasUpperExtremes ? 0.1 : 0,
+      );
       trimmedScheme = trimResult.scheme;
-      if (effectiveReverse) {
-        lowOutlierColor = trimResult.rightOutlier;
-        highOutlierColor = trimResult.leftOutlier;
-      } else {
-        lowOutlierColor = trimResult.leftOutlier;
-        highOutlierColor = trimResult.rightOutlier;
-      }
+      const lowColor = effectiveReverse ? trimResult.rightOutlier : trimResult.leftOutlier;
+      const highColor = effectiveReverse ? trimResult.leftOutlier : trimResult.rightOutlier;
+      lowOutlierColor = hasLowerExtremes ? lowColor : null;
+      highOutlierColor = hasUpperExtremes ? highColor : null;
     } catch {
       // Fall back to no trimming if colorjs.io fails
     }

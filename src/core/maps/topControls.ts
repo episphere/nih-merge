@@ -1,6 +1,7 @@
 import * as d3 from 'd3';
 import type { MapStore } from 'nanostores';
 import { MAPS_MEASURE_LABELS, type MapsMeasure, type MapsState } from './state';
+import type { ExtremeValueSensitivity } from './colorDomain';
 import { createPopup, createDropdown } from '../shared/popup';
 import { downloadCSV, downloadTSV, downloadJSON } from '../shared/download';
 import { initLazyDataTableButton } from '../shared/lazyDataTable';
@@ -155,26 +156,24 @@ function initSettingsButton(
   const stripedExtremes = createCheckbox('settings-striped-extremes', 'Striped Extreme Values');
   content.appendChild(stripedExtremes.wrapper);
 
-  // Cutoff range
-  const cutoffGroup = document.createElement('div');
-  cutoffGroup.className = 'usa-form-group';
-  const cutoffLabel = document.createElement('label');
-  cutoffLabel.className = 'usa-label';
-  cutoffLabel.htmlFor = 'settings-cutoff';
-  cutoffLabel.textContent = 'Extreme Cutoff';
-  const cutoffValue = document.createElement('span');
-  cutoffValue.className = 'margin-left-1 font-sans-3xs';
-  cutoffLabel.appendChild(cutoffValue);
-  const cutoffInput = document.createElement('input');
-  cutoffInput.type = 'range';
-  cutoffInput.className = 'usa-range';
-  cutoffInput.id = 'settings-cutoff';
-  cutoffInput.min = '0';
-  cutoffInput.max = '10';
-  cutoffInput.step = '0.5';
-  cutoffGroup.appendChild(cutoffLabel);
-  cutoffGroup.appendChild(cutoffInput);
-  content.appendChild(cutoffGroup);
+  const sensitivity = createSelect('settings-extreme-sensitivity', 'Extreme-value Sensitivity');
+  for (const [value, label] of [
+    ['conservative', 'Conservative'],
+    ['balanced', 'Balanced'],
+    ['aggressive', 'Aggressive'],
+    ['custom', 'Custom'],
+  ]) {
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = label;
+    sensitivity.select.appendChild(option);
+  }
+  content.appendChild(sensitivity.group);
+
+  // This slider is linear in log space, giving the low end of the gamma
+  // range enough resolution without constraining custom values to presets.
+  const gammaControl = createRangeControl('settings-gamma', 'γ', 0, 1000, 1);
+  content.appendChild(gammaControl.group);
 
   // Show zero values checkbox
   const showZeros = createCheckbox('settings-show-zeros', 'Show Zero Values');
@@ -214,9 +213,13 @@ function initSettingsButton(
     reverse.input.checked = state.colorReverse;
     center.input.checked = state.colorCenterMean;
     exclude.input.checked = state.colorExcludeExtremes;
-    cutoffInput.value = String(state.colorExtremeCutoff);
-    cutoffValue.textContent = `${state.colorExtremeCutoff}% per tail`;
-    cutoffGroup.style.display = state.colorExcludeExtremes ? '' : 'none';
+    sensitivity.select.value = state.extremeValueSensitivity;
+    sensitivity.group.style.display = state.colorExcludeExtremes ? '' : 'none';
+    gammaControl.input.value = String(gammaToSlider(state.gamma));
+    gammaControl.value.textContent = formatGamma(state.gamma);
+    gammaControl.input.setAttribute('aria-valuetext', formatGamma(state.gamma));
+    gammaControl.group.style.display = state.colorExcludeExtremes
+      && state.extremeValueSensitivity === 'custom' ? '' : 'none';
     stripedExtremes.input.checked = state.stripedExtremes;
     stripedExtremes.wrapper.style.display = state.colorExcludeExtremes ? '' : 'none';
     showZeros.input.checked = state.showZeroValues;
@@ -243,14 +246,17 @@ function initSettingsButton(
   exclude.input.addEventListener('change', () => {
     update({ colorExcludeExtremes: exclude.input.checked });
   });
+  sensitivity.select.addEventListener('change', () => {
+    update({ extremeValueSensitivity: sensitivity.select.value as ExtremeValueSensitivity });
+  });
   stripedExtremes.input.addEventListener('change', () => {
     update({ stripedExtremes: stripedExtremes.input.checked });
   });
   showZeros.input.addEventListener('change', () => {
     update({ showZeroValues: showZeros.input.checked });
   });
-  cutoffInput.addEventListener('input', () => {
-    update({ colorExtremeCutoff: parseFloat(cutoffInput.value) });
+  gammaControl.input.addEventListener('input', () => {
+    update({ gamma: sliderToGamma(Number(gammaControl.input.value)) });
   });
   countyOutline.input.addEventListener('change', () => {
     update({ showOutlineCounty: countyOutline.input.checked });
@@ -260,6 +266,55 @@ function initSettingsButton(
   });
   nationOutline.input.addEventListener('change', () => {
     update({ showOutlineNation: nationOutline.input.checked });
+  });
+}
+
+function createRangeControl(
+  id: string,
+  labelText: string,
+  min: number,
+  max: number,
+  step: number,
+): { group: HTMLElement; input: HTMLInputElement; value: HTMLSpanElement } {
+  const group = document.createElement('div');
+  group.className = 'usa-form-group';
+  const label = document.createElement('label');
+  label.className = 'usa-label';
+  label.htmlFor = id;
+  label.textContent = labelText;
+  const value = document.createElement('span');
+  value.className = 'margin-left-1 font-sans-3xs';
+  label.appendChild(value);
+  const input = document.createElement('input');
+  input.type = 'range';
+  input.className = 'usa-range';
+  input.id = id;
+  input.min = String(min);
+  input.max = String(max);
+  input.step = String(step);
+  group.append(label, input);
+  return { group, input, value };
+}
+
+const GAMMA_MIN = 0.01;
+const GAMMA_MAX = 2;
+
+function gammaToSlider(gamma: number): number {
+  if (gamma <= 0) return 0;
+  const bounded = Math.max(GAMMA_MIN, Math.min(GAMMA_MAX, gamma));
+  return 1 + Math.round(999 * Math.log(bounded / GAMMA_MIN) / Math.log(GAMMA_MAX / GAMMA_MIN));
+}
+
+function sliderToGamma(position: number): number {
+  if (position <= 0) return 0;
+  const gamma = GAMMA_MIN * Math.pow(GAMMA_MAX / GAMMA_MIN, (position - 1) / 999);
+  return Number(gamma.toPrecision(3));
+}
+
+function formatGamma(gamma: number): string {
+  if (gamma <= 0) return 'Off';
+  return Math.max(GAMMA_MIN, Math.min(GAMMA_MAX, gamma)).toLocaleString(undefined, {
+    maximumSignificantDigits: 3,
   });
 }
 

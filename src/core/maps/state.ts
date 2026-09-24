@@ -4,6 +4,7 @@ import {
 } from '../../domain/mortality';
 import { ALL_STATE_FIPS } from '../shared/fips';
 import { causeSexRule } from '../shared/state/rules';
+import type { ExtremeValueSensitivity } from './colorDomain';
 
 // --- Maps-specific types ---
 
@@ -46,7 +47,8 @@ export interface MapsState {
   colorReverse: boolean;
   colorCenterMean: boolean;
   colorExcludeExtremes: boolean;
-  colorExtremeCutoff: number;
+  extremeValueSensitivity: ExtremeValueSensitivity;
+  gamma: number;
   showZeroValues: boolean;
   stripedExtremes: boolean;
   showOutlineCounty: boolean;
@@ -98,7 +100,8 @@ export const MAPS_DEFAULTS: MapsState = {
   colorReverse: false,
   colorCenterMean: true,
   colorExcludeExtremes: true,
-  colorExtremeCutoff: 2,
+  extremeValueSensitivity: 'balanced',
+  gamma: 0.25,
   showZeroValues: true,
   stripedExtremes: true,
   showOutlineCounty: false,

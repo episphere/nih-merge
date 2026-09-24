@@ -5,7 +5,7 @@ import { DEFAULT_CARD, MAPS_DEFAULTS, type Card, type CardState, type MapsState 
 /** Scalar keys to sync to URL (excludes cards, edit form state, and options). */
 const URL_KEYS: (keyof MapsState & string)[] = [
   'nRows', 'nCols', 'measure', 'colorScheme', 'colorReverse',
-  'colorCenterMean', 'colorExcludeExtremes', 'colorExtremeCutoff',
+  'colorCenterMean', 'colorExcludeExtremes', 'extremeValueSensitivity', 'gamma',
   'showZeroValues', 'stripedExtremes', 'showOutlineCounty', 'showOutlineState', 'showOutlineNation',
 ];
 
