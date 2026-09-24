@@ -155,6 +155,7 @@ const HIGHLIGHT_SELECTORS = [
   "g[aria-label='line'] :is(line, path)",
   "g[aria-label='link'] :is(line, path)",
 ];
+const SUPPRESSED_LABEL_SELECTOR = "g[aria-label='text'] text";
 
 function highlightSeries(container: HTMLElement, row: Record<string, unknown> | null): void {
   if (!row) {
@@ -163,6 +164,9 @@ function highlightSeries(container: HTMLElement, row: Record<string, unknown> | 
       for (const el of container.querySelectorAll<SVGElement>(sel)) {
         el.style.opacity = '';
       }
+    }
+    for (const el of container.querySelectorAll<SVGElement>(SUPPRESSED_LABEL_SELECTOR)) {
+      el.style.opacity = '0';
     }
     return;
   }
@@ -179,6 +183,10 @@ function highlightSeries(container: HTMLElement, row: Record<string, unknown> | 
   }
 
   if (!seriesColor) return;
+
+  for (const el of container.querySelectorAll<SVGElement>(SUPPRESSED_LABEL_SELECTOR)) {
+    el.style.opacity = el.getAttribute('fill') === seriesColor ? '1' : '0';
+  }
 
   for (const sel of HIGHLIGHT_SELECTORS) {
     const groups = new Set<Element>();

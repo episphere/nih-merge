@@ -367,26 +367,29 @@ export function renderPlot(
 
   // A null death count represents a suppressed count between 1 and 9. Since
   // the associated measure cannot be plotted, label its quantile position at
-  // the bottom of the chart. Multiple comparison series may share a position,
-  // so de-duplicate labels by quantile and facet.
-  const suppressedByPosition = new Map<string, { x: string | number; fx?: string }>();
-  for (const d of data) {
-    if (d.deaths != null) continue;
-    const x = d.quantile_bin;
+  // the bottom of the chart. With a within-plot comparison, keep one label per
+  // series so the hover interaction can reveal only the active series' labels.
+  // Without one, de-duplicate labels that share a quantile and facet.
+  const suppressedRows = data.filter(d => d.deaths == null);
+  const suppressedByPosition = new Map<string, EnrichedQuantileRow>();
+  for (const d of suppressedRows) {
     const fx = fxField ? (d[fxField] as string) : undefined;
-    suppressedByPosition.set(`${x}\u0000${fx ?? ''}`, { x, fx });
+    suppressedByPosition.set(`${d.quantile_bin}\u0000${fx ?? ''}`, d);
   }
-  const suppressedData = [...suppressedByPosition.values()];
+  const suppressedData = compareColor === 'none'
+    ? [...suppressedByPosition.values()]
+    : suppressedRows;
   if (suppressedData.length > 0) {
     marks.push(Plot.text(suppressedData, {
-      x: 'x',
+      x: 'quantile_bin',
       y: () => yDomain[0],
-      fx: fxField ? 'fx' : undefined,
+      fx: fxField ?? undefined,
       text: () => 'Suppressed',
       rotate: -90,
       textAnchor: 'start',
       dy: -10,
-      fill: '#888',
+      fill: compareColor === 'none' ? '#888' : colorFn as never,
+      opacity: compareColor === 'none' ? 1 : 0,
       fontSize: 16,
     }));
   }
