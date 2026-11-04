@@ -8,6 +8,7 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "vitest run",
+    "vendor:data-table": "node tools/vendor/rebuild-data-table.mjs",
     "generate:geography": "node tools/data/generate-geography.mjs"
   },
   "devDependencies": {
@@ -27,10 +28,10 @@
     "@codemirror/language": "^6.12.3",
     "@codemirror/state": "^6.6.0",
     "@codemirror/view": "^6.41.1",
-    "@duckdb/duckdb-wasm": "^1.33.1-dev45.0",
+    "@duckdb/duckdb-wasm": "1.33.1-dev57.0",
     "@floating-ui/dom": "^1.7.6",
     "@fortawesome/fontawesome-free": "^7.2.0",
-    "@jeyabbalas/data-table": "file:vendor/jeyabbalas-data-table-0.7.0.tgz",
+    "@jeyabbalas/data-table": "file:vendor/jeyabbalas-data-table-0.10.1-nih.1.tgz",
     "@nciocpl/ncids-css": "^3.5.1",
     "@nciocpl/ncids-js": "^3.5.1",
     "@observablehq/plot": "^0.6.17",

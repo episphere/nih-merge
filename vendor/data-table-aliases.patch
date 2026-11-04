@@ -1,0 +1,1434 @@
+diff --git a/src/DataTable.ts b/src/DataTable.ts
+index e887940a..f0509593 100644
+--- a/src/DataTable.ts
++++ b/src/DataTable.ts
+@@ -42,6 +42,7 @@
+ import { annotatedRowsTableName } from './annotations/annotatedRowsSource';
+ import { AnnotationStore } from './annotations/AnnotationStore';
+ import { StateActions, type LoadDataOptions } from './core/Actions';
++import { AliasResolver, type DataTableAliases } from './core/Aliases';
+ import { checkBrowserSupport } from './core/checkBrowserSupport';
+ import {
+   ConfigurationError,
+@@ -183,6 +184,8 @@ export interface CreateDataTableOptions {
+    * loads under a generated name, so no saved session is restored.
+    */
+   tableName?: string;
++  /** Presentation-only column and value labels. Raw data, APIs, SQL, and exports are unchanged. */
++  aliases?: DataTableAliases;
+ 
+   // ---- Feature toggles ----
+ 
+@@ -516,6 +519,7 @@ export async function createDataTable(opts: CreateDataTableOptions): Promise<Dat
+ 
+   // -------- Resolve i18n messages (done once, threaded to every component) --------
+   const messages: Strings = mergeStrings(defaultStrings, opts.messages);
++  const aliases = new AliasResolver(opts.aliases);
+ 
+   // -------- Worker bridge --------
+   const ownsBridge = !opts.bridge;
+@@ -672,6 +676,7 @@ export async function createDataTable(opts: CreateDataTableOptions): Promise<Dat
+       return recounted;
+     },
+     onAnnotatedRowsError: (error) => emitError({ error, source: 'query' }),
++    aliases,
+   });
+ 
+   // -------- Instance id (multi-instance DOM ID isolation) --------
+@@ -986,6 +991,7 @@ export async function createDataTable(opts: CreateDataTableOptions): Promise<Dat
+       bridge,
+       filters: state.filters.get(),
+       messages,
++      aliases,
+       onFilterChange: (filter: Filter | null) => {
+         coordinator.handleFilterChange(column.name, filter);
+       },
+@@ -1170,6 +1176,7 @@ export async function createDataTable(opts: CreateDataTableOptions): Promise<Dat
+       bridge,
+       filters: state.filters.get(),
+       messages,
++      aliases,
+       onError: (err, ctx) => {
+         // Merge ctx into err.details so async errors carry the same
+         // {column, phase} payload the synchronous-throw path attaches
+diff --git a/src/core/Aliases.ts b/src/core/Aliases.ts
+new file mode 100644
+index 00000000..1066e4d3
+--- /dev/null
++++ b/src/core/Aliases.ts
+@@ -0,0 +1,112 @@
++import { ConfigurationError } from './errors';
++import type { DataType } from './types';
++
++/** Scalar values that may be assigned a presentation-only label. */
++export type AliasValue = string | number | boolean | bigint | Date | null;
++
++/** One raw value to display-label mapping. */
++export interface ValueAlias {
++  value: AliasValue;
++  label: string;
++}
++
++/** Presentation-only aliases keyed by raw column name. */
++export interface DataTableAliases {
++  columns?: Readonly<Record<string, string>>;
++  values?: Readonly<Record<string, readonly ValueAlias[]>>;
++}
++
++function aliasKey(value: AliasValue): string {
++  if (value === null) return 'null:';
++  if (value instanceof Date) return `date:${value.getTime()}`;
++  if (typeof value === 'number') {
++    if (Number.isNaN(value)) return 'number:NaN';
++    if (Object.is(value, -0)) return 'number:-0';
++  }
++  return `${typeof value}:${String(value)}`;
++}
++
++function isAliasValue(value: unknown): value is AliasValue {
++  return (
++    value === null ||
++    value instanceof Date ||
++    typeof value === 'string' ||
++    typeof value === 'number' ||
++    typeof value === 'boolean' ||
++    typeof value === 'bigint'
++  );
++}
++
++/** Immutable alias lookup shared by presentation components. */
++export class AliasResolver {
++  private readonly columns = new Map<string, string>();
++  private readonly values = new Map<string, Map<string, string>>();
++  private readonly dateValueColumns = new Set<string>();
++
++  constructor(config?: DataTableAliases) {
++    if (!config) return;
++    for (const [column, label] of Object.entries(config.columns ?? {})) {
++      if (typeof label !== 'string') this.invalid(`Column alias for "${column}" must be a string.`);
++      this.columns.set(column, label);
++    }
++    for (const [column, entries] of Object.entries(config.values ?? {})) {
++      if (!Array.isArray(entries)) this.invalid(`Value aliases for "${column}" must be an array.`);
++      const lookup = new Map<string, string>();
++      for (const entry of entries) {
++        if (!entry || typeof entry !== 'object' || typeof entry.label !== 'string') {
++          this.invalid(`Every value alias for "${column}" must have a string label.`);
++        }
++        if (
++          !isAliasValue(entry.value) ||
++          (entry.value instanceof Date && Number.isNaN(entry.value.getTime()))
++        ) {
++          this.invalid(`Value aliases for "${column}" must use a supported scalar value.`);
++        }
++        const key = aliasKey(entry.value);
++        if (lookup.has(key)) {
++          this.invalid(
++            `Duplicate value alias for column "${column}" and value ${String(entry.value)}.`,
++          );
++        }
++        lookup.set(key, entry.label);
++        if (entry.value instanceof Date) this.dateValueColumns.add(column);
++      }
++      this.values.set(column, lookup);
++    }
++  }
++
++  column(columnName: string): string {
++    return this.columns.get(columnName) ?? columnName;
++  }
++
++  value(columnName: string, value: unknown, type?: DataType): string | undefined {
++    const lookup = this.values.get(columnName);
++    if (!lookup) return undefined;
++    if (value === undefined) return lookup.get(aliasKey(null));
++    if (
++      value === null ||
++      typeof value === 'string' ||
++      typeof value === 'number' ||
++      typeof value === 'boolean' ||
++      typeof value === 'bigint' ||
++      value instanceof Date
++    ) {
++      const direct = lookup.get(aliasKey(value));
++      if (direct !== undefined) return direct;
++      if (type === 'date' || type === 'timestamp' || this.dateValueColumns.has(columnName)) {
++        const date =
++          typeof value === 'number' || typeof value === 'bigint'
++            ? new Date(Number(value))
++            : typeof value === 'string'
++              ? new Date(value)
++              : null;
++        if (date && !Number.isNaN(date.getTime())) return lookup.get(aliasKey(date));
++      }
++    }
++    return undefined;
++  }
++
++  private invalid(message: string): never {
++    throw new ConfigurationError(message, { code: 'OPTIONS_INVALID' });
++  }
++}
+diff --git a/src/derived/DerivedColumnEditPanel.ts b/src/derived/DerivedColumnEditPanel.ts
+index f5653dd7..1152228c 100644
+--- a/src/derived/DerivedColumnEditPanel.ts
++++ b/src/derived/DerivedColumnEditPanel.ts
+@@ -9,6 +9,7 @@
+ import type { StateActions } from '../core/Actions';
+ import { takenColumnName } from '../core/columnNames';
+ import { nextInstanceId } from '../core/instanceId';
++import { AliasResolver } from '../core/Aliases';
+ import { ModalHost } from '../core/ModalHost';
+ import type { TableState } from '../core/State';
+ import { type Strings, defaultStrings } from '../core/Strings';
+@@ -46,6 +47,7 @@ export interface DerivedColumnEditPanelOptions {
+    * constructed without one generates its own.
+    */
+   instanceId?: string | undefined;
++  aliases?: AliasResolver | undefined;
+ }
+ 
+ /**
+@@ -71,6 +73,7 @@ export class DerivedColumnEditPanel {
+   private prefix: string;
+   private readonly instanceId: string;
+   private readonly messages: Strings;
++  private readonly aliases: AliasResolver;
+   private editorFactory?: ExpressionEditorFactory | undefined;
+   private colorSchemeSource?: HTMLElement | undefined;
+   private readonly onOpenChange: ((column: string | null) => void) | undefined;
+@@ -95,6 +98,7 @@ export class DerivedColumnEditPanel {
+   ) {
+     this.prefix = options?.classPrefix ?? 'dt';
+     this.messages = options?.messages ?? defaultStrings;
++    this.aliases = options?.aliases ?? new AliasResolver();
+     this.editorFactory = options?.editorFactory;
+     this.colorSchemeSource = options?.colorSchemeSource;
+     this.onOpenChange = options?.onOpenChange;
+@@ -432,7 +436,9 @@ export class DerivedColumnEditPanel {
+     anchorElement.classList.add(`${this.prefix}-derived-icon-btn--active`);
+ 
+     // Update title
+-    this.titleEl.textContent = this.messages.derived.editTitleForColumn(columnName);
++    const label = this.aliases.column(columnName);
++    const titleName = label === columnName ? columnName : `${label} (${columnName})`;
++    this.titleEl.textContent = this.messages.derived.editTitleForColumn(titleName);
+ 
+     // Populate name input
+     this.nameInput.value = def.name;
+diff --git a/src/filters/FilterBar.ts b/src/filters/FilterBar.ts
+index c0404e6b..b4f7dc6d 100644
+--- a/src/filters/FilterBar.ts
++++ b/src/filters/FilterBar.ts
+@@ -7,6 +7,7 @@
+ 
+ import type { StateActions } from '../core/Actions';
+ import { ChipStrip, nearestSurvivingKey } from '../core/ChipStrip';
++import type { AliasResolver } from '../core/Aliases';
+ import { RovingTabindex } from '../core/RovingTabindex';
+ import type { TableState } from '../core/State';
+ import { type Strings, defaultStrings } from '../core/Strings';
+@@ -31,6 +32,7 @@ export interface FilterBarOptions {
+   onPresetsClick?: (() => void) | undefined;
+   /** Resolved i18n strings. Defaults to English. */
+   messages?: Strings | undefined;
++  aliases?: AliasResolver | undefined;
+ }
+ 
+ /**
+@@ -265,6 +267,7 @@ export class FilterBar {
+       const chipOptions: FilterChipOptions = {
+         classPrefix: this.prefix,
+         messages: this.messages,
++        aliases: this.options.aliases,
+       };
+ 
+       // For raw-sql filters, pass onEdit callback for modal integration
+diff --git a/src/filters/FilterChip.ts b/src/filters/FilterChip.ts
+index 258e5448..13b73de0 100644
+--- a/src/filters/FilterChip.ts
++++ b/src/filters/FilterChip.ts
+@@ -7,6 +7,7 @@
+ 
+ import { ALL_SEVERITIES_MASK, severitiesOfMask } from '../annotations/severity';
+ import { graphemeSegmenter } from '../core/graphemes';
++import { AliasResolver } from '../core/Aliases';
+ import { type Strings, defaultStrings } from '../core/Strings';
+ import { annotatedFilterMask } from './annotatedFilters';
+ import type { Filter } from './FilterTypes';
+@@ -20,12 +21,21 @@ export interface FilterChipOptions {
+   onEdit?: (() => void) | undefined;
+   /** Resolved i18n strings. Defaults to English. */
+   messages?: Strings | undefined;
++  aliases?: AliasResolver | undefined;
+ }
+ 
+ /**
+  * Format a value for display in a filter chip
+  */
+-export function formatDisplayValue(value: unknown): string {
++export function formatDisplayValue(
++  value: unknown,
++  column?: string,
++  aliases?: AliasResolver,
++): string {
++  if (column && aliases) {
++    const label = aliases.value(column, value);
++    if (label !== undefined) return label;
++  }
+   if (value === null || value === undefined) {
+     return 'null';
+   }
+@@ -111,35 +121,37 @@ export function formatFilter(
+   filter: Filter,
+   messages: Strings = defaultStrings,
+   options: { maxValueLength?: number } = {},
++  aliases: AliasResolver = new AliasResolver(),
+ ): { column: string; description: string } {
+   const d = messages.filters.chipDescriptions;
+   const maxLength = options.maxValueLength;
+   const fit = (text: string): string =>
+     maxLength === undefined ? text : shortenText(text, maxLength);
+-  const show = (value: unknown): string => fit(formatDisplayValue(value));
++  const show = (value: unknown): string => fit(formatDisplayValue(value, filter.column, aliases));
++  const displayColumn = aliases.column(filter.column);
+   switch (filter.type) {
+     case 'range': {
+       const minIsOpen = typeof filter.min === 'number' && !Number.isFinite(filter.min);
+       const maxIsOpen = typeof filter.max === 'number' && !Number.isFinite(filter.max);
+ 
+       if (minIsOpen && maxIsOpen) {
+-        return { column: filter.column, description: d.anyValue };
++        return { column: displayColumn, description: d.anyValue };
+       }
+       if (minIsOpen) {
+         const op = filter.maxInclusive ? '\u2264' : '<';
+-        return { column: filter.column, description: `${op} ${show(filter.max)}` };
++        return { column: displayColumn, description: `${op} ${show(filter.max)}` };
+       }
+       if (maxIsOpen) {
+         const op = filter.minExclusive ? '>' : '\u2265';
+-        return { column: filter.column, description: `${op} ${show(filter.min)}` };
++        return { column: displayColumn, description: `${op} ${show(filter.min)}` };
+       }
+       const min = show(filter.min);
+       const max = show(filter.max);
+-      return { column: filter.column, description: `${min} ${d.rangeSeparator} ${max}` };
++      return { column: displayColumn, description: `${min} ${d.rangeSeparator} ${max}` };
+     }
+     case 'point': {
+       return {
+-        column: filter.column,
++        column: displayColumn,
+         description: `${d.pointPrefix} ${show(filter.value)}`,
+       };
+     }
+@@ -148,20 +160,20 @@ export function formatFilter(
+       const shown = filter.values.slice(0, maxShow).map(show);
+       const rest = filter.values.length - maxShow;
+       const list = rest > 0 ? `${shown.join(', ')}, ${d.valueListMore(rest)}` : shown.join(', ');
+-      return { column: filter.column, description: d.inSet(list, !!filter.includeNull) };
++      return { column: displayColumn, description: d.inSet(list, !!filter.includeNull) };
+     }
+     case 'not-set': {
+       const maxShow = 3;
+       const shown = filter.values.slice(0, maxShow).map(show);
+       const rest = filter.values.length - maxShow;
+       const list = rest > 0 ? `${shown.join(', ')}, ${d.valueListMore(rest)}` : shown.join(', ');
+-      return { column: filter.column, description: d.notInSet(list, !!filter.includeNull) };
++      return { column: displayColumn, description: d.notInSet(list, !!filter.includeNull) };
+     }
+     case 'null': {
+-      return { column: filter.column, description: d.isNull };
++      return { column: displayColumn, description: d.isNull };
+     }
+     case 'not-null': {
+-      return { column: filter.column, description: d.isNotNull };
++      return { column: displayColumn, description: d.isNotNull };
+     }
+     case 'pattern': {
+       const modeLabel =
+@@ -175,7 +187,7 @@ export function formatFilter(
+       const pattern = fit(filter.pattern);
+       const quote = filter.mode === 'regex' ? `/${pattern}/` : `"${pattern}"`;
+       return {
+-        column: filter.column,
++        column: displayColumn,
+         description: `${modeLabel} ${quote}`,
+       };
+     }
+@@ -207,6 +219,7 @@ export class FilterChip {
+   private readonly prefix: string;
+   private readonly onEdit?: (() => void) | undefined;
+   private readonly messages: Strings;
++  private readonly aliases: AliasResolver;
+ 
+   constructor(
+     private filter: Filter,
+@@ -216,16 +229,22 @@ export class FilterChip {
+     this.prefix = options.classPrefix ?? 'dt';
+     this.onEdit = options.onEdit;
+     this.messages = options.messages ?? defaultStrings;
++    this.aliases = options.aliases ?? new AliasResolver();
+     this.element = this.createElement();
+   }
+ 
+   private createElement(): HTMLElement {
+     // The chip shows each value cut short; its title keeps them whole. The
+     // remove button is named by the column alone, however long the value.
+-    const { column, description } = formatFilter(this.filter, this.messages, {
+-      maxValueLength: CHIP_VALUE_MAX_LENGTH,
+-    });
+-    const fullDescription = formatFilter(this.filter, this.messages).description;
++    const { column, description } = formatFilter(
++      this.filter,
++      this.messages,
++      {
++        maxValueLength: CHIP_VALUE_MAX_LENGTH,
++      },
++      this.aliases,
++    );
++    const fullDescription = formatFilter(this.filter, this.messages, {}, this.aliases).description;
+ 
+     // Container span
+     const chip = document.createElement('span');
+diff --git a/src/filters/FilterPanel.ts b/src/filters/FilterPanel.ts
+index 504031ca..ec27eda2 100644
+--- a/src/filters/FilterPanel.ts
++++ b/src/filters/FilterPanel.ts
+@@ -33,6 +33,7 @@
+ 
+ import type { StateActions } from '../core/Actions';
+ import { nextInstanceId } from '../core/instanceId';
++import { AliasResolver } from '../core/Aliases';
+ import { ModalHost } from '../core/ModalHost';
+ import type { TableState } from '../core/State';
+ import { type Strings, defaultStrings } from '../core/Strings';
+@@ -70,6 +71,7 @@ export interface FilterPanelOptions {
+    * @internal
+    */
+   onOpenChange?: ((column: string | null) => void) | undefined;
++  aliases?: AliasResolver | undefined;
+ }
+ 
+ /**
+@@ -93,6 +95,7 @@ export class FilterPanel {
+   private readonly colorSchemeSource?: HTMLElement | undefined;
+   private readonly messages: Strings;
+   private readonly onOpenChange: ((column: string | null) => void) | undefined;
++  private readonly aliases: AliasResolver;
+ 
+   // Focus trap / Escape / outside-click delegated to ModalHost.
+   private modalHost = new ModalHost();
+@@ -110,6 +113,7 @@ export class FilterPanel {
+     this.colorSchemeSource = options.colorSchemeSource;
+     this.messages = options.messages ?? defaultStrings;
+     this.onOpenChange = options.onOpenChange;
++    this.aliases = options.aliases ?? new AliasResolver();
+     this.element = this.createElement();
+     this.body = this.element.querySelector(`.${this.prefix}-filter-panel-body`)!;
+     this.titleEl = this.element.querySelector(`.${this.prefix}-filter-panel-title`)!;
+@@ -256,6 +260,7 @@ export class FilterPanel {
+       this.currentField = new FilterPanelField(colSchema, this.state, this.actions, {
+         classPrefix: this.prefix,
+         messages: this.messages,
++        aliases: this.aliases,
+       });
+       this.body.appendChild(this.currentField.getElement());
+     }
+@@ -266,7 +271,9 @@ export class FilterPanel {
+     this.onOpenChange?.(column);
+ 
+     // Update header: title, type badge, clear button
+-    this.titleEl.textContent = this.messages.filters.panelTitleForColumn(column);
++    this.titleEl.textContent = this.messages.filters.panelTitleForColumn(
++      this.aliases.column(column),
++    );
+     // A nested or JSON column's badge is the header's short type, titled
+     // with the full one.
+     this.typeBadgeEl.textContent = columnTypeLabel(colSchema);
+diff --git a/src/filters/FilterPanelField.ts b/src/filters/FilterPanelField.ts
+index 8a74fb15..63548d44 100644
+--- a/src/filters/FilterPanelField.ts
++++ b/src/filters/FilterPanelField.ts
+@@ -10,6 +10,7 @@
+ 
+ import type { StateActions } from '../core/Actions';
+ import { isTimeWithTimeZone } from '../core/duckdbType';
++import { AliasResolver } from '../core/Aliases';
+ import type { TableState } from '../core/State';
+ import { type Strings, defaultStrings } from '../core/Strings';
+ import type { ColumnSchema } from '../core/types';
+@@ -24,6 +25,7 @@ export interface FilterPanelFieldOptions {
+   classPrefix?: string;
+   /** Resolved i18n strings. Defaults to English. */
+   messages?: Strings;
++  aliases?: AliasResolver;
+ }
+ 
+ /**
+@@ -36,6 +38,7 @@ export class FilterPanelField {
+   private destroyed = false;
+   private readonly prefix: string;
+   private readonly messages: Strings;
++  private readonly aliases: AliasResolver;
+   private applyDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+ 
+   // Flag to prevent re-entrant sync when we apply our own filters.
+@@ -52,6 +55,7 @@ export class FilterPanelField {
+   ) {
+     this.prefix = options.classPrefix ?? 'dt';
+     this.messages = options.messages ?? defaultStrings;
++    this.aliases = options.aliases ?? new AliasResolver();
+     this.element = this.createElement();
+     this.controlsContainer = this.element.querySelector(`.${this.prefix}-filter-field-controls`)!;
+     this.nullGroup = this.element.querySelector(`.${this.prefix}-filter-field-null`)!;
+@@ -90,7 +94,7 @@ export class FilterPanelField {
+     nullGroup.setAttribute('role', 'radiogroup');
+     nullGroup.setAttribute(
+       'aria-label',
+-      this.messages.filters.ariaLabels.nullFilter(this.column.name),
++      this.messages.filters.ariaLabels.nullFilter(this.aliases.column(this.column.name)),
+     );
+ 
+     const radioName = `null-${this.column.name}-${Math.random().toString(36).slice(2, 8)}`;
+@@ -174,7 +178,7 @@ export class FilterPanelField {
+ 
+     const select = document.createElement('select');
+     select.className = `${this.prefix}-filter-select`;
+-    select.setAttribute('aria-label', aria.filterMode(this.column.name));
++    select.setAttribute('aria-label', aria.filterMode(this.aliases.column(this.column.name)));
+     const addOption = (value: string, label: string) => {
+       const opt = document.createElement('option');
+       opt.value = value;
+@@ -194,14 +198,14 @@ export class FilterPanelField {
+     input1.className = `${this.prefix}-filter-input`;
+     input1.placeholder = ph.min;
+     input1.setAttribute('step', 'any');
+-    input1.setAttribute('aria-label', aria.minValue(this.column.name));
++    input1.setAttribute('aria-label', aria.minValue(this.aliases.column(this.column.name)));
+ 
+     const input2 = document.createElement('input');
+     input2.type = 'number';
+     input2.className = `${this.prefix}-filter-input`;
+     input2.placeholder = ph.max;
+     input2.setAttribute('step', 'any');
+-    input2.setAttribute('aria-label', aria.maxValue(this.column.name));
++    input2.setAttribute('aria-label', aria.maxValue(this.aliases.column(this.column.name)));
+ 
+     c.appendChild(select);
+     c.appendChild(input1);
+@@ -226,7 +230,7 @@ export class FilterPanelField {
+ 
+     const select = document.createElement('select');
+     select.className = `${this.prefix}-filter-select`;
+-    select.setAttribute('aria-label', aria.filterMode(this.column.name));
++    select.setAttribute('aria-label', aria.filterMode(this.aliases.column(this.column.name)));
+     const addOption = (value: string, label: string) => {
+       const opt = document.createElement('option');
+       opt.value = value;
+@@ -243,7 +247,7 @@ export class FilterPanelField {
+     input.type = 'text';
+     input.className = `${this.prefix}-filter-input`;
+     input.placeholder = this.messages.filters.placeholders.stringFilter;
+-    input.setAttribute('aria-label', aria.filterValue(this.column.name));
++    input.setAttribute('aria-label', aria.filterValue(this.aliases.column(this.column.name)));
+ 
+     c.appendChild(select);
+     c.appendChild(input);
+@@ -296,7 +300,7 @@ export class FilterPanelField {
+ 
+     const select = document.createElement('select');
+     select.className = `${this.prefix}-filter-select`;
+-    select.setAttribute('aria-label', aria.dateFilterMode(this.column.name));
++    select.setAttribute('aria-label', aria.dateFilterMode(this.aliases.column(this.column.name)));
+     const addOption = (value: string, label: string) => {
+       const opt = document.createElement('option');
+       opt.value = value;
+@@ -313,12 +317,12 @@ export class FilterPanelField {
+     const input1 = document.createElement('input');
+     input1.type = inputType;
+     input1.className = `${this.prefix}-filter-input`;
+-    input1.setAttribute('aria-label', aria.startDate(this.column.name));
++    input1.setAttribute('aria-label', aria.startDate(this.aliases.column(this.column.name)));
+ 
+     const input2 = document.createElement('input');
+     input2.type = inputType;
+     input2.className = `${this.prefix}-filter-input`;
+-    input2.setAttribute('aria-label', aria.endDate(this.column.name));
++    input2.setAttribute('aria-label', aria.endDate(this.aliases.column(this.column.name)));
+ 
+     c.appendChild(select);
+     c.appendChild(input1);
+@@ -346,7 +350,7 @@ export class FilterPanelField {
+     const input1 = document.createElement('input');
+     input1.type = 'time';
+     input1.className = `${this.prefix}-filter-input`;
+-    input1.setAttribute('aria-label', aria.fromTime(this.column.name));
++    input1.setAttribute('aria-label', aria.fromTime(this.aliases.column(this.column.name)));
+ 
+     const label2 = document.createElement('span');
+     label2.className = `${this.prefix}-filter-field-label`;
+@@ -355,7 +359,7 @@ export class FilterPanelField {
+     const input2 = document.createElement('input');
+     input2.type = 'time';
+     input2.className = `${this.prefix}-filter-input`;
+-    input2.setAttribute('aria-label', aria.toTime(this.column.name));
++    input2.setAttribute('aria-label', aria.toTime(this.aliases.column(this.column.name)));
+ 
+     c.appendChild(label1);
+     c.appendChild(input1);
+@@ -372,7 +376,7 @@ export class FilterPanelField {
+ 
+     const select = document.createElement('select');
+     select.className = `${this.prefix}-filter-select`;
+-    select.setAttribute('aria-label', aria.uuidFilterMode(this.column.name));
++    select.setAttribute('aria-label', aria.uuidFilterMode(this.aliases.column(this.column.name)));
+     const addOption = (value: string, label: string) => {
+       const opt = document.createElement('option');
+       opt.value = value;
+@@ -386,7 +390,7 @@ export class FilterPanelField {
+     input.type = 'text';
+     input.className = `${this.prefix}-filter-input`;
+     input.placeholder = this.messages.filters.placeholders.uuidFilter;
+-    input.setAttribute('aria-label', aria.uuidValue(this.column.name));
++    input.setAttribute('aria-label', aria.uuidValue(this.aliases.column(this.column.name)));
+ 
+     c.appendChild(select);
+     c.appendChild(input);
+@@ -403,7 +407,7 @@ export class FilterPanelField {
+     input.placeholder = this.messages.filters.placeholders.intervalFilter;
+     input.setAttribute(
+       'aria-label',
+-      this.messages.filters.ariaLabels.intervalFilter(this.column.name),
++      this.messages.filters.ariaLabels.intervalFilter(this.aliases.column(this.column.name)),
+     );
+ 
+     c.appendChild(input);
+diff --git a/src/index.ts b/src/index.ts
+index f6498f1f..e179dad5 100644
+--- a/src/index.ts
++++ b/src/index.ts
+@@ -26,6 +26,7 @@ export const VERSION: string = __DT_VERSION__;
+ // into a single `createDataTable()` call.
+ export { createDataTable } from './DataTable';
+ export type { DataTable, CreateDataTableOptions, ColorScheme } from './DataTable';
++export type { AliasValue, ValueAlias, DataTableAliases } from './core/Aliases';
+ export type { TableEvents, TableEventName, TableErrorSource } from './core/TableEvents';
+ 
+ // ---- Typed error model ----
+diff --git a/src/table/Cell.ts b/src/table/Cell.ts
+index b05a1190..aedcd1dc 100644
+--- a/src/table/Cell.ts
++++ b/src/table/Cell.ts
+@@ -5,6 +5,7 @@
+  * cell element updates with appropriate CSS classes.
+  */
+ 
++import { AliasResolver } from '../core/Aliases';
+ import type { ColumnSchema, DataType } from '../core/types';
+ import {
+   intervalFieldsToString,
+@@ -93,6 +94,8 @@ export interface CellOptions {
+   classPrefix?: string;
+   /** Locale for number/date formatting (default: undefined = user's locale) */
+   locale?: string;
++  /** Shared presentation-only alias resolver. */
++  aliases?: AliasResolver | undefined;
+ }
+ 
+ /**
+@@ -113,10 +116,12 @@ export interface CellOptions {
+ export class CellRenderer {
+   private readonly classPrefix: string;
+   private readonly locale: string | undefined;
++  private readonly aliases: AliasResolver;
+ 
+   constructor(options: CellOptions = {}) {
+     this.classPrefix = options.classPrefix ?? 'dt';
+     this.locale = options.locale;
++    this.aliases = options.aliases ?? new AliasResolver();
+   }
+ 
+   /**
+@@ -131,12 +136,16 @@ export class CellRenderer {
+     const numberClass = `${this.classPrefix}-cell--number`;
+ 
+     if (value === null || value === undefined) {
+-      cellEl.textContent = 'null';
+-      cellEl.title = ''; // No tooltip for null values
++      const label = schema ? this.aliases.value(schema.name, value, schema.type) : undefined;
++      cellEl.textContent = label ?? 'null';
++      cellEl.title = label ?? ''; // Preserve the no-tooltip default for unaliased nulls
+       cellEl.classList.add(nullClass);
+       cellEl.classList.remove(numberClass);
+     } else {
+-      const formatted = this.formatValue(value, schema?.type, schema?.originalType);
++      const formatted = schema
++        ? (this.aliases.value(schema.name, value, schema.type) ??
++          this.formatValue(value, schema.type, schema.originalType))
++        : this.formatValue(value);
+       cellEl.textContent = formatted;
+       cellEl.title = formatted; // Tooltip shows full text on hover
+       cellEl.classList.remove(nullClass);
+diff --git a/src/table/ColumnHeader.ts b/src/table/ColumnHeader.ts
+index 7bc3db87..7b689bc0 100644
+--- a/src/table/ColumnHeader.ts
++++ b/src/table/ColumnHeader.ts
+@@ -20,6 +20,7 @@
+ 
+ import type { AnnotationStore } from '../annotations/AnnotationStore';
+ import type { StateActions } from '../core/Actions';
++import { AliasResolver } from '../core/Aliases';
+ import type { TableState } from '../core/State';
+ import { type Strings, defaultStrings } from '../core/Strings';
+ import type { ColumnSchema, ColumnHeaderTooltipContent } from '../core/types';
+@@ -78,6 +79,8 @@ export interface ColumnHeaderOptions {
+   colIndex?: number | undefined;
+   /** Resolved i18n strings. Defaults to English. */
+   messages?: Strings | undefined;
++  /** Shared presentation-only alias resolver. */
++  aliases?: AliasResolver | undefined;
+   /** Shared annotation store for column-scope annotation classes + popover. */
+   annotations?: AnnotationStore | undefined;
+   /**
+@@ -166,6 +169,7 @@ export class ColumnHeader {
+   private readonly classPrefix: string;
+   private readonly options: ColumnHeaderOptions;
+   private readonly messages: Strings;
++  private readonly aliases: AliasResolver;
+ 
+   constructor(
+     private column: ColumnSchema,
+@@ -176,6 +180,7 @@ export class ColumnHeader {
+     this.options = options;
+     this.classPrefix = options.classPrefix ?? 'dt';
+     this.messages = options.messages ?? defaultStrings;
++    this.aliases = options.aliases ?? new AliasResolver();
+     this.element = this.createElement();
+     this.statsEl = this.element.querySelector(`.${this.classPrefix}-col-stats`)!;
+     // From the store's O(1) summary: a header built later, for a column
+@@ -196,6 +201,7 @@ export class ColumnHeader {
+    * Create the column header element structure
+    */
+   private createElement(): HTMLElement {
++    const label = this.aliases.column(this.column.name);
+     const el = document.createElement('div');
+     el.className = `${this.classPrefix}-col-header`;
+     if (this.column.isDerived) {
+@@ -249,7 +255,7 @@ export class ColumnHeader {
+     // keyboard users can reach the popover.
+     const nameEl = document.createElement('div');
+     nameEl.className = `${this.classPrefix}-col-name`;
+-    nameEl.textContent = this.column.name;
++    nameEl.textContent = label;
+     this.nameEl = nameEl;
+     if (this.column.isDerived) {
+       nameEl.classList.add(`${this.classPrefix}-col-name--derived`);
+@@ -315,12 +321,13 @@ export class ColumnHeader {
+     if (this.controls) return;
+     const p = this.classPrefix;
+     const a = this.messages.a11y;
++    const label = this.aliases.column(this.column.name);
+ 
+     // Pin button (thumbtack icon)
+     const pinBtn = document.createElement('button');
+     pinBtn.className = `${p}-col-action-btn ${p}-col-pin-btn`;
+     pinBtn.setAttribute('type', 'button');
+-    pinBtn.setAttribute('aria-label', a.pinButtonLabel(this.column.name));
++    pinBtn.setAttribute('aria-label', a.pinButtonLabel(label));
+     pinBtn.setAttribute('title', a.pinColumnTitle);
+     pinBtn.innerHTML = `
+       <svg viewBox="0 0 16 16" aria-hidden="true">
+@@ -333,7 +340,7 @@ export class ColumnHeader {
+     const hideBtn = document.createElement('button');
+     hideBtn.className = `${p}-col-action-btn ${p}-col-hide-btn`;
+     hideBtn.setAttribute('type', 'button');
+-    hideBtn.setAttribute('aria-label', a.hideButtonLabel(this.column.name));
++    hideBtn.setAttribute('aria-label', a.hideButtonLabel(label));
+     hideBtn.setAttribute('title', a.hideColumnTitle);
+     hideBtn.innerHTML = `
+       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" aria-hidden="true">
+@@ -347,7 +354,7 @@ export class ColumnHeader {
+     const filterBtn = document.createElement('button');
+     filterBtn.className = `${p}-col-action-btn ${p}-col-filter-btn`;
+     filterBtn.setAttribute('type', 'button');
+-    filterBtn.setAttribute('aria-label', a.filterButtonLabel(this.column.name));
++    filterBtn.setAttribute('aria-label', a.filterButtonLabel(label));
+     filterBtn.setAttribute('title', a.filterColumnTitle);
+     filterBtn.innerHTML = `
+       <svg viewBox="0 0 16 16" aria-hidden="true">
+@@ -364,10 +371,7 @@ export class ColumnHeader {
+       extractBtn = document.createElement('button');
+       extractBtn.className = `${p}-col-action-btn ${p}-col-extract-btn`;
+       extractBtn.setAttribute('type', 'button');
+-      extractBtn.setAttribute(
+-        'aria-label',
+-        this.messages.values.extractButtonLabel(this.column.name),
+-      );
++      extractBtn.setAttribute('aria-label', this.messages.values.extractButtonLabel(label));
+       extractBtn.setAttribute('title', this.messages.values.extractButtonTitle);
+       extractBtn.setAttribute('aria-haspopup', 'dialog');
+       extractBtn.setAttribute('aria-expanded', 'false');
+@@ -382,7 +386,7 @@ export class ColumnHeader {
+     const sortBtn = document.createElement('button');
+     sortBtn.className = `${p}-col-sort-btn`;
+     sortBtn.setAttribute('type', 'button');
+-    sortBtn.setAttribute('aria-label', a.sortButtonLabel(this.column.name));
++    sortBtn.setAttribute('aria-label', a.sortButtonLabel(label));
+     sortBtn.setAttribute('title', a.sortAscendingTitle);
+     sortBtn.innerHTML = `
+       <svg viewBox="0 0 10 14" aria-hidden="true">
+@@ -401,7 +405,7 @@ export class ColumnHeader {
+     const dragHandle = document.createElement('button');
+     dragHandle.className = `${p}-col-drag-handle`;
+     dragHandle.setAttribute('type', 'button');
+-    dragHandle.setAttribute('aria-label', a.dragHandleLabel(this.column.name));
++    dragHandle.setAttribute('aria-label', a.dragHandleLabel(label));
+     dragHandle.setAttribute('title', a.dragHandleTitle);
+     dragHandle.innerHTML = `
+       <svg viewBox="0 0 16 16" aria-hidden="true">
+@@ -447,7 +451,10 @@ export class ColumnHeader {
+           // Announced once at drag end, not on every mousemove — a live
+           // region fired at pointer rate is noise, not information.
+           this.options.announce?.(
+-            this.messages.a11y.columnWidthAnnouncement(this.column.name, this.getWidth()),
++            this.messages.a11y.columnWidthAnnouncement(
++              this.aliases.column(this.column.name),
++              this.getWidth(),
++            ),
+           );
+           this.releaseResizeHold?.();
+           this.releaseResizeHold = null;
+@@ -848,8 +855,8 @@ export class ColumnHeader {
+     controls.pinButton.setAttribute(
+       'aria-label',
+       isPinned
+-        ? this.messages.a11y.unpinButtonLabel(this.column.name)
+-        : this.messages.a11y.pinButtonLabel(this.column.name),
++        ? this.messages.a11y.unpinButtonLabel(this.aliases.column(this.column.name))
++        : this.messages.a11y.pinButtonLabel(this.aliases.column(this.column.name)),
+     );
+ 
+     // Disable drag-to-reorder for pinned columns
+@@ -905,7 +912,7 @@ export class ColumnHeader {
+   private buildAriaLabel(): string {
+     const a = this.messages.a11y;
+     const parts: string[] = [
+-      `${this.column.name}, ${columnTypeSpoken(this.column, this.messages)}`,
++      `${this.aliases.column(this.column.name)}, ${columnTypeSpoken(this.column, this.messages)}`,
+     ];
+ 
+     const sortColumns = this.state.sortColumns.get();
+diff --git a/src/table/HiddenColumnsGutter.ts b/src/table/HiddenColumnsGutter.ts
+index f6944832..2f0f15e7 100644
+--- a/src/table/HiddenColumnsGutter.ts
++++ b/src/table/HiddenColumnsGutter.ts
+@@ -7,6 +7,7 @@
+ 
+ import type { StateActions } from '../core/Actions';
+ import { ChipStrip, nearestSurvivingKey } from '../core/ChipStrip';
++import { AliasResolver } from '../core/Aliases';
+ import { RovingTabindex } from '../core/RovingTabindex';
+ import type { TableState } from '../core/State';
+ import { type Strings, defaultStrings } from '../core/Strings';
+@@ -19,6 +20,7 @@ export interface HiddenColumnsGutterOptions {
+   classPrefix?: string | undefined;
+   /** Resolved i18n strings. Defaults to English. */
+   messages?: Strings | undefined;
++  aliases?: AliasResolver | undefined;
+ }
+ 
+ /**
+@@ -50,6 +52,7 @@ export class HiddenColumnsGutter {
+   private destroyed = false;
+   private readonly prefix: string;
+   private readonly messages: Strings;
++  private readonly aliases: AliasResolver;
+ 
+   constructor(
+     private state: TableState,
+@@ -58,6 +61,7 @@ export class HiddenColumnsGutter {
+   ) {
+     this.prefix = options.classPrefix ?? 'dt';
+     this.messages = options.messages ?? defaultStrings;
++    this.aliases = options.aliases ?? new AliasResolver();
+     this.element = this.createElement();
+     this.chipsContainer = this.element.querySelector(`.${this.prefix}-hidden-chips`)!;
+     this.showAllButton = this.element.querySelector(`.${this.prefix}-hidden-show-all`)!;
+@@ -216,17 +220,18 @@ export class HiddenColumnsGutter {
+   }
+ 
+   private createChip(colName: string): HTMLElement {
++    const label = this.aliases.column(colName);
+     const chip = document.createElement('span');
+     chip.className = `${this.prefix}-hidden-chip`;
+-    chip.title = this.messages.a11y.showColumn(colName);
++    chip.title = this.messages.a11y.showColumn(label);
+ 
+     const nameEl = document.createElement('span');
+     nameEl.className = `${this.prefix}-hidden-chip-name`;
+-    nameEl.textContent = colName;
++    nameEl.textContent = label;
+ 
+     const restoreBtn = document.createElement('button');
+     restoreBtn.className = `${this.prefix}-hidden-chip-restore`;
+-    restoreBtn.setAttribute('aria-label', this.messages.a11y.showColumn(colName));
++    restoreBtn.setAttribute('aria-label', this.messages.a11y.showColumn(label));
+     restoreBtn.type = 'button';
+     // Eye icon (without slash) — inverse of the hide button's eye-slash icon
+     restoreBtn.innerHTML = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" aria-hidden="true">
+diff --git a/src/table/KeyboardNavigator.ts b/src/table/KeyboardNavigator.ts
+index 418ea827..ce6f3a4b 100644
+--- a/src/table/KeyboardNavigator.ts
++++ b/src/table/KeyboardNavigator.ts
+@@ -40,6 +40,7 @@
+  */
+ 
+ import type { StateActions } from '../core/Actions';
++import { AliasResolver } from '../core/Aliases';
+ import { isAnyModalOpen } from '../core/ModalHost';
+ import type { TableState } from '../core/State';
+ import { type Strings, defaultStrings } from '../core/Strings';
+@@ -85,6 +86,8 @@ function annotationDirection(e: KeyboardEvent): 'next' | 'previous' | null {
+ 
+ /** Construction options for {@link KeyboardNavigator}. */
+ export interface KeyboardNavigatorOptions {
++  /** Shared presentation-only alias resolver. */
++  aliases?: AliasResolver | undefined;
+   /**
+    * Element the keydown listener is attached to. Bubble-phase, so it sees
+    * keystrokes from every descendant of the table root.
+@@ -183,6 +186,7 @@ export class KeyboardNavigator {
+   private readonly revealControl: ((control: HTMLElement) => void) | undefined;
+   private readonly openCellInspector:
+     ((cell: { row: number; column: string }) => boolean) | undefined;
++  private readonly aliases: AliasResolver;
+   private readonly getBridge: (() => WorkerBridge | undefined) | undefined;
+   private readonly announceMessage: ((message: string) => void) | undefined;
+   private readonly messages: Strings;
+@@ -217,6 +221,7 @@ export class KeyboardNavigator {
+       opts.revealColumn ?? ((column) => revealColumnIn(this.bodyScroll, this.state, column));
+     this.revealControl = opts.revealControl;
+     this.openCellInspector = opts.openCellInspector;
++    this.aliases = opts.aliases ?? new AliasResolver();
+     this.getBridge = opts.getBridge;
+     this.announceMessage = opts.announce;
+     this.messages = opts.messages ?? defaultStrings;
+@@ -717,7 +722,7 @@ export class KeyboardNavigator {
+     this.layout = { column };
+     this.syncLayoutAffordance();
+     this.scrollFocusedCellIntoView(HEADER_ROW_INDEX, column);
+-    this.announce(this.messages.a11y.columnLayoutModeEntered(column));
++    this.announce(this.messages.a11y.columnLayoutModeEntered(this.aliases.column(column)));
+     return true;
+   }
+ 
+@@ -734,10 +739,10 @@ export class KeyboardNavigator {
+     const a = this.messages.a11y;
+     if (mode === 'cancel') {
+       this.actions.cancelColumnLayoutChange();
+-      this.announce(a.columnLayoutCancelled(layout.column));
++      this.announce(a.columnLayoutCancelled(this.aliases.column(layout.column)));
+     } else {
+       this.actions.endColumnLayoutChange();
+-      this.announce(a.columnLayoutCommitted(layout.column));
++      this.announce(a.columnLayoutCommitted(this.aliases.column(layout.column)));
+     }
+     // After the restore, not before: cancelling rewrites the column order.
+     this.syncLayoutAffordance();
+@@ -844,7 +849,7 @@ export class KeyboardNavigator {
+         // The column's own default now: 168 px for a nested or JSON column.
+         this.announce(
+           this.messages.a11y.columnWidthAnnouncement(
+-            layout.column,
++            this.aliases.column(layout.column),
+             getColumnLayout(this.state).widthOf(layout.column),
+           ),
+         );
+@@ -868,12 +873,13 @@ export class KeyboardNavigator {
+     // A column at the right edge grows out of the view otherwise, taking the
+     // outline that marks the gesture with it.
+     this.scrollFocusedCellIntoView(HEADER_ROW_INDEX, column);
++    const label = this.aliases.column(column);
+     this.announce(
+       applied <= min
+-        ? a.columnWidthAtMinimum(column, applied)
++        ? a.columnWidthAtMinimum(label, applied)
+         : applied >= max
+-          ? a.columnWidthAtMaximum(column, applied)
+-          : a.columnWidthAnnouncement(column, applied),
++          ? a.columnWidthAtMaximum(label, applied)
++          : a.columnWidthAnnouncement(label, applied),
+     );
+   }
+ 
+@@ -919,7 +925,7 @@ export class KeyboardNavigator {
+     const a = this.messages.a11y;
+     const pinned = this.state.pinnedColumns.get();
+     if (pinned.includes(layout.column)) {
+-      this.announce(a.columnMoveBlockedPinned(layout.column));
++      this.announce(a.columnMoveBlockedPinned(this.aliases.column(layout.column)));
+       return;
+     }
+ 
+@@ -940,7 +946,9 @@ export class KeyboardNavigator {
+     // the header, which a render may have rebuilt.
+     this.syncLayoutAffordance();
+     this.scrollFocusedCellIntoView(HEADER_ROW_INDEX, layout.column);
+-    this.announce(a.columnMovedAnnouncement(layout.column, target + 1, next.length));
++    this.announce(
++      a.columnMovedAnnouncement(this.aliases.column(layout.column), target + 1, next.length),
++    );
+   }
+ 
+   /** Put the layout outline on the gesture's header, and nowhere else. */
+diff --git a/src/table/TableBody.ts b/src/table/TableBody.ts
+index d3b1b6e1..2cd7f49a 100644
+--- a/src/table/TableBody.ts
++++ b/src/table/TableBody.ts
+@@ -10,6 +10,7 @@ import type { StateActions } from '../core/Actions';
+ import { nextTask } from '../core/nextTask';
+ import { setOwnProperty } from '../core/ownProperty';
+ import type { Signal } from '../core/Signal';
++import type { AliasResolver } from '../core/Aliases';
+ import type { TableState } from '../core/State';
+ import { type Strings, defaultStrings } from '../core/Strings';
+ import { ROWID_COLUMN, type ColumnSchema, type SortColumn, type Filter } from '../core/types';
+@@ -107,6 +108,8 @@ export interface TableBodyOptions {
+   annotationPopover?: AnnotationPopover | undefined;
+   /** Resolved i18n strings (used for the placeholder-row label). Defaults to English. */
+   messages?: Strings | undefined;
++  /** Shared presentation-only alias resolver. */
++  aliases?: AliasResolver | undefined;
+   /**
+    * Rows fetched per block. Default: 128. Clamped to [16, 1024].
+    *
+@@ -479,7 +482,10 @@ export class TableBody {
+       Math.ceil((options.rowCacheRows ?? 2048) / this.fetchBlockSize) * this.fetchBlockSize,
+     );
+     this.prefetchEnabled = options.prefetch ?? true;
+-    this.cellRenderer = new CellRenderer({ classPrefix: this.classPrefix });
++    this.cellRenderer = new CellRenderer({
++      classPrefix: this.classPrefix,
++      aliases: options.aliases,
++    });
+ 
+     // Create virtual scroller
+     this.virtualScroller = new VirtualScroller(container, {
+diff --git a/src/table/TableContainer.ts b/src/table/TableContainer.ts
+index 954ff6f5..3098e633 100644
+--- a/src/table/TableContainer.ts
++++ b/src/table/TableContainer.ts
+@@ -35,6 +35,7 @@ import type { AnnotationNavigator } from '../annotations/AnnotationNavigator';
+ import type { AnnotationStore } from '../annotations/AnnotationStore';
+ import type { NestedFieldColumnOptions, StateActions } from '../core/Actions';
+ import { ConfigurationError, DataTableError, QueryError } from '../core/errors';
++import { AliasResolver } from '../core/Aliases';
+ import { resolveInstanceId } from '../core/instanceId';
+ import { isAnyModalOpen } from '../core/ModalHost';
+ import { effectiveRowCount, type TableState } from '../core/State';
+@@ -125,6 +126,8 @@ export interface TableContainerOptions {
+   colorScheme?: ColorScheme | undefined;
+   /** Resolved i18n strings. Defaults to English. */
+   messages?: Strings | undefined;
++  /** Shared presentation-only alias resolver. */
++  aliases?: AliasResolver | undefined;
+   /**
+    * Shared annotation store. When provided, `TableBody` and every
+    * `ColumnHeader` render its annotations inline (tint + popover), and the
+@@ -493,7 +496,10 @@ export class TableContainer {
+   // `Required<>`, which keeps the explicit `| undefined` written on the option:
+   // the constructor always overwrites it with `resolveInstanceId`, so every
+   // reader — id builders, `getInstanceId` — gets a `string`.
+-  private readonly resolvedOptions: Required<TableContainerOptions> & { instanceId: string };
++  private readonly resolvedOptions: Required<TableContainerOptions> & {
++    instanceId: string;
++    aliases: AliasResolver;
++  };
+   private readonly messages: Strings;
+ 
+   constructor(
+@@ -538,6 +544,7 @@ export class TableContainer {
+       // deliberately — this is the only value the field can ever hold, which is
+       // what lets everything downstream read it back as a plain `string`.
+       instanceId: resolveInstanceId(options.instanceId),
++      aliases: options.aliases ?? new AliasResolver(),
+     };
+     // Spread above writes `undefined` over the defaults if the caller passed
+     // `messages: undefined` / `colorScheme: undefined` explicitly. Restore.
+@@ -601,6 +608,7 @@ export class TableContainer {
+           ? () => void this.handlePresetsClick()
+           : undefined,
+         messages: this.messages,
++        aliases: this.resolvedOptions.aliases,
+       });
+       this.element.appendChild(this.filterBar.getElement());
+     }
+@@ -633,6 +641,7 @@ export class TableContainer {
+       this.hiddenColumnsGutter = new HiddenColumnsGutter(this.state, this.actions, {
+         classPrefix: this.resolvedOptions.classPrefix,
+         messages: this.messages,
++        aliases: this.resolvedOptions.aliases,
+       });
+       this.element.appendChild(this.hiddenColumnsGutter.getElement());
+     }
+@@ -742,6 +751,7 @@ export class TableContainer {
+           this.resolvedOptions.annotationNavigation !== false
+             ? (direction) => this.navigateAnnotations(direction)
+             : undefined,
++        aliases: this.resolvedOptions.aliases,
+       });
+     }
+     if (this.actions && this.bridge) {
+@@ -1379,7 +1389,8 @@ export class TableContainer {
+ 
+     if (sortColumns.length > 0) {
+       const sortDescriptions = sortColumns.map(
+-        (s) => `${s.column} ${s.direction === 'asc' ? a.ascending : a.descending}`,
++        (s) =>
++          `${this.resolvedOptions.aliases.column(s.column)} ${s.direction === 'asc' ? a.ascending : a.descending}`,
+       );
+       parts.push(a.sortedBy(sortDescriptions));
+     }
+@@ -1401,7 +1412,11 @@ export class TableContainer {
+     const position = visible.indexOf(movedColumn);
+     if (position === -1) return;
+     this.announce(
+-      this.messages.a11y.columnMovedAnnouncement(movedColumn, position + 1, visible.length),
++      this.messages.a11y.columnMovedAnnouncement(
++        this.resolvedOptions.aliases.column(movedColumn),
++        position + 1,
++        visible.length,
++      ),
+     );
+   }
+ 
+@@ -1901,6 +1916,7 @@ export class TableContainer {
+               : undefined,
+           colIndex,
+           messages: this.messages,
++          aliases: this.resolvedOptions.aliases,
+           showDerivedEditIcon: this.resolvedOptions.showDerivedColumnEditIcon !== false,
+           annotations: this.resolvedOptions.annotations,
+           annotationSync: this.annotationOverlay ? 'owner' : undefined,
+@@ -2163,7 +2179,7 @@ export class TableContainer {
+             // markup. Reachable via /advanced when TableContainer is mounted
+             // without `actions`.
+             const nameEl = document.createElement('strong');
+-            nameEl.textContent = colSchema.name;
++            nameEl.textContent = this.resolvedOptions.aliases.column(colSchema.name);
+             const typeEl = document.createElement('small');
+             typeEl.textContent = columnTypeLabel(colSchema);
+             colEl.replaceChildren(nameEl, document.createElement('br'), typeEl);
+@@ -2205,6 +2221,7 @@ export class TableContainer {
+               annotationSync: this.annotationOverlay ? 'owner' : undefined,
+               annotationPopover: this.resolvedOptions.annotationPopover,
+               messages: this.messages,
++              aliases: this.resolvedOptions.aliases,
+               fetchBlockSize: this.resolvedOptions.fetchBlockSize,
+               rowCacheRows: this.resolvedOptions.rowCacheRows,
+               prefetch: this.resolvedOptions.prefetch,
+@@ -2504,6 +2521,7 @@ export class TableContainer {
+         colorSchemeSource: this.element,
+         messages: this.messages,
+         onOpenChange: this.holdWhileOpen(),
++        aliases: this.resolvedOptions.aliases,
+       });
+       this.element.appendChild(this.filterPanel.getElement());
+     }
+@@ -2536,6 +2554,7 @@ export class TableContainer {
+           colorSchemeSource: this.element,
+           messages: this.messages,
+           onOpenChange: this.holdWhileOpen(),
++          aliases: this.resolvedOptions.aliases,
+         });
+         this.element.appendChild(this.derivedEditPanel.getElement());
+       }
+diff --git a/src/visualizations/BaseStatsPanel.ts b/src/visualizations/BaseStatsPanel.ts
+index ac9db52c..c8d8289e 100644
+--- a/src/visualizations/BaseStatsPanel.ts
++++ b/src/visualizations/BaseStatsPanel.ts
+@@ -60,6 +60,7 @@
+  * @see StatsPanelCoordinator for the filter-broadcast plumbing.
+  */
+ 
++import type { AliasResolver } from '../core/Aliases';
+ import type { DataTableError } from '../core/errors';
+ import type { Strings } from '../core/Strings';
+ import type { ColumnSchema, Filter } from '../core/types';
+@@ -98,6 +99,8 @@ export interface StatsPanelOptions {
+   filters: Filter[];
+   /** Resolved i18n strings; use these to localize any text the panel renders. */
+   messages: Strings;
++  /** Shared presentation-only alias resolver. */
++  aliases?: AliasResolver;
+   /**
+    * Called when the panel fails to fetch, render, or update. The facade
+    * routes these to the `error` event with `source: 'statsPanel'`.
+diff --git a/src/visualizations/BaseVisualization.ts b/src/visualizations/BaseVisualization.ts
+index 2c518ae2..7f6d14cb 100644
+--- a/src/visualizations/BaseVisualization.ts
++++ b/src/visualizations/BaseVisualization.ts
+@@ -47,6 +47,7 @@
+  * @see VisualizationRegistry for registering custom subclasses.
+  */
+ 
++import type { AliasResolver } from '../core/Aliases';
+ import { DataTableError, ExportError, QueryError } from '../core/errors';
+ import { type Strings, defaultStrings } from '../core/Strings';
+ import type { ColumnSchema, Filter } from '../core/types';
+@@ -122,6 +123,8 @@ export interface VisualizationOptions {
+   onDefaultStatsChange?: (stats: ColumnStatsData) => void;
+   /** Resolved i18n strings for viz-emitted stats text. Defaults to English. */
+   messages?: Strings;
++  /** Shared presentation-only alias resolver. */
++  aliases?: AliasResolver;
+   /** Maximum number of histogram bins (default: 15) */
+   maxBins?: number;
+   /** Callback when brush is committed (column name passed) */
+diff --git a/src/visualizations/valuecounts/ValueCounts.ts b/src/visualizations/valuecounts/ValueCounts.ts
+index a1ed3e04..a55951b6 100644
+--- a/src/visualizations/valuecounts/ValueCounts.ts
++++ b/src/visualizations/valuecounts/ValueCounts.ts
+@@ -1058,13 +1058,13 @@ export class ValueCounts extends BaseVisualization {
+     // Determine label text
+     let labelText: string;
+     if (segment.isNull) {
+-      labelText = '\u2205'; // Empty set symbol for null
++      labelText = this.options.aliases?.value(this.column.name, null) ?? '\u2205';
+     } else if (segment.isAllUnique) {
+       labelText = this.statsMessages.allUniqueCategory(segment.count);
+     } else if (segment.isOther) {
+       labelText = this.statsMessages.otherSegmentLabel;
+     } else {
+-      labelText = segment.value;
++      labelText = this.displaySegmentValue(segment.value);
+     }
+ 
+     // Truncate if needed
+@@ -1238,13 +1238,27 @@ export class ValueCounts extends BaseVisualization {
+   private formatSegmentLabel(idx: number): string {
+     const seg = this.backgroundSegments[idx] ?? this.renderSegments[idx];
+     if (!seg) return '';
+-    if (seg.isNull) return this.statsMessages.nullBinLabel;
++    if (seg.isNull) {
++      return escapeHTML(
++        this.options.aliases?.value(this.column.name, null) ?? this.statsMessages.nullBinLabel,
++      );
++    }
+     if (seg.isAllUnique) return this.statsMessages.allUniqueCategory(seg.count);
+     if (seg.isOther) return this.statsMessages.otherCategory(seg.otherCount ?? 0);
+-    const raw = seg.value.length > 30 ? seg.value.substring(0, 27) + '...' : seg.value;
++    const displayed = this.displaySegmentValue(seg.value);
++    const raw = displayed.length > 30 ? displayed.substring(0, 27) + '...' : displayed;
+     return escapeHTML(raw);
+   }
+ 
++  private displaySegmentValue(value: string): string {
++    let typed: unknown = value;
++    if (this.column.type === 'boolean') {
++      if (value.toLowerCase() === 'true') typed = true;
++      else if (value.toLowerCase() === 'false') typed = false;
++    }
++    return this.options.aliases?.value(this.column.name, typed) ?? value;
++  }
++
+   /** Sum unfiltered (background-first) counts over segment indices. */
+   private sumBgCounts(indices: Iterable<number>): number {
+     let count = 0;
+diff --git a/tests/nih-merge/aliases.test.ts b/tests/nih-merge/aliases.test.ts
+new file mode 100644
+index 00000000..f817e2e5
+--- /dev/null
++++ b/tests/nih-merge/aliases.test.ts
+@@ -0,0 +1,189 @@
++/** @vitest-environment jsdom */
++import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
++import { AliasResolver } from '../../src/core/Aliases';
++import { CellRenderer } from '../../src/table/Cell';
++import { formatFilter } from '../../src/filters/FilterChip';
++import { exportFromState } from '../../src/export/CSVExport';
++import { exportJSONFromState } from '../../src/export/JSONExport';
++import { createDataTable, type DataTable, type DataTableAliases } from '../../src/index';
++import { createNodeDuckDB, type NodeDuckDBHarness } from '../helpers/duckdbNode';
++import { makeNodeBridge } from '../helpers/nodeBridge';
++
++const aliases: DataTableAliases = {
++  columns: { grp: 'Study Group', score: 'Score' },
++  values: {
++    grp: [
++      { value: 'A', label: '<b>Group A</b>' },
++      { value: 'B', label: 'Group B' },
++    ],
++  },
++};
++
++describe('NIH-MERGE presentation aliases', () => {
++  it('distinguishes scalar types, handles dates and nulls, and preserves empty labels', () => {
++    const date = new Date('2020-01-01T00:00:00Z');
++    const resolver = new AliasResolver({
++      values: {
++        x: [
++          { value: '1', label: 'text' },
++          { value: 1, label: 'number' },
++          { value: 1n, label: 'bigint' },
++          { value: true, label: 'boolean' },
++          { value: null, label: 'missing' },
++          { value: date, label: 'date' },
++          { value: '', label: '' },
++        ],
++      },
++    });
++    for (const [value, label] of [
++      ['1', 'text'],
++      [1, 'number'],
++      [1n, 'bigint'],
++      [true, 'boolean'],
++      [null, 'missing'],
++      [undefined, 'missing'],
++      [date.getTime(), 'date'],
++      ['', ''],
++    ]) {
++      expect(resolver.value('x', value)).toBe(label);
++    }
++    expect(resolver.value('x', '2020-01-01', 'date')).toBe('date');
++    expect(resolver.column('unmapped')).toBe('unmapped');
++    expect(resolver.value('x', 'unmapped')).toBeUndefined();
++    expect(
++      () =>
++        new AliasResolver({
++          values: {
++            x: [
++              { value: 1, label: 'one' },
++              { value: 1, label: 'duplicate' },
++            ],
++          },
++        }),
++    ).toThrow('Duplicate value alias');
++  });
++
++  it('renders labels as literal text, clears recycled cells, and keeps chips on raw filters', () => {
++    const resolver = new AliasResolver(aliases);
++    const renderer = new CellRenderer({ aliases: resolver });
++    const cell = document.createElement('div');
++    const schema = { name: 'grp', type: 'string', originalType: 'VARCHAR' } as const;
++    renderer.render(cell, 'A', schema);
++    expect(cell.textContent).toBe('<b>Group A</b>');
++    expect(cell.querySelector('b')).toBeNull();
++    renderer.render(cell, 'unmapped', schema);
++    expect(cell.textContent).toBe('unmapped');
++    const filter = { type: 'point', column: 'grp', value: 'A' } as const;
++    expect(formatFilter(filter, undefined, {}, resolver)).toEqual({
++      column: 'Study Group',
++      description: '= <b>Group A</b>',
++    });
++    expect(filter).toEqual({ type: 'point', column: 'grp', value: 'A' });
++  });
++});
++
++let harness: NodeDuckDBHarness;
++const tables: DataTable[] = [];
++const originalHeight = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'clientHeight');
++beforeAll(async () => {
++  vi.stubGlobal(
++    'ResizeObserver',
++    class {
++      observe() {}
++      unobserve() {}
++      disconnect() {}
++    },
++  );
++  Object.defineProperty(HTMLElement.prototype, 'clientHeight', {
++    configurable: true,
++    get: () => 500,
++  });
++  harness = await createNodeDuckDB();
++}, 30_000);
++afterEach(async () => {
++  for (const table of tables.splice(0)) await table.destroy();
++  document.body.replaceChildren();
++});
++afterAll(async () => {
++  await harness?.cleanup();
++  if (originalHeight) Object.defineProperty(HTMLElement.prototype, 'clientHeight', originalHeight);
++  else Reflect.deleteProperty(HTMLElement.prototype, 'clientHeight');
++  vi.unstubAllGlobals();
++});
++
++it('threads aliases through the facade and recreated headers/cells, retaining raw filtering, sorting and exports', async () => {
++  const host = document.createElement('div');
++  document.body.append(host);
++  const bridge = Object.assign(makeNodeBridge(harness.conn, harness.db), {
++    initialize: async () => {},
++    isInitialized: () => true,
++    clearQueryCache: () => {},
++    terminate: () => {},
++    dropTable: async (name: string) => {
++      await harness.conn.query(`DROP TABLE IF EXISTS "${name}"`);
++    },
++  });
++  const table = await createDataTable({
++    container: host,
++    bridge,
++    aliases,
++    source: 'grp,score\nA,2\nB,1\nA,3',
++    sourceFormat: 'csv',
++    tableName: 'nih_aliases',
++    persistence: false,
++    presets: false,
++    undoRedo: false,
++    expressionFilter: false,
++    exportDialog: false,
++  });
++  tables.push(table);
++  expect(host.querySelector('[data-column="grp"] .dt-col-name')?.textContent).toBe('Study Group');
++  await vi.waitFor(() =>
++    expect(host.querySelector('.dt-cell')?.textContent).toBe('<b>Group A</b>'),
++  );
++  const grpHeader = () =>
++    table.container.getColumnHeaders().find((header) => header.getColumn().name === 'grp')!;
++  expect(
++    grpHeader()
++      .getControls()
++      .some((el) => el.getAttribute('aria-label')?.includes('Study Group')),
++  ).toBe(true);
++  const viz = table.container
++    .getColumnHeaders()
++    .find((header) => header.getColumn().name === 'grp')!;
++  expect(viz.getElement().getAttribute('data-column')).toBe('grp');
++  table.actions.hideColumn('grp');
++  expect([...host.querySelectorAll('.dt-hidden-chip-name')].map((el) => el.textContent)).toContain(
++    'Study Group',
++  );
++  table.actions.showColumn('grp');
++  expect(grpHeader().getElement().querySelector('.dt-col-name')?.textContent).toBe('Study Group');
++  const counted = new Promise<void>((resolve) => {
++    const off = table.on('filterChange', () => {
++      off();
++      resolve();
++    });
++  });
++  table.actions.addFilter({ type: 'point', column: 'grp', value: 'A' });
++  await counted;
++  expect(table.state.filteredRows.get()).toBe(2);
++  expect(host.querySelector('.dt-filter-chip')?.textContent).toContain('<b>Group A</b>');
++  expect(host.querySelector('.dt-filter-chip b')).toBeNull();
++  table.actions.toggleSort('score');
++  const csv = await exportFromState(table.state, bridge, {
++    scope: 'filtered',
++    columns: ['grp', 'score'],
++    includeHeaders: true,
++  });
++  expect(csv.trim().split('\n')).toEqual(['grp,score', 'A,2', 'A,3']);
++  const json = await exportJSONFromState(table.state, bridge, {
++    scope: 'filtered',
++    columns: ['grp', 'score'],
++    format: 'array',
++  });
++  expect(JSON.parse(json)).toEqual([
++    { grp: 'A', score: 2 },
++    { grp: 'A', score: 3 },
++  ]);
++  expect(table.state.schema.get().map((col) => col.name)).toContain('grp');
++}, 30_000);

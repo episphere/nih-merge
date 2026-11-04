@@ -30,3 +30,11 @@ tools/data/input/geography
 epitracker/
 nih-merge/
 /src/data/less_old_data
+src/core/maps/state.test.ts
+src/core/characteristics/plot.test.ts
+src/core/demographics/plot.test.ts
+src/core/maps/mapPlot.test.ts
+src/core/maps/titles.test.ts
+docs/automatic-choropleth-domain-study.md
+src/core/maps/colorDomain.test.ts
+src/core/maps/query.test.ts
