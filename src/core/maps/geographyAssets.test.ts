@@ -40,7 +40,8 @@ describe('generated map geography', () => {
     const lowStates = geometries(low, 'states').map((item) => String(item.id)).sort();
     const mediumStates = geometries(medium, 'states').map((item) => String(item.id)).sort();
 
-    expect(lowCounties).toHaveLength(3143);
+    // NCHS geography combines Chugach and Copper River as historical Valdez-Cordova.
+    expect(lowCounties).toHaveLength(3142);
     expect(lowStates).toHaveLength(51);
     expect(mediumCounties).toEqual(lowCounties);
     expect(mediumStates).toEqual(lowStates);
@@ -57,6 +58,19 @@ describe('generated map geography', () => {
       '09009', '09011', '09013', '09015',
     ]);
   });
+
+  it.each(['low', 'medium', 'high'] as const)(
+    'retains historical Valdez-Cordova in the %s tier to match NCHS data',
+    (tier) => {
+      const topology = tier === 'high' ? readTopology('topology/high/02.topojson')
+        : tier === 'low' ? low : medium;
+      const countyIds = geometries(topology, 'counties').map((item) => String(item.id));
+
+      expect(countyIds).toContain('02261'); // Valdez-Cordova
+      expect(countyIds).not.toContain('02063'); // Chugach
+      expect(countyIds).not.toContain('02066'); // Copper River
+    },
+  );
 
   it('increases boundary detail at each Rhode Island tier', () => {
     const high = readTopology('topology/high/44.topojson');
@@ -86,6 +100,6 @@ describe('generated map geography', () => {
       counties: Record<string, string>;
     };
     expect(Object.keys(names.states)).toHaveLength(51);
-    expect(Object.keys(names.counties)).toHaveLength(3143);
+    expect(Object.keys(names.counties)).toHaveLength(3142);
   });
 });
