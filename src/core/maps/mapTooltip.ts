@@ -9,10 +9,15 @@ import { density1d } from 'fast-kde';
 import { createTooltip, type TooltipHandle } from '../shared/tooltip';
 import { fipsName } from '../shared/fips';
 import type { ColorConfig } from './query';
-import { MAPS_MEASURE_LABELS, type MapsMeasure } from './state';
+import { MAPS_MEASURE_LABELS, type CardState, type MapsMeasure } from './state';
+import { cardSource, valueField } from './scales';
+import { chrField } from './chrFields';
 import { PALETTE } from '../shared/visual';
 
 export interface CardInfo {
+  cardState?: CardState;
+  density?: CardDensityData;
+  colorConfig?: ColorConfig;
   row: Record<string, unknown> | undefined;
   spatialLevel: 'county' | 'state';
   measure: MapsMeasure;
@@ -25,6 +30,7 @@ export interface CardDensityData {
 }
 
 export interface MapTooltipHandle {
+  hide(): void;
   updateDensity(cardData: CardDensityData[], colorConfig: ColorConfig): void;
   bindCard(container: HTMLElement, cardIndex: number, features: { id: string }[]): void;
   destroy(): void;
@@ -41,6 +47,7 @@ export function initMapTooltip(
   getCardInfo: (cardIndex: number, featureId: string) => CardInfo | null,
 ): MapTooltipHandle {
   const tooltip: TooltipHandle = createTooltip();
+  tooltip.el.classList.add('map-tooltip');
 
   const nameEl = document.createElement('div');
   nameEl.className = 'epi-tooltip__name';
@@ -270,6 +277,22 @@ export function initMapTooltip(
 
   function renderDetails(info: CardInfo): void {
     detailsTable.replaceChildren();
+    if (info.cardState && cardSource(info.cardState) === 'chr') {
+      const field = chrField(info.cardState.chrField);
+      const val = info.row?.value;
+      const rows = [
+        [field.name, typeof val === 'number' && Number.isFinite(val)
+          ? `${val.toLocaleString('en-US', { maximumFractionDigits: field.digits })}${field.unit === '%' ? '' : ' '}${field.unit}` : 'Missing observation'],
+        ['Data years', String(info.row?.dataYears ?? 'Unavailable')],
+      ];
+      for (const [labelText, valueText] of rows) {
+        const tr = document.createElement('tr');
+        const label = document.createElement('th'); label.scope = 'row'; label.className = 'epi-tooltip__table-label'; label.textContent = labelText;
+        const value = document.createElement('td'); value.className = 'epi-tooltip__table-value'; value.textContent = valueText;
+        tr.append(label, value); detailsTable.append(tr);
+      }
+      return;
+    }
 
     // Deaths and population are always useful context. Avoid repeating either
     // when it is also the selected map measure.
@@ -322,12 +345,16 @@ export function initMapTooltip(
       const feature = features[idx];
       if (!feature?.id) continue;
 
-      path.addEventListener('mousemove', (e: MouseEvent) => {
+      const showDetails = (e: MouseEvent) => {
         const featureId = feature.id;
         const info = getCardInfo(cardIndex, featureId);
         if (!info) return;
 
-        const val = info.row?.[info.measure] as number | undefined;
+        const val = info.row?.[info.cardState ? valueField(info.cardState) : info.measure] as number | undefined;
+        if (info.density && info.colorConfig && (storedCardData[0] !== info.density || storedColorConfig !== info.colorConfig)) {
+          storedCardData = [info.density]; storedColorConfig = info.colorConfig;
+          buildDensityPlot(storedCardData, storedColorConfig);
+        } else if (!info.density || !info.colorConfig) densityContainer.replaceChildren();
 
         let name = (info.row?.['regionName'] as string) ?? feature.properties?.name ?? featureId;
         if (info.spatialLevel === 'county' && featureId.length === 5) {
@@ -361,7 +388,9 @@ export function initMapTooltip(
         highlightGroup.appendChild(highlightClone);
 
         tooltip.show(e.clientX, e.clientY);
-      });
+      };
+      path.addEventListener('mousemove', showDetails);
+      path.addEventListener('click', showDetails);
 
       path.addEventListener('mouseleave', () => {
         if (highlightClone) {
@@ -375,6 +404,7 @@ export function initMapTooltip(
   }
 
   return {
+    hide() { tooltip.hide(); },
     updateDensity(cardData: CardDensityData[], colorConfig: ColorConfig) {
       storedCardData = cardData;
       storedColorConfig = colorConfig;

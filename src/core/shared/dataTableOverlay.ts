@@ -22,6 +22,7 @@ const NUMERIC_TYPES = new Set(['integer', 'float', 'decimal']);
 export interface TableColumnPlan {
   order: string[];
   numeric: string[];
+  selectable: string[];
   defaultVisible: Set<string>;
 }
 
@@ -34,20 +35,22 @@ export function planTableColumns(
   const fixed = presentation.fixedColumns.filter((column) => availableSet.has(column));
   const fixedSet = new Set(presentation.fixedColumns);
   const remainingDimensions = schema
-    .filter((column) => !column.system && !NUMERIC_TYPES.has(column.type) && !fixedSet.has(column.name))
+    .filter((column) => !column.system && !NUMERIC_TYPES.has(column.type) && !fixedSet.has(column.name) && column.name !== presentation.activeMeasure)
     .map((column) => column.name);
   const numeric = schema
     .filter((column) => !column.system && NUMERIC_TYPES.has(column.type) && !fixedSet.has(column.name))
     .map((column) => column.name);
   const withoutActive = numeric.filter((column) => column !== presentation.activeMeasure);
-  const active = numeric.includes(presentation.activeMeasure) ? [presentation.activeMeasure] : [];
+  const active = availableSet.has(presentation.activeMeasure) && !fixedSet.has(presentation.activeMeasure) ? [presentation.activeMeasure] : [];
+  const order = [...fixed, ...remainingDimensions, ...withoutActive, ...active];
+  const optional = new Set(presentation.optionalColumns ?? []);
+  const selectable = order.filter(column => !fixedSet.has(column) && (numeric.includes(column) || optional.has(column)));
   const defaultVisible = new Set(
-    presentation.defaultNumericColumns.filter((column) => numeric.includes(column)),
+    presentation.defaultNumericColumns.filter((column) => selectable.includes(column)),
   );
-  if (active.length > 0) defaultVisible.add(presentation.activeMeasure);
+  if (selectable.includes(presentation.activeMeasure)) defaultVisible.add(presentation.activeMeasure);
   return {
-    order: [...fixed, ...remainingDimensions, ...withoutActive, ...active],
-    numeric,
+    order, numeric, selectable,
     defaultVisible,
   };
 }
@@ -65,7 +68,10 @@ function applyDefaultColumns(table: DataTable, presentation: TablePresentation):
   const plan = planTableColumns(table.state.schema.get(), presentation);
 
   table.actions.setColumnOrder(plan.order);
-  for (const column of plan.numeric) {
+  for (const [column, width] of Object.entries(presentation.columnWidths ?? {})) {
+    if (plan.order.includes(column)) table.actions.setColumnWidth(column, width);
+  }
+  for (const column of plan.selectable) {
     if (plan.defaultVisible.has(column)) table.actions.showColumn(column);
     else table.actions.hideColumn(column);
   }
@@ -103,7 +109,7 @@ function attachColumnChooser(
     content.replaceChildren();
     inputs = new Map();
     const plan = planTableColumns(table.state.schema.get(), presentation);
-    for (const column of plan.numeric) {
+    for (const column of plan.selectable) {
       const wrapper = document.createElement('div');
       wrapper.className = 'usa-checkbox';
       const input = document.createElement('input');
@@ -225,7 +231,7 @@ function attachTableControls(
   };
 }
 
-export function initDataTableButton(buttonId: string, getView: () => TableView): void {
+export function initDataTableButton(buttonId: string, getView: (choiceId?: string) => TableView): void {
   const button = document.getElementById(buttonId);
   if (!button) return;
 
@@ -233,48 +239,81 @@ export function initDataTableButton(buttonId: string, getView: () => TableView):
   let activeTable: DataTable | null = null;
   let controls: TableControls | null = null;
   let lastKey = '';
+  let selectedChoiceId: string | undefined;
+  let renderVersion = 0;
+  let renderQueue: Promise<void> = Promise.resolve();
+  const selector = document.createElement('label');
+  selector.className = 'epi-table-selector';
+  selector.hidden = true;
+  selector.append(document.createTextNode('Map'));
+  const select = document.createElement('select');
+  select.className = 'usa-select';
+  select.setAttribute('aria-label', 'Map to display in table');
+  selector.append(select);
+  overlay.subtitleEl.before(selector);
+  const panel = overlay.contentEl.parentElement!;
+  panel.setAttribute('role', 'dialog');
+  panel.setAttribute('aria-modal', 'true');
+  panel.setAttribute('aria-label', 'Data Table');
 
   // Popups are portalled outside the overlay panel, so hiding the overlay must
   // explicitly dismiss them before the underlying page becomes interactive.
   overlay.onClose(() => controls?.close());
 
-  button.addEventListener('click', async () => {
-    const view = getView();
+  function showView(view: TableView): void {
+    const version = ++renderVersion;
+    selectedChoiceId = view.selectedChoiceId;
+    selector.hidden = !view.choices?.length;
+    overlay.el.classList.toggle('epi-overlay--map-table', !selector.hidden);
+    select.replaceChildren(...(view.choices ?? []).map(choice => {
+      const option = new Option(choice.label, choice.id);
+      option.disabled = !!choice.disabled;
+      return option;
+    }));
+    select.value = selectedChoiceId ?? '';
+    overlay.subtitleEl.textContent = view.subtitle ?? '';
     if (activeTable && view.key === lastKey) {
+      overlay.hideLoading();
       overlay.open();
       return;
     }
 
-    overlay.subtitleEl.textContent = view.subtitle ?? '';
     overlay.open();
     overlay.showLoading();
-    controls?.destroy();
-    controls = null;
-    overlay.toolbarEl.replaceChildren();
-    if (activeTable) await activeTable.destroy();
-
-    try {
-      activeTable = await renderDataTable(
-        overlay.contentEl,
-        view.rows,
-        overlay.el,
-        view.presentation.aliases,
-      );
-      controls = attachTableControls(
-        activeTable,
-        overlay.toolbarEl,
-        view.presentation,
-        () => requestAnimationFrame(() => overlay.sizeToFit()),
-      );
+    controls?.close();
+    // Serialize table teardown/mounting. Rapid selector changes must never mix two maps' rows.
+    renderQueue = renderQueue.then(async () => {
+      if (version !== renderVersion) return;
+      controls?.destroy();
+      controls = null;
+      overlay.toolbarEl.replaceChildren();
+      const previousTable = activeTable;
+      activeTable = null;
+      lastKey = '';
+      if (previousTable) await previousTable.destroy();
+      if (version !== renderVersion) return;
+      if (!view.rows.length) {
+        overlay.contentEl.innerHTML = '<p class="padding-3">No observations are available for this selection.</p>';
+        overlay.hideLoading();
+        return;
+      }
+      const table = await renderDataTable(overlay.contentEl, view.rows, overlay.el, view.presentation.aliases);
+      if (version !== renderVersion) { await table.destroy(); return; }
+      activeTable = table;
+      controls = attachTableControls(table, overlay.toolbarEl, view.presentation,
+        () => requestAnimationFrame(() => overlay.sizeToFit()));
       lastKey = view.key;
       overlay.hideLoading();
       overlay.sizeToFit();
-    } catch (error) {
+    }).catch(error => {
+      if (version !== renderVersion) return;
       activeTable = null;
       lastKey = '';
       overlay.hideLoading();
       overlay.contentEl.innerHTML = '<p class="padding-3">Unable to load the data table.</p>';
       console.error(error);
-    }
-  });
+    });
+  }
+  select.addEventListener('change', () => showView(getView(select.value)));
+  button.addEventListener('click', () => showView(getView(selectedChoiceId)));
 }

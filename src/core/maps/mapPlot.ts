@@ -2,6 +2,7 @@ import * as d3 from 'd3';
 import * as Plot from '@observablehq/plot';
 import type { ColorConfig, GeoData, GeoFeatureCollection } from './query';
 import type { CardState, MapsState } from './state';
+import { cardSource, valueField } from './scales';
 
 // --- Types ---
 
@@ -24,7 +25,10 @@ interface ChoroplethOptions {
   trimmedScheme: string[] | null;
   stripedExtremes: boolean;
   crosshatchConnecticut: boolean;
+  mortality?: boolean;
 }
+
+let nextMapPatternId = 0;
 
 // --- Choropleth plot ---
 
@@ -34,6 +38,10 @@ function createChoroplethPlot(
   options: ChoroplethOptions,
 ): SVGSVGElement {
   const { color, strokeColor, indexField, measureField } = options;
+  const patternPrefix = `map-${nextMapPatternId++}`;
+  const stripesId = `${patternPrefix}-stripes`;
+  const suppressedId = `${patternPrefix}-suppressed`;
+  const connecticutId = `${patternPrefix}-ct`;
 
   const spatialDataMap = d3.index(data, (d) => d[indexField] as string);
 
@@ -88,9 +96,9 @@ function createChoroplethPlot(
       stroke: strokeFn as unknown as Plot.ChannelValueSpec,
       fill: ((d: { id: string }) => {
         const row = spatialDataMap.get(d.id);
-        if (row && row[measureField] != null) {
+        if (row && typeof row[measureField] === 'number' && Number.isFinite(row[measureField])) {
           const val = row[measureField] as number;
-          if (!options.showZeroValues && val === 0) return 'white';
+          if (!options.showZeroValues && val === 0) return '#f8f3df';
           if (val >= color.domain[0] && val <= color.domain[1]) {
             return colorScale(val);
           }
@@ -116,7 +124,7 @@ function createChoroplethPlot(
     marks.push(
       Plot.geo(featureCollection as unknown as GeoJSON.FeatureCollection, {
         filter: isOutlier as unknown as Plot.ChannelValue,
-        fill: 'url(#map-stripes)',
+        fill: `url(#${stripesId})`,
         stroke: 'none',
         strokeWidth: 0,
         pointerEvents: 'none',
@@ -127,7 +135,7 @@ function createChoroplethPlot(
   // Suppressed mortality values have a data row, but their death count is
   // null. Distinguish them from genuinely missing geography (no row) with a
   // grey dot overlay on the white base fill.
-  if (measureField !== 'population') {
+  if (options.mortality ?? measureField !== 'population') {
     const isSuppressed = (d: { id: string }) => {
       const row = spatialDataMap.get(d.id);
       return row != null && row.deaths == null;
@@ -135,7 +143,7 @@ function createChoroplethPlot(
     marks.push(
       Plot.geo(featureCollection as unknown as GeoJSON.FeatureCollection, {
         filter: isSuppressed as unknown as Plot.ChannelValue,
-        fill: 'url(#map-suppressed-dots)',
+        fill: `url(#${suppressedId})`,
         stroke: 'none',
         strokeWidth: 0,
         pointerEvents: 'none',
@@ -150,7 +158,7 @@ function createChoroplethPlot(
     marks.push(
       Plot.geo(featureCollection as unknown as GeoJSON.FeatureCollection, {
         filter: ((d: { id: string }) => d.id.startsWith('09')) as unknown as Plot.ChannelValue,
-        fill: 'url(#map-ct-crosshatch)',
+        fill: `url(#${connecticutId})`,
         stroke: 'none',
         strokeWidth: 0,
         pointerEvents: 'none',
@@ -185,13 +193,13 @@ function createChoroplethPlot(
   // Inject patterns for outliers, suppressed values, and historical CT data.
   const stripePatterns = [
     options.stripedExtremes
-      ? '<pattern id="map-stripes" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="1" height="8" fill="rgba(255, 255, 255, 1)" /></pattern>'
+      ? `<pattern id="${stripesId}" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="1" height="8" fill="rgba(255, 255, 255, 1)" /></pattern>`
       : '',
-    measureField !== 'population'
-      ? '<pattern id="map-suppressed-dots" width="6" height="6" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.25" fill="#8d9297" /></pattern>'
+    (options.mortality ?? measureField !== 'population')
+      ? `<pattern id="${suppressedId}" width="6" height="6" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.25" fill="#8d9297" /></pattern>`
       : '',
     options.crosshatchConnecticut
-      ? '<pattern id="map-ct-crosshatch" width="6" height="6" patternUnits="userSpaceOnUse"><path d="M-1 1L1-1M0 6L6 0M5 7L7 5M-1 5L1 7M0 0L6 6M5-1L7 1" fill="none" stroke="#565c65" stroke-width="1" /></pattern>'
+      ? `<pattern id="${connecticutId}" width="6" height="6" patternUnits="userSpaceOnUse"><path d="M-1 1L1-1M0 6L6 0M5 7L7 5M-1 5L1 7M0 0L6 6M5-1L7 1" fill="none" stroke="#565c65" stroke-width="1" /></pattern>`
       : '',
   ].join('');
   if (stripePatterns) {
@@ -264,6 +272,7 @@ export function getMapDomain(
 }
 
 export function shouldCrosshatchConnecticut(cardState: CardState): boolean {
+  if (cardSource(cardState) === 'chr') return false;
   if (cardState.spatialLevel !== 'county') return false;
   const selectedYears = cardState.year.match(/\d{4}/g) ?? [];
   return selectedYears.some((year) => Number(year) >= 2020);
@@ -322,7 +331,7 @@ export function renderMapCard(
 
   const plot = createChoroplethPlot(data, featureCollection, {
     indexField,
-    measureField: globalState.measure,
+    measureField: valueField(cardState),
     overlays,
     width: bbox.width - 30,
     height: bbox.height - 30,
@@ -334,6 +343,7 @@ export function renderMapCard(
     trimmedScheme: colorConfig.trimmedScheme,
     stripedExtremes: globalState.stripedExtremes,
     crosshatchConnecticut: shouldCrosshatchConnecticut(cardState),
+    mortality: cardSource(cardState) === 'mortality',
   });
 
   container.replaceChildren(plot);

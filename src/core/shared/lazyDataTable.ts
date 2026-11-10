@@ -1,7 +1,7 @@
 import type { TableView } from './tableView'
 
 /** Attach the small table-button bootstrap without loading the table UI. */
-export function initLazyDataTableButton(buttonId: string, getView: () => TableView): void {
+export function initLazyDataTableButton(buttonId: string, getView: (choiceId?: string) => TableView): void {
   const button = document.getElementById(buttonId)
   if (!button) return
 

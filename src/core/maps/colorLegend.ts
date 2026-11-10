@@ -11,7 +11,7 @@ const MEASURE_LABEL: Record<MapsMeasure, string> = {
 
 // --- Generic color legend renderer ---
 
-interface ColorLegendOptions {
+export interface ColorLegendOptions {
   container: HTMLElement;
   domain: [number, number];
   scheme: string | ((t: number) => string) | string[];
@@ -23,9 +23,10 @@ interface ColorLegendOptions {
   stripedOutliers?: boolean;
   width?: number;
   height?: number;
+  fontSize?: number;
 }
 
-function renderColorLegendGeneric(options: ColorLegendOptions): void {
+export function renderColorLegendGeneric(options: ColorLegendOptions): void {
   let {
     container,
     domain,
@@ -55,7 +56,7 @@ function renderColorLegendGeneric(options: ColorLegendOptions): void {
     swatchGutter: 12,
     swatchRadius: 3,
     gradientStops: 16,
-    fontSize: 14,
+    fontSize: options.fontSize ?? 12,
     fontFamily: 'sans-serif',
     textColor: '#424242',
     stripeSpacing: 4,
@@ -122,7 +123,7 @@ function renderColorLegendGeneric(options: ColorLegendOptions): void {
     .domain(reverse ? [colorDomain[1], colorDomain[0]] : colorDomain);
 
   const tickValues =
-    pivot !== null ? [domain[0], pivot, domain[1]] : [domain[0], domain[1]];
+    pivot !== null ? [...new Set([domain[0], pivot, domain[1]])] : [...new Set([domain[0], domain[1]])];
 
   // Geometry
   const lowLabelText = lowOutlierColor ? `<${formatNumber(domain[0])}` : '';

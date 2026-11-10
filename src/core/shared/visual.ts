@@ -89,6 +89,8 @@ interface MeasureStyle {
   label: string;
   labelShort: string;
   plotLabel: string;
+  /** Compact wording for card header bars. */
+  barLabel?: string;
 }
 
 export const MEASURE_STYLE: Record<Measure, MeasureStyle> = {
@@ -96,11 +98,13 @@ export const MEASURE_STYLE: Record<Measure, MeasureStyle> = {
     label: 'Age-Adjusted Cancer Mortality (per 100,000)',
     labelShort: 'AA Mortality',
     plotLabel: 'Age-Adjusted Mortality (per 100,000)',
+    barLabel: 'Age-adjusted mortality',
   },
   crudeRate: {
     label: 'Crude Cancer Mortality (per 100,000)',
     labelShort: 'Crude Mortality',
     plotLabel: 'Crude Mortality (per 100,000)',
+    barLabel: 'Crude mortality',
   },
 };
 

@@ -25,7 +25,7 @@ export interface FigureOptions {
 export interface MapsFigureOptions {
   title: string;
   /** One entry per grid cell in row-major order. null = blank cell. */
-  maps: ({ svg: SVGSVGElement; title: string } | null)[];
+  maps: ({ svg: SVGSVGElement; title: string; subtitle?: string; legendSVG?: SVGSVGElement } | null)[];
   nRows: number;
   nCols: number;
   legendSVGs: SVGSVGElement[];
@@ -259,8 +259,11 @@ function composeMapsFigureSVG(options: MapsFigureOptions): SVGSVGElement {
   // Determine per-cell size from the first non-null map's bounding box
   const firstMap = maps.find((m) => m !== null);
   const firstBBox = firstMap?.svg.getBBox();
-  const cellW = firstBBox ? firstBBox.width + 10 : 300;
-  const cellH = firstBBox ? firstBBox.height + 10 : 200;
+  // Export size should stay readable even when a dense on-screen grid has tiny maps.
+  const cellW = Math.max(480, firstBBox ? firstBBox.width + 10 : 480);
+  const cellH = Math.max(300, firstBBox ? firstBBox.height + 10 : 300);
+  const cardLegendHeight = maps.some(entry => entry?.legendSVG) ? 65 : 0;
+  const subtitleHeight = maps.some(entry => entry?.subtitle) ? 32 : 0;
   const contentWidth = nCols * cellW + (nCols - 1) * MAP_GAP;
 
   let y = PADDING;
@@ -292,7 +295,7 @@ function composeMapsFigureSVG(options: MapsFigureOptions): SVGSVGElement {
       // Blank cell — leave empty space
       if (!entry) continue;
 
-      const { svg, title: cardTitle } = entry;
+      const { svg, title: cardTitle, subtitle, legendSVG } = entry;
 
       const x = PADDING + col * (cellW + MAP_GAP);
       const cellY = y;
@@ -306,7 +309,20 @@ function composeMapsFigureSVG(options: MapsFigureOptions): SVGSVGElement {
         titleEl.setAttribute('font-family', FONT_FAMILY);
         titleEl.setAttribute('text-anchor', 'middle');
         titleEl.textContent = cardTitle;
+        if (cardTitle.length * 6 > cellW - 10) {
+          titleEl.setAttribute('textLength', String(cellW - 10));
+          titleEl.setAttribute('lengthAdjust', 'spacingAndGlyphs');
+        }
         root.appendChild(titleEl);
+      }
+      if (subtitle) {
+        const text = document.createElementNS(NS, 'text');
+        text.setAttribute('x', String(x + cellW / 2));
+        text.setAttribute('y', String(cellY + MAP_TITLE_FONT_SIZE + 15));
+        text.setAttribute('font-size', '10'); text.setAttribute('font-family', FONT_FAMILY);
+        text.setAttribute('text-anchor', 'middle'); text.textContent = subtitle;
+        if (subtitle.length * 5 > cellW) { text.setAttribute('textLength', String(cellW - 10)); text.setAttribute('lengthAdjust', 'spacingAndGlyphs'); }
+        root.append(text);
       }
 
       // Map SVG clone
@@ -316,13 +332,23 @@ function composeMapsFigureSVG(options: MapsFigureOptions): SVGSVGElement {
       clone.setAttribute('viewBox',
         `${bbox.x - bboxPad} ${bbox.y - bboxPad} ${bbox.width + bboxPad * 2} ${bbox.height + bboxPad * 2}`);
       clone.setAttribute('x', String(x));
-      clone.setAttribute('y', String(cellY + MAP_TITLE_FONT_SIZE + 4));
+      clone.setAttribute('y', String(cellY + MAP_TITLE_FONT_SIZE + 4 + subtitleHeight));
       clone.setAttribute('width', String(cellW));
       clone.setAttribute('height', String(cellH));
       inlineFonts(clone);
       root.appendChild(clone);
+      if (legendSVG) {
+        const legend = legendSVG.cloneNode(true) as SVGSVGElement;
+        const width = Number(legend.getAttribute('width')) || 400;
+        const height = Number(legend.getAttribute('height')) || 51;
+        legend.setAttribute('viewBox', `0 0 ${width} ${height}`);
+        legend.setAttribute('x', String(x));
+        legend.setAttribute('y', String(cellY + MAP_TITLE_FONT_SIZE + 4 + subtitleHeight + cellH));
+        legend.setAttribute('width', String(cellW)); legend.setAttribute('height', '60');
+        inlineFonts(legend); root.append(legend);
+      }
     }
-    y += MAP_TITLE_FONT_SIZE + 4 + cellH + MAP_GAP;
+    y += MAP_TITLE_FONT_SIZE + 4 + subtitleHeight + cellH + cardLegendHeight + MAP_GAP;
   }
 
   // --- Color legend ---

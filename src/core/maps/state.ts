@@ -1,10 +1,11 @@
 import {
   ALL_CANCER_SITES, ALL_RACES, ALL_YEARS,
-  type Year, type CancerSite, type Race, type Sex,
+  type Year, type CancerSite, type Race, type Sex, type FieldId,
 } from '../../domain/mortality';
 import { ALL_STATE_FIPS } from '../shared/fips';
 import { causeSexRule } from '../shared/state/rules';
 import type { ExtremeValueSensitivity } from './colorDomain';
+import { gridDimension, normalizeMapCards, type ScaleSettings } from './scales';
 
 // --- Maps-specific types ---
 
@@ -20,6 +21,11 @@ export const MAPS_MEASURE_LABELS: Record<MapsMeasure, string> = {
 const AI_AN_RACE: Race = 'American Indian or Alaska Native';
 
 export interface CardState {
+  source?: 'mortality' | 'population' | 'chr';
+  measure?: MapsMeasure;
+  chrField?: FieldId;
+  /** Internal provenance for selected data years. "auto" supports older saved URLs. */
+  chrVintage?: string;
   year: Year;
   cause: CancerSite | 'All';
   sex: Sex | 'All';
@@ -29,6 +35,9 @@ export interface CardState {
 }
 
 export interface Card {
+  id?: string;
+  scaleId?: string;
+  legendMode?: 'full' | 'minimized';
   x: number;
   y: number;
   blank: boolean;
@@ -36,6 +45,7 @@ export interface Card {
 }
 
 export interface MapsState {
+  scales: Record<string, ScaleSettings>;
   // Grid
   cards: Card[];
   nRows: number;
@@ -91,6 +101,7 @@ function makeDefaultCards(): Card[] {
 }
 
 export const MAPS_DEFAULTS: MapsState = {
+  scales: {},
   cards: makeDefaultCards(),
   nRows: 1,
   nCols: 1,
@@ -191,6 +202,8 @@ function syncCardsToGrid(state: MapsState, prev: MapsState): void {
 
 export function resolveMaps(state: MapsState, change: Partial<MapsState>): MapsState {
   const next = { ...state, ...change };
+  next.nRows = gridDimension(next.nRows);
+  next.nCols = gridDimension(next.nCols);
 
   // If cards array was directly updated (e.g., card state changed), use deep copy
   if (change.cards) {
@@ -222,6 +235,7 @@ export function resolveMaps(state: MapsState, change: Partial<MapsState>): MapsS
   populationHidesCauseRule(next);
   countyHidesAiAnRule(next, change);
   syncCardsToGrid(next, state);
+  normalizeMapCards(next, change);
 
   return next;
 }

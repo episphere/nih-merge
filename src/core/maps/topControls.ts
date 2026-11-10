@@ -1,459 +1,49 @@
-import * as d3 from 'd3';
 import type { MapStore } from 'nanostores';
-import { MAPS_MEASURE_LABELS, type MapsMeasure, type MapsState } from './state';
-import type { ExtremeValueSensitivity } from './colorDomain';
+import type { MapsState } from './state';
 import { createPopup, createDropdown } from '../shared/popup';
 import { downloadCSV, downloadTSV, downloadJSON } from '../shared/download';
 import { initLazyDataTableButton } from '../shared/lazyDataTable';
 import type { TableView } from '../shared/tableView';
-import { createCheckbox, createSelect } from '../shared/formElements';
-import { USAComboBox } from '../../lib/USAComboBox';
+import { createCheckbox } from '../shared/formElements';
 import { downloadMapsFigurePNG, downloadMapsFigureSVG, type MapsFigureOptions } from '../shared/downloadImage';
+import { element } from './editorUI';
 
-// --- Color scheme options ---
-
-const COLOR_SCHEMES: { value: string; label: string; reverse?: boolean }[] = [
-  { value: 'RdYlBu', label: 'Blue-Yellow-Red', reverse: true },
-  { value: 'RdYlGn', label: 'Green-Yellow-Red', reverse: true },
-  { value: 'RdBu', label: 'Blue-Red', reverse: true },
-  { value: 'PiYG', label: 'Green-Yellow-Pink', reverse: true },
-  { value: 'PRGn', label: 'Green-Purple', reverse: true },
-  { value: 'BrBG', label: 'Blue-Green-Brown', reverse: true },
-  { value: 'Spectral', label: 'Spectral', reverse: true },
-  { value: 'RdPu', label: 'Red-Purple' },
-  { value: 'YlGnBu', label: 'Blue-Green-Yellow', reverse: true },
-  { value: 'YlOrRd', label: 'Yellow-Orange-Red' },
-  { value: 'Blues', label: 'Blues' },
-  { value: 'Greens', label: 'Greens' },
-  { value: 'Oranges', label: 'Oranges' },
-  { value: 'Reds', label: 'Reds' },
-  { value: 'Purples', label: 'Purples' },
-  { value: 'Greys', label: 'Greys' },
-];
-
-const schemeReverseMap = new Map(
-  COLOR_SCHEMES.filter((s) => s.reverse).map((s) => [s.value, true]),
-);
-
-/** Check whether a color scheme should be auto-reversed. */
-export function getSchemeReverse(schemeName: string): boolean {
-  return schemeReverseMap.has(schemeName);
-}
-
-
-// --- Public ---
+export { getSchemeReverse } from './scales';
 
 export function initTopControls(
-  $state: MapStore<MapsState>,
-  update: (change: Partial<MapsState>) => void,
-  getData: () => Record<string, unknown>[],
-  getTableView?: () => TableView,
+  store: MapStore<MapsState>, update: (change: Partial<MapsState>) => void,
+  getData: () => Record<string, unknown>[], getTableView: (cardId?: string) => TableView,
+  getFigure: () => MapsFigureOptions | null,
 ): void {
-  initGridEditButton($state, update);
-  initSettingsButton($state, update);
-  if (getTableView) initLazyDataTableButton('btn-table', getTableView);
-  initDownloadButton($state, getData);
-}
-
-// --- Grid edit button ---
-
-function initGridEditButton(
-  $state: MapStore<MapsState>,
-  update: (change: Partial<MapsState>) => void,
-): void {
-  const btn = document.getElementById('btn-edit-grid');
-  if (!btn) return;
-
-  createDropdown(btn, [
-    {
-      label: 'Add Row',
-      onClick: () => {
-        const s = $state.get();
-        update({ nRows: s.nRows + 1 });
-      },
-    },
-    {
-      label: 'Add Column',
-      onClick: () => {
-        const s = $state.get();
-        update({ nCols: s.nCols + 1 });
-      },
-    },
+  const grid = document.getElementById('btn-edit-grid');
+  if (grid) createDropdown(grid, [
+    { label: 'Add row', onClick: () => update({ nRows: store.get().nRows + 1 }) },
+    { label: 'Add column', onClick: () => update({ nCols: store.get().nCols + 1 }) },
     'separator',
-    {
-      label: 'Remove Row',
-      onClick: () => {
-        const s = $state.get();
-        if (s.nRows > 1) update({ nRows: s.nRows - 1 });
-      },
-    },
-    {
-      label: 'Remove Column',
-      onClick: () => {
-        const s = $state.get();
-        if (s.nCols > 1) update({ nCols: s.nCols - 1 });
-      },
-    },
+    { label: 'Remove last row', onClick: () => update({ nRows: Math.max(1, store.get().nRows - 1) }) },
+    { label: 'Remove last column', onClick: () => update({ nCols: Math.max(1, store.get().nCols - 1) }) },
   ]);
-}
-
-// --- Settings button ---
-
-function initSettingsButton(
-  $state: MapStore<MapsState>,
-  update: (change: Partial<MapsState>) => void,
-): void {
-  const btn = document.getElementById('btn-settings');
-  if (!btn) return;
-
-  const content = document.createElement('div');
-
-  // Measure select
-  const measure = createSelect('settings-measure', 'Measure');
-  for (const [value, label] of Object.entries(MAPS_MEASURE_LABELS)) {
-    const opt = document.createElement('option');
-    opt.value = value;
-    opt.textContent = label;
-    measure.select.appendChild(opt);
-  }
-  content.appendChild(measure.group);
-
-  // Color scheme combo box
-  const colorSchemeGroup = document.createElement('div');
-  colorSchemeGroup.className = 'usa-form-group';
-  const colorSchemeLabel = document.createElement('label');
-  colorSchemeLabel.className = 'usa-label';
-  colorSchemeLabel.htmlFor = 'settings-color-scheme';
-  colorSchemeLabel.textContent = 'Color Scheme';
-  colorSchemeGroup.appendChild(colorSchemeLabel);
-
-  const colorSchemeWrapper = document.createElement('div');
-  colorSchemeWrapper.className = 'usa-combo-box';
-  const colorSchemeSelect = document.createElement('select');
-  colorSchemeSelect.className = 'usa-select';
-  colorSchemeSelect.id = 'settings-color-scheme';
-  colorSchemeSelect.name = 'settings-color-scheme';
-  for (const scheme of COLOR_SCHEMES) {
-    const opt = document.createElement('option');
-    opt.value = scheme.value;
-    opt.textContent = scheme.label;
-    colorSchemeSelect.appendChild(opt);
-  }
-  colorSchemeWrapper.appendChild(colorSchemeSelect);
-  colorSchemeGroup.appendChild(colorSchemeWrapper);
-  content.appendChild(colorSchemeGroup);
-
-  // Color checkboxes
-  const reverse = createCheckbox('settings-reverse', 'Reverse Colors');
-  content.appendChild(reverse.wrapper);
-
-  const center = createCheckbox('settings-center', 'Center on Mean');
-  content.appendChild(center.wrapper);
-
-  const exclude = createCheckbox('settings-exclude', 'Exclude Extreme Values');
-  content.appendChild(exclude.wrapper);
-
-  const stripedExtremes = createCheckbox('settings-striped-extremes', 'Striped Extreme Values');
-  content.appendChild(stripedExtremes.wrapper);
-
-  const sensitivity = createSelect('settings-extreme-sensitivity', 'Extreme-value Sensitivity');
-  for (const [value, label] of [
-    ['conservative', 'Conservative'],
-    ['balanced', 'Balanced'],
-    ['aggressive', 'Aggressive'],
-    ['custom', 'Custom'],
-  ]) {
-    const option = document.createElement('option');
-    option.value = value;
-    option.textContent = label;
-    sensitivity.select.appendChild(option);
-  }
-  content.appendChild(sensitivity.group);
-
-  // This slider is linear in log space, giving the low end of the gamma
-  // range enough resolution without constraining custom values to presets.
-  const gammaControl = createRangeControl('settings-gamma', 'γ', 0, 1000, 1);
-  content.appendChild(gammaControl.group);
-
-  // Show zero values checkbox
-  const showZeros = createCheckbox('settings-show-zeros', 'Show Zero Values');
-  content.appendChild(showZeros.wrapper);
-
-  // Outline section
-  const outlineTitle = document.createElement('span');
-  outlineTitle.className = 'usa-legend text-bold';
-  outlineTitle.textContent = 'Outlines';
-  content.appendChild(outlineTitle);
-
-  const countyOutline = createCheckbox('settings-outline-county', 'County Borders');
-  content.appendChild(countyOutline.wrapper);
-
-  const stateOutline = createCheckbox('settings-outline-state', 'State Borders');
-  content.appendChild(stateOutline.wrapper);
-
-  const nationOutline = createCheckbox('settings-outline-nation', 'Nation Border');
-  content.appendChild(nationOutline.wrapper);
-
-  const popup = createPopup(btn, content, { title: 'Map Settings' });
-  btn.addEventListener('click', () => popup.toggle());
-
-  // Initialize combo box after it's in the DOM
-  const colorSchemeComboBox = USAComboBox.create(colorSchemeWrapper, { portal: true });
-
-  // Add gradient previews to combo box list items
-  addGradientPreviews(colorSchemeWrapper);
-
-  // Sync state → UI
-  let syncingColorScheme = false;
-  $state.subscribe((state) => {
-    measure.select.value = state.measure;
-    syncingColorScheme = true;
-    colorSchemeComboBox.setSelectedByValue(state.colorScheme);
-    syncingColorScheme = false;
-    reverse.input.checked = state.colorReverse;
-    center.input.checked = state.colorCenterMean;
-    exclude.input.checked = state.colorExcludeExtremes;
-    sensitivity.select.value = state.extremeValueSensitivity;
-    sensitivity.group.style.display = state.colorExcludeExtremes ? '' : 'none';
-    gammaControl.input.value = String(gammaToSlider(state.gamma));
-    gammaControl.value.textContent = formatGamma(state.gamma);
-    gammaControl.input.setAttribute('aria-valuetext', formatGamma(state.gamma));
-    gammaControl.group.style.display = state.colorExcludeExtremes
-      && state.extremeValueSensitivity === 'custom' ? '' : 'none';
-    stripedExtremes.input.checked = state.stripedExtremes;
-    stripedExtremes.wrapper.style.display = state.colorExcludeExtremes ? '' : 'none';
-    showZeros.input.checked = state.showZeroValues;
-    countyOutline.input.checked = state.showOutlineCounty;
-    stateOutline.input.checked = state.showOutlineState;
-    nationOutline.input.checked = state.showOutlineNation;
-  });
-
-  // UI → state
-  measure.select.addEventListener('change', () => {
-    update({ measure: measure.select.value as MapsMeasure });
-  });
-  colorSchemeWrapper.addEventListener('usa-combo-box:selected', () => {
-    if (syncingColorScheme) return;
-    const value = colorSchemeComboBox.getValue();
-    if (value) update({ colorScheme: value });
-  });
-  reverse.input.addEventListener('change', () => {
-    update({ colorReverse: reverse.input.checked });
-  });
-  center.input.addEventListener('change', () => {
-    update({ colorCenterMean: center.input.checked });
-  });
-  exclude.input.addEventListener('change', () => {
-    update({ colorExcludeExtremes: exclude.input.checked });
-  });
-  sensitivity.select.addEventListener('change', () => {
-    update({ extremeValueSensitivity: sensitivity.select.value as ExtremeValueSensitivity });
-  });
-  stripedExtremes.input.addEventListener('change', () => {
-    update({ stripedExtremes: stripedExtremes.input.checked });
-  });
-  showZeros.input.addEventListener('change', () => {
-    update({ showZeroValues: showZeros.input.checked });
-  });
-  gammaControl.input.addEventListener('input', () => {
-    update({ gamma: sliderToGamma(Number(gammaControl.input.value)) });
-  });
-  countyOutline.input.addEventListener('change', () => {
-    update({ showOutlineCounty: countyOutline.input.checked });
-  });
-  stateOutline.input.addEventListener('change', () => {
-    update({ showOutlineState: stateOutline.input.checked });
-  });
-  nationOutline.input.addEventListener('change', () => {
-    update({ showOutlineNation: nationOutline.input.checked });
-  });
-}
-
-function createRangeControl(
-  id: string,
-  labelText: string,
-  min: number,
-  max: number,
-  step: number,
-): { group: HTMLElement; input: HTMLInputElement; value: HTMLSpanElement } {
-  const group = document.createElement('div');
-  group.className = 'usa-form-group';
-  const label = document.createElement('label');
-  label.className = 'usa-label';
-  label.htmlFor = id;
-  label.textContent = labelText;
-  const value = document.createElement('span');
-  value.className = 'margin-left-1 font-sans-3xs';
-  label.appendChild(value);
-  const input = document.createElement('input');
-  input.type = 'range';
-  input.className = 'usa-range';
-  input.id = id;
-  input.min = String(min);
-  input.max = String(max);
-  input.step = String(step);
-  group.append(label, input);
-  return { group, input, value };
-}
-
-const GAMMA_MIN = 0.01;
-const GAMMA_MAX = 2;
-
-function gammaToSlider(gamma: number): number {
-  if (gamma <= 0) return 0;
-  const bounded = Math.max(GAMMA_MIN, Math.min(GAMMA_MAX, gamma));
-  return 1 + Math.round(999 * Math.log(bounded / GAMMA_MIN) / Math.log(GAMMA_MAX / GAMMA_MIN));
-}
-
-function sliderToGamma(position: number): number {
-  if (position <= 0) return 0;
-  const gamma = GAMMA_MIN * Math.pow(GAMMA_MAX / GAMMA_MIN, (position - 1) / 999);
-  return Number(gamma.toPrecision(3));
-}
-
-function formatGamma(gamma: number): string {
-  if (gamma <= 0) return 'Off';
-  return Math.max(GAMMA_MIN, Math.min(GAMMA_MAX, gamma)).toLocaleString(undefined, {
-    maximumSignificantDigits: 3,
-  });
-}
-
-// --- Download button ---
-
-/** Gather map SVGs and metadata from the DOM for image export. */
-function getMapsFigureOptions($state: MapStore<MapsState>): MapsFigureOptions | null {
-  const titleEl = document.getElementById('title');
-  if (!titleEl) return null;
-
-  const title = titleEl.textContent ?? '';
-  const state = $state.get();
-
-  // Collect all grid cells in row-major order (null for blank cards)
-  const maps: ({ svg: SVGSVGElement; title: string } | null)[] = [];
-  const mapGrid = document.getElementById('map-grid');
-  if (!mapGrid) return null;
-
-  let hasAnyMap = false;
-  for (const card of state.cards) {
-    if (card.blank || !card.state) {
-      maps.push(null);
-      continue;
+  const settings = document.getElementById('btn-settings');
+  if (settings) {
+    const content = element('div');
+    content.append(element('p', 'map-editor__hint', 'Borders apply to all maps. Edit colors and scale sharing using the gear beside each map’s legend.'));
+    for (const [key, label] of [['showOutlineCounty', 'County borders'], ['showOutlineState', 'State borders'], ['showOutlineNation', 'Nation / extent border']] as const) {
+      const control = createCheckbox(`dashboard-${key}`, label);
+      content.append(control.wrapper);
+      store.subscribe(state => { control.input.checked = state[key]; });
+      control.input.addEventListener('change', () => update({ [key]: control.input.checked }));
     }
-    const cardIdx = state.cards.indexOf(card);
-    const cardEl = mapGrid.querySelector(`[data-card-index="${cardIdx}"]`);
-    const svg = cardEl?.querySelector('.map-card__body svg') as SVGSVGElement | null;
-    const titleSpan = cardEl?.querySelector('.map-card__title') as HTMLElement | null;
-    if (svg) {
-      maps.push({ svg, title: titleSpan?.textContent ?? '' });
-      hasAnyMap = true;
-    } else {
-      maps.push(null);
-    }
+    const popup = createPopup(settings, content, { title: 'Dashboard appearance' });
+    settings.addEventListener('click', () => popup.toggle());
   }
-
-  if (!hasAnyMap) return null;
-
-  // Collect legend SVGs
-  const legendEl = document.getElementById('color-legend');
-  const legendSVGs: SVGSVGElement[] = [];
-  if (legendEl) {
-    for (const svg of legendEl.querySelectorAll('svg')) {
-      legendSVGs.push(svg as SVGSVGElement);
-    }
-  }
-
-  return {
-    title,
-    maps,
-    nRows: state.nRows,
-    nCols: state.nCols,
-    legendSVGs,
-    filename: 'nih-merge-maps',
-  };
-}
-
-function initDownloadButton(
-  $state: MapStore<MapsState>,
-  getData: () => Record<string, unknown>[],
-): void {
-  const btn = document.getElementById('btn-download');
-  if (!btn) return;
-
-  createDropdown(btn, [
+  initLazyDataTableButton('btn-table', getTableView);
+  const download = document.getElementById('btn-download');
+  if (download) createDropdown(download, [
     { label: 'Data (.csv)', onClick: () => downloadCSV(getData(), 'nih-merge-maps.csv') },
     { label: 'Data (.tsv)', onClick: () => downloadTSV(getData(), 'nih-merge-maps.tsv') },
     { label: 'Data (.json)', onClick: () => downloadJSON(getData(), 'nih-merge-maps.json') },
     'separator',
-    {
-      label: 'Image (.png)',
-      onClick: () => {
-        const opts = getMapsFigureOptions($state);
-        if (opts) downloadMapsFigurePNG(opts);
-      },
-    },
-    {
-      label: 'Image (.svg)',
-      onClick: () => {
-        const opts = getMapsFigureOptions($state);
-        if (opts) downloadMapsFigureSVG(opts);
-      },
-    },
+    { label: 'Image (.png)', onClick: () => { const figure = getFigure(); if (figure) downloadMapsFigurePNG(figure); } },
+    { label: 'Image (.svg)', onClick: () => { const figure = getFigure(); if (figure) downloadMapsFigureSVG(figure); } },
   ]);
-}
-
-// --- Color scheme gradient helpers ---
-
-const GRADIENT_STOPS = 10;
-
-/** Create a small inline SVG showing a color scheme gradient. */
-function createSchemeGradient(scheme: string, width: number, height: number): SVGSVGElement {
-  const ns = 'http://www.w3.org/2000/svg';
-  const svg = document.createElementNS(ns, 'svg');
-  svg.setAttribute('width', String(width));
-  svg.setAttribute('height', String(height));
-
-  const gradientId = `scheme-grad-${scheme}`;
-  const defs = document.createElementNS(ns, 'defs');
-  const linearGrad = document.createElementNS(ns, 'linearGradient');
-  linearGrad.setAttribute('id', gradientId);
-  linearGrad.setAttribute('x1', '0%');
-  linearGrad.setAttribute('x2', '100%');
-
-  const interpolator = (d3 as Record<string, unknown>)[
-    'interpolate' + scheme
-  ] as ((t: number) => string) | undefined;
-
-  if (interpolator) {
-    const shouldReverse = schemeReverseMap.has(scheme);
-    for (let i = 0; i <= GRADIENT_STOPS; i++) {
-      const t = i / GRADIENT_STOPS;
-      const stop = document.createElementNS(ns, 'stop');
-      stop.setAttribute('offset', `${(t * 100).toFixed(0)}%`);
-      stop.setAttribute('stop-color', interpolator(shouldReverse ? 1 - t : t));
-      linearGrad.appendChild(stop);
-    }
-  }
-
-  defs.appendChild(linearGrad);
-  svg.appendChild(defs);
-
-  const rect = document.createElementNS(ns, 'rect');
-  rect.setAttribute('width', String(width));
-  rect.setAttribute('height', String(height));
-  rect.setAttribute('rx', '2');
-  rect.setAttribute('fill', `url(#${gradientId})`);
-  svg.appendChild(rect);
-
-  return svg;
-}
-
-/** Add gradient preview SVGs to each combo box list option. */
-function addGradientPreviews(wrapper: HTMLElement): void {
-  const listItems = wrapper.querySelectorAll<HTMLLIElement>('.usa-combo-box__list-option');
-  for (const li of listItems) {
-    const scheme = li.dataset.value;
-    if (!scheme) continue;
-    const svg = createSchemeGradient(scheme, 60, 14);
-    li.insertBefore(svg, li.firstChild);
-  }
 }

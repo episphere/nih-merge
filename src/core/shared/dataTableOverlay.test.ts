@@ -45,4 +45,25 @@ describe('table column presentation', () => {
     expect(plan.order).toEqual(['year', 'region', 'population']);
     expect([...plan.defaultVisible]).toEqual(['population']);
   });
+
+  it('makes text metadata optional while retaining population and deaths by default', () => {
+    const plan = planTableColumns([
+      column('county', 'string'), column('stateFips', 'string'), column('source', 'string'),
+      column('deaths', 'integer'), column('population', 'integer'), column('ageAdjustedRate', 'float'),
+    ], { fixedColumns: ['county'], optionalColumns: ['stateFips', 'source'], activeMeasure: 'ageAdjustedRate',
+      defaultNumericColumns: ['deaths', 'population', 'ageAdjustedRate'], exportFileStem: 'map' });
+    expect(plan.selectable).toContain('stateFips');
+    expect(plan.selectable).toContain('source');
+    expect(plan.defaultVisible.has('source')).toBe(false);
+    expect([...plan.defaultVisible]).toEqual(['deaths', 'population', 'ageAdjustedRate']);
+  });
+
+  it('keeps completely suppressed measures visible when all-null columns infer as text', () => {
+    const plan = planTableColumns([
+      column('county', 'string'), column('deaths', 'string'), column('population', 'integer'), column('ageAdjustedRate', 'string'),
+    ], { fixedColumns: ['county'], optionalColumns: ['deaths', 'population', 'ageAdjustedRate'], activeMeasure: 'ageAdjustedRate',
+      defaultNumericColumns: ['deaths', 'population', 'ageAdjustedRate'], exportFileStem: 'map' });
+    expect(plan.order.at(-1)).toBe('ageAdjustedRate');
+    expect([...plan.defaultVisible]).toEqual(['deaths', 'population', 'ageAdjustedRate']);
+  });
 });

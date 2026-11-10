@@ -295,6 +295,9 @@ export class USAComboBox {
 	 * Resets component to a clean state.
 	 */
 	public unregister(): void {
+		if (USAComboBox._components.get(this.comboBox) === this) {
+			USAComboBox._components.delete(this.comboBox);
+		}
 		this.removeEventListeners();
 		this.restorePortaledListbox();
 		this.resetSelectState();

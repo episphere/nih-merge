@@ -10,7 +10,8 @@ import {
 import type { CountyFilters, CountyRow, PopulationFilters, PopulationRow } from '../../domain/mortality';
 import type { Card, CardState, MapsMeasure, MapsState } from './state';
 import { buildTrimmedColorScheme, sampleInterpolator } from './trimmedScheme';
-import { getSchemeReverse } from './topControls';
+import { getSchemeReverse, valueField, type ScaleSettings } from './scales';
+import { fetchChrData } from './chrData';
 import { calculateColorDomain } from './colorDomain';
 
 // --- GeoJSON types ---
@@ -146,6 +147,7 @@ function cardQueryKey(cardState: CardState, measure: MapsMeasure): string {
     cardState.stateFips,
     cardState.spatialLevel,
     measure,
+    cardState.source, cardState.chrField, cardState.chrVintage,
   ].join('\0');
 }
 
@@ -167,6 +169,11 @@ async function doFetch(
   cardState: CardState,
   measure: MapsMeasure,
 ): Promise<Record<string, unknown>[]> {
+  if (cardState.source === 'chr') {
+    const rows = await fetchChrData(cardState);
+    const names = await loadGeographyNames();
+    return rows.map(row => ({ ...row, regionName: names.counties[row.countyFips as string] ?? String(row.countyFips) }));
+  }
   if (measure === 'population') {
     const filters: PopulationFilters = {
       year: cardState.year,
@@ -239,10 +246,18 @@ export function computeColorConfig(
   cardDataMap: Map<number, Record<string, unknown>[]>,
   state: MapsState,
 ): ColorConfig | null {
+  return computeScaleConfig(cardDataMap, state, state.measure);
+}
+
+export function computeScaleConfig(
+  cardDataMap: Map<number, Record<string, unknown>[]>,
+  state: ScaleSettings | MapsState,
+  field: string,
+): ColorConfig | null {
   const allValues: number[] = [];
   for (const data of cardDataMap.values()) {
     for (const row of data) {
-      const val = row[state.measure] as number | null | undefined;
+      const val = row[field] as number | null | undefined;
       if (val != null && Number.isFinite(val)) {
         if (!state.showZeroValues && val === 0) continue;
         allValues.push(val);
@@ -264,14 +279,16 @@ export function computeColorConfig(
   if (automaticDomain) {
     domain = [automaticDomain.domainMin, automaticDomain.domainMax];
   }
+  if ('domainMin' in state && state.domainMin != null) domain[0] = state.domainMin;
+  if ('domainMax' in state && state.domainMax != null) domain[1] = state.domainMax;
 
   // Center the continuous scale on the retained distribution. An accepted
   // extreme must not pull the pivot back toward the range we just excluded.
   const retainedValues = allValues.filter((value) => value >= domain[0] && value <= domain[1]);
-  const mean = d3.mean(retainedValues)!;
+  const mean = d3.mean(retainedValues) ?? (domain[0] + domain[1]) / 2;
   const pivot = state.colorCenterMean ? mean : null;
 
-  const valid = Number.isFinite(mean) && domain.every((d) => Number.isFinite(d));
+  const valid = Number.isFinite(mean) && domain.every((d) => Number.isFinite(d)) && domain[0] <= domain[1];
 
   // XOR: if the scheme is auto-reversed, the user toggle flips it back
   const schemeReverse = getSchemeReverse(state.colorScheme);
@@ -282,9 +299,9 @@ export function computeColorConfig(
   let lowOutlierColor: string | null = null;
   let highOutlierColor: string | null = null;
 
-  const hasLowerExtremes = (automaticDomain?.lowerExtremes.length ?? 0) > 0;
-  const hasUpperExtremes = (automaticDomain?.upperExtremes.length ?? 0) > 0;
-  if (state.colorExcludeExtremes && valid && (hasLowerExtremes || hasUpperExtremes)) {
+  const hasLowerExtremes = allValues.some(value => value < domain[0]);
+  const hasUpperExtremes = allValues.some(value => value > domain[1]);
+  if (valid && (hasLowerExtremes || hasUpperExtremes)) {
     try {
       const sampled = sampleInterpolator(state.colorScheme, 16);
       const trimResult = buildTrimmedColorScheme(
@@ -312,4 +329,25 @@ export function computeColorConfig(
     lowOutlierColor,
     highOutlierColor,
   };
+}
+
+export function computeCardScales(state: MapsState, cardData: Map<number, Record<string, unknown>[]>) {
+  const configs = new Map<string, ColorConfig>();
+  for (const [id, settings] of Object.entries(state.scales)) {
+    const members = state.cards.flatMap((card, i) => !card.blank && card.state && card.scaleId === id ? [i] : []);
+    const first = state.cards[members[0]]?.state;
+    if (!first) continue;
+    const seen = new Set<string>();
+    const rows: Record<string, unknown>[] = [];
+    for (const i of members) for (const row of cardData.get(i) ?? []) {
+      const card = state.cards[i].state!;
+      const key = JSON.stringify([row.countyFips, row.stateFips,
+        card.source === 'chr' ? row.chrVintage : card.year, card.cause, card.sex, card.race]);
+      if (seen.has(key)) continue;
+      seen.add(key); rows.push(row);
+    }
+    const config = computeScaleConfig(new Map([[0, rows]]), settings, valueField(first));
+    if (config) configs.set(id, config);
+  }
+  return configs;
 }
